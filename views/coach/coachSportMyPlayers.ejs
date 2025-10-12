@@ -8,8 +8,96 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        
-    </style>
+/* Student Type Badge */
+.student-type-badge {
+    background: #8B0039;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    margin-bottom: 15px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
+
+/* Documents Category */
+.documents-category {
+    margin-bottom: 20px;
+}
+
+.documents-category h4 {
+    color: #8B0039;
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.document-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.document-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    border: 1px solid transparent;
+    font-size: 0.85rem;
+}
+
+/* Required Documents */
+.document-link.required-doc {
+    background: #e8f5e8;
+    color: #2d5016;
+    border-color: #4caf50;
+}
+
+.document-link.required-doc:hover {
+    background: #d4edda;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+/* Optional Documents */
+.document-link.optional-doc {
+    background: #e3f2fd;
+    color: #0d47a1;
+    border-color: #2196f3;
+}
+
+.document-link.optional-doc:hover {
+    background: #bbdefb;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .document-links {
+        gap: 8px;
+    }
+    
+    .document-link {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+    
+    .student-type-badge {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+    }
+}
+</style>
 </head>
 <body>
 
@@ -143,110 +231,172 @@
                 </div>
                 <div class="documents-section">
                     <h3><i class="fas fa-file-alt"></i> Documents</h3>
-                    <div class="document-links" id="modalPlayerDocuments"></div>
+                    
+                    <!-- Student Type Badge -->
+                    <div id="studentTypeBadge" class="student-type-badge" style="display: none;">
+                        <i class="fas fa-user-graduate"></i>
+                        <span id="studentTypeText"></span>
+                    </div>
+                    
+                    <!-- Required Documents Section -->
+                    <div class="documents-category" id="requiredDocumentsSection" style="display: none;">
+                        <h4><i class="fas fa-exclamation-circle"></i> Required Documents</h4>
+                        <div class="document-links" id="requiredDocuments"></div>
+                    </div>
+                    
+                    <!-- All Documents Section -->
+                    <div class="documents-category">
+                        <h4><i class="fas fa-folder-open"></i> All Documents</h4>
+                        <div class="document-links" id="modalPlayerDocuments"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
     <script>
-        function showPlayerModal(player) {
-            // Format date
-            const formatDate = (dateString) => {
-                if (!dateString) return 'N/A';
-                const date = new Date(dateString);
-                return date.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-            };
-
-            // Set modal content
-            document.getElementById('modalPlayerName').textContent = player.player_name;
-            
-            // Handle profile picture or default icon
-            const playerImage = document.getElementById('modalPlayerImage');
-            const defaultIcon = document.getElementById('defaultProfileIcon');
-            
-            if (player.profile_picture) {
-                playerImage.src = player.profile_picture;
-                playerImage.style.display = 'block';
-                defaultIcon.style.display = 'none';
-            } else {
-                playerImage.style.display = 'none';
-                defaultIcon.style.display = 'flex'; // Show the default icon
-            }
-            
-            document.getElementById('modalPlayerAge').textContent = player.age || 'N/A';
-            document.getElementById('modalPlayerSex').textContent = player.sex || 'N/A';
-            
-            // Conditionally set school/year level or barangay
-            const organizationType = '<%= team.organization %>';
-            if (organizationType === 'school') {
-                document.getElementById('modalPlayerSchool').textContent = player.school || 'N/A';
-                document.getElementById('modalPlayerYearLevel').textContent = player.year_level || 'N/A';
-            } else if (organizationType === 'barangay') {
-                document.getElementById('modalPlayerBarangay').textContent = player.barangay || 'N/A';
-            }
-            
-            document.getElementById('modalPlayerContact').textContent = player.contact_number || 'N/A';
-            document.getElementById('modalPlayerBirthdate').textContent = formatDate(player.birthdate);
-            document.getElementById('modalPlayerSport').textContent = player.sports || 'N/A';
-            document.getElementById('modalPlayerJoined').textContent = formatDate(player.created_at);
-
-            // Set documents
-            const documentsDiv = document.getElementById('modalPlayerDocuments');
-            documentsDiv.innerHTML = '';
-            
-            const documents = [
-                { name: 'PSA', value: player.documents.PSA, icon: 'fa-id-card' },
-                { name: 'Waiver', value: player.documents.waiver, icon: 'fa-file-signature' },
-                { name: 'Medical Certificate', value: player.documents.med_cert, icon: 'fa-file-medical' }
-            ];
-            
-            documents.forEach(doc => {
-                if (doc.value) {
-                    const link = document.createElement('a');
-                    link.href = doc.value;
-                    link.target = '_blank';
-                    link.className = 'document-link';
-                    link.innerHTML = `<i class="fas ${doc.icon}"></i> ${doc.name}`;
-                    documentsDiv.appendChild(link);
-                } else {
-                    const span = document.createElement('span');
-                    span.className = 'document-link';
-                    span.innerHTML = `<i class="fas ${doc.icon}"></i> ${doc.name}: Not Provided`;
-                    span.style.opacity = '0.7';
-                    span.style.cursor = 'not-allowed';
-                    documentsDiv.appendChild(span);
-                }
+    function showPlayerModal(player) {
+        // Format date
+        const formatDate = (dateString) => {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
             });
+        };
 
-            // Show modal
-            document.getElementById('playerModal').style.display = 'block';
-            document.body.style.overflow = 'hidden';
+        // Set modal content
+        document.getElementById('modalPlayerName').textContent = player.player_name;
+        
+        // Handle profile picture or default icon
+        const playerImage = document.getElementById('modalPlayerImage');
+        const defaultIcon = document.getElementById('defaultProfileIcon');
+        
+        if (player.profile_picture) {
+            playerImage.src = player.profile_picture;
+            playerImage.style.display = 'block';
+            defaultIcon.style.display = 'none';
+        } else {
+            playerImage.style.display = 'none';
+            defaultIcon.style.display = 'flex';
+        }
+        
+        document.getElementById('modalPlayerAge').textContent = player.age || 'N/A';
+        document.getElementById('modalPlayerSex').textContent = player.sex || 'N/A';
+        
+        // Conditionally set school/year level or barangay
+        const organizationType = '<%= team.organization %>';
+        if (organizationType === 'school') {
+            document.getElementById('modalPlayerSchool').textContent = player.school || 'N/A';
+            document.getElementById('modalPlayerYearLevel').textContent = player.year_level || 'N/A';
+        } else if (organizationType === 'barangay') {
+            document.getElementById('modalPlayerBarangay').textContent = player.barangay || 'N/A';
+        }
+        
+        document.getElementById('modalPlayerContact').textContent = player.contact_number || 'N/A';
+        document.getElementById('modalPlayerBirthdate').textContent = formatDate(player.birthdate);
+        document.getElementById('modalPlayerSport').textContent = player.sports || 'N/A';
+        document.getElementById('modalPlayerJoined').textContent = formatDate(player.created_at);
+
+        // Handle student type badge
+        const studentTypeBadge = document.getElementById('studentTypeBadge');
+        const studentTypeText = document.getElementById('studentTypeText');
+        
+        if (player.student_type) {
+            const formattedType = player.student_type.split('_').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+            studentTypeText.textContent = formattedType;
+            studentTypeBadge.style.display = 'inline-flex';
+        } else {
+            studentTypeBadge.style.display = 'none';
         }
 
-        function closeModal() {
-            document.getElementById('playerModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('playerModal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        }
-
-        // Close modal with ESC key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeModal();
+        // Set documents
+        const documentsDiv = document.getElementById('modalPlayerDocuments');
+        const requiredDocumentsDiv = document.getElementById('requiredDocuments');
+        const requiredSection = document.getElementById('requiredDocumentsSection');
+        
+        documentsDiv.innerHTML = '';
+        requiredDocumentsDiv.innerHTML = '';
+        
+        // Get all document fields
+        const documentFields = [
+            'PSA', 'COR', 'TOR_previous_school', 'COG', 'entry_form', 
+            'COE', 'authorization_letter', 'school_id', 'med_cert', 
+            'waiver', 'certification_lack_units'
+        ];
+        
+        let hasRequiredDocs = false;
+        let hasAnyDocs = false;
+        
+        documentFields.forEach(docField => {
+            if (player.documents && player.documents[docField]) {
+                hasAnyDocs = true;
+                const doc = player.documents[docField];
+                const isRequired = player.requiredDocuments && player.requiredDocuments.includes(docField);
+                
+                const link = document.createElement('a');
+                link.href = doc.url;
+                link.target = '_blank';
+                link.className = `document-link ${isRequired ? 'required-doc' : 'optional-doc'}`;
+                link.innerHTML = `<i class="fas ${doc.icon}"></i> ${doc.label}`;
+                link.title = doc.label;
+                
+                documentsDiv.appendChild(link);
+                
+                // Add to required section if it's required
+                if (isRequired) {
+                    hasRequiredDocs = true;
+                    const requiredLink = link.cloneNode(true);
+                    requiredDocumentsDiv.appendChild(requiredLink);
+                }
             }
         });
-    </script>
+        
+        // Show/hide required documents section
+        if (hasRequiredDocs) {
+            requiredSection.style.display = 'block';
+        } else {
+            requiredSection.style.display = 'none';
+        }
+        
+        // Show message if no documents
+        if (!hasAnyDocs) {
+            const noDocsMessage = document.createElement('p');
+            noDocsMessage.textContent = 'No documents uploaded';
+            noDocsMessage.style.color = '#666';
+            noDocsMessage.style.fontStyle = 'italic';
+            documentsDiv.appendChild(noDocsMessage);
+        }
+
+        // Show modal
+        document.getElementById('playerModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        document.getElementById('playerModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('playerModal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
+
+    // Close modal with ESC key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    });
+</script>
 </body>
+
 </html>
