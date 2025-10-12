@@ -617,7 +617,7 @@
                     <input type="file" id="image" name="image" accept="image/*">
                     <% if (event.image) { %>
                         <div class="file-preview">
-                            <img src="/uploads/events/<%= event.image %>" alt="Current event image">
+                            <img src="<%= event.image %>" alt="Current event image">
                             <span class="current-file">Current: <%= event.image %></span>
                         </div>
                     <% } %>
@@ -645,7 +645,7 @@
                     <input type="file" id="appointmentForm" name="appointmentForm" accept=".pdf">
                     <% if (event.appointmentForm) { %>
                         <div class="file-preview">
-                            <a href="/uploads/admin_appointment_form/<%= event.appointmentForm %>" target="_blank">
+                            <a href="<%= event.appointmentForm %>" target="_blank">
                                 <i class="fas fa-file-pdf"></i> View Current PDF
                             </a>
                             <span class="current-file">Current: <%= event.appointmentForm %></span>
@@ -722,4 +722,5 @@
     </script>
 </body>
 </html>
+
 
