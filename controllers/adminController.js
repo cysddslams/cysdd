@@ -1081,30 +1081,43 @@ exports.getAdminUsers = async (req, res) => {
         }
 
         // Fetch users with all required data
-        const [users] = await db.execute(`
-            SELECT 
-                u.id,
-                u.email,
-                u.profile,
-                tp.id AS team_player_id, 
-                tp.player_name,
-                tp.sports,
-                tp.age,
-                tp.sex,
-                tp.birthdate,
-                tp.PSA,
-                tp.waiver,
-                tp.med_cert,
-                tp.contact_number,
-                t.teamName,
-                e.title AS event_title,
-                tp.created_at
-            FROM users u
-            INNER JOIN team_players tp ON u.id = tp.user_id AND tp.status = 'confirmed'
-            LEFT JOIN team t ON tp.team_id = t.id
-            LEFT JOIN events e ON t.event_id = e.id
-            ORDER BY tp.created_at DESC
-        `);
+       const [users] = await db.execute(`
+        SELECT 
+            u.id,
+            u.email,
+            u.profile,
+            tp.id AS team_player_id, 
+            tp.player_name,
+            tp.sports,
+            tp.age,
+            tp.sex,
+            tp.birthdate,
+            tp.PSA,
+            tp.waiver,
+            tp.med_cert,
+            tp.contact_number,
+            tp.student_type,
+            tp.organization,
+            tp.school,
+            tp.barangay,
+            tp.year_level,
+            tp.COR,
+            tp.COG,
+            tp.TOR_previous_school,
+            tp.entry_form,
+            tp.COE,
+            tp.authorization_letter,
+            tp.school_id,
+            tp.certification_lack_units,
+            t.teamName,
+            e.title AS event_title,
+            tp.created_at
+        FROM users u
+        INNER JOIN team_players tp ON u.id = tp.user_id AND tp.status = 'confirmed'
+        LEFT JOIN team t ON tp.team_id = t.id
+        LEFT JOIN events e ON t.event_id = e.id
+        ORDER BY tp.created_at DESC
+    `);
 
         const formattedUsers = users.map(user => {
             return {
@@ -1525,6 +1538,7 @@ exports.exportEventResults = async (req, res) => {
         res.redirect('/admin/event-history');
     }
 };
+
 
 
 
