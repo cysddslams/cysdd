@@ -219,22 +219,54 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="documents-list">
-                                                    <% if (player.PSA) { %>
-                                                        <a href="<%= player.PSA %>" target="_blank" class="document-link">
-                                                            <i class="fas fa-file-pdf"></i> PSA
-                                                        </a>
+                                                <div class="documents-section">
+                                                    <!-- Student Type Badge -->
+                                                    <% if (player.student_type) { %>
+                                                        <div class="student-type-badge">
+                                                            <i class="fas fa-user-graduate"></i>
+                                                            <%= player.student_type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') %>
+                                                        </div>
                                                     <% } %>
-                                                    <% if (player.waiver) { %>
-                                                        <a href="<%= player.waiver %>" target="_blank" class="document-link">
-                                                            <i class="fas fa-file-pdf"></i> Waiver
-                                                        </a>
-                                                    <% } %>
-                                                    <% if (player.med_cert) { %>
-                                                        <a href="<%= player.med_cert %>" target="_blank" class="document-link">
-                                                            <i class="fas fa-file-pdf"></i> Med Cert
-                                                        </a>
-                                                    <% } %>
+                                                    
+                                                    <!-- Required Documents -->
+                                                    <div class="documents-list">
+                                                        <% if (player.requiredDocuments && player.requiredDocuments.length > 0) { %>
+                                                            <div class="documents-category">
+                                                                <strong>Required:</strong>
+                                                                <div class="document-links">
+                                                                    <% player.requiredDocuments.forEach(doc => { %>
+                                                                        <% if (player[doc]) { %>
+                                                                            <a href="<%= player[doc] %>" target="_blank" class="document-link required-doc" 
+                                                                               title="<%= player.documentLabels[doc] %>">
+                                                                                <i class="fas fa-file-pdf"></i> <%= player.documentLabels[doc] %>
+                                                                            </a>
+                                                                        <% } else { %>
+                                                                            <span class="document-missing" title="Missing <%= player.documentLabels[doc] %>">
+                                                                                <i class="fas fa-times-circle"></i> <%= player.documentLabels[doc] %>
+                                                                            </span>
+                                                                        <% } %>
+                                                                    <% }); %>
+                                                                </div>
+                                                            </div>
+                                                        <% } %>
+                                                        
+                                                        <!-- Optional Documents -->
+                                                        <% if (player.optionalDocuments && player.optionalDocuments.length > 0) { %>
+                                                            <div class="documents-category">
+                                                                <strong>Additional:</strong>
+                                                                <div class="document-links">
+                                                                    <% player.optionalDocuments.forEach(doc => { %>
+                                                                        <% if (player[doc]) { %>
+                                                                            <a href="<%= player[doc] %>" target="_blank" class="document-link optional-doc" 
+                                                                               title="<%= player.documentLabels[doc] %>">
+                                                                                <i class="fas fa-file-pdf"></i> <%= player.documentLabels[doc] %>
+                                                                            </a>
+                                                                        <% } %>
+                                                                    <% }); %>
+                                                                </div>
+                                                            </div>
+                                                        <% } %>
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td>
@@ -395,5 +427,6 @@
 </body>
 
 </html>
+
 
 
