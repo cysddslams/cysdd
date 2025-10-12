@@ -1076,7 +1076,7 @@ exports.getPlayerRegister = async (req, res) => {
     }
 };
 
-//REGISTER PLAYER FUNCTION
+//REGISTER PLAYER FUNCTION (Alternative robust version)
 exports.registerPlayer = async (req, res) => {
     const { 
         team_id, 
@@ -1128,26 +1128,6 @@ exports.registerPlayer = async (req, res) => {
             return res.redirect(`/player-register?team_id=${team_id}`);
         }
 
-        // Validate documents based on organization and student type
-        if (organizationType === 'school') {
-            const requiredDocs = DOCUMENT_REQUIREMENTS[student_type] || [];
-            for (const doc of requiredDocs) {
-                if (!req.files || !req.files[doc]) {
-                    req.flash('error', `Please upload all required documents for ${student_type.replace('_', ' ')}`);
-                    return res.redirect(`/player-register?team_id=${team_id}`);
-                }
-            }
-        } else if (organizationType === 'barangay') {
-            // Barangay requires basic documents
-            const barangayDocs = ['PSA', 'waiver', 'med_cert'];
-            for (const doc of barangayDocs) {
-                if (!req.files || !req.files[doc]) {
-                    req.flash('error', 'Please upload all required documents for barangay registration');
-                    return res.redirect(`/player-register?team_id=${team_id}`);
-                }
-            }
-        }
-
         // Map display names back to codes if needed
         let sportsValue = sports;
         const reverseEsportsMap = {
@@ -1160,7 +1140,6 @@ exports.registerPlayer = async (req, res) => {
             'Singing Contest': 'singing_contest'
         };
 
-        // Check if the selected sport is an esport or activity and convert to code
         if (reverseEsportsMap[sports]) {
             sportsValue = reverseEsportsMap[sports];
         } else if (reverseActivitiesMap[sports]) {
@@ -1169,7 +1148,6 @@ exports.registerPlayer = async (req, res) => {
 
         // Check if sport has player limit
         if (SPORT_LIMITS[sportsValue]) {
-            // Get current player count for this sport in this team
             const [playerCount] = await db.execute(`
                 SELECT COUNT(*) as count 
                 FROM team_players 
@@ -1184,45 +1162,36 @@ exports.registerPlayer = async (req, res) => {
 
         const userId = req.session.user.id;
 
-        // Get file URLs from Cloudinary
+        // Helper function to safely get file URL
         const getFileUrl = (fieldName) => {
-            return req.files && req.files[fieldName] ? req.files[fieldName][0].path : null;
+            if (req.files && req.files[fieldName] && req.files[fieldName][0] && req.files[fieldName][0].path) {
+                return req.files[fieldName][0].path;
+            }
+            return null;
         };
 
-        // Prepare document URLs based on organization type
-        let documentData = {};
-        
-        if (organizationType === 'school') {
-            const requiredDocs = DOCUMENT_REQUIREMENTS[student_type] || [];
-            requiredDocs.forEach(doc => {
-                documentData[doc] = getFileUrl(doc);
-            });
-        } else if (organizationType === 'barangay') {
-            // Barangay basic documents
-            documentData = {
-                PSA: getFileUrl('PSA'),
-                waiver: getFileUrl('waiver'),
-                med_cert: getFileUrl('med_cert')
-            };
-        }
+        // Get all document URLs
+        const PSA = getFileUrl('PSA');
+        const waiver = getFileUrl('waiver');
+        const med_cert = getFileUrl('med_cert');
+        const COR = getFileUrl('COR');
+        const TOR_previous_school = getFileUrl('TOR_previous_school');
+        const COG = getFileUrl('COG');
+        const entry_form = getFileUrl('entry_form');
+        const COE = getFileUrl('COE');
+        const authorization_letter = getFileUrl('authorization_letter');
+        const school_id = getFileUrl('school_id');
 
-        // Insert player with all fields
-        await db.execute(`
-            INSERT INTO team_players 
-            (team_id, user_id, player_name, PSA, waiver, med_cert, 
-            birthdate, age, sex, sports, school, year_level, barangay, contact_number,
-            student_type, COR, TOR_previous_school, COG, entry_form, COE, authorization_letter, school_id,
-            status, notification_viewed, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "pending", 0, NOW(), NOW())
-        `, [
+        // Prepare values for database
+        const insertValues = [
             team_id,
             userId,
             player_name,
-            documentData.PSA,
-            documentData.waiver,
-            documentData.med_cert,
+            PSA,
+            waiver,
+            med_cert,
             birthdate,
-            age,
+            parseInt(age),
             sex,
             sportsValue,
             organizationType === 'school' ? school : null,
@@ -1230,14 +1199,53 @@ exports.registerPlayer = async (req, res) => {
             organizationType === 'barangay' ? barangay : null,
             contact_no,
             organizationType === 'school' ? student_type : null,
-            documentData.COR || null,
-            documentData.TOR_previous_school || null,
-            documentData.COG || null,
-            documentData.entry_form || null,
-            documentData.COE || null,
-            documentData.authorization_letter || null,
-            documentData.school_id || null
-        ]);
+            COR,
+            TOR_previous_school,
+            COG,
+            entry_form,
+            COE,
+            authorization_letter,
+            school_id
+        ];
+
+        // Validate required documents based on organization type
+        if (organizationType === 'school') {
+            const requiredDocs = DOCUMENT_REQUIREMENTS[student_type] || [];
+            for (const doc of requiredDocs) {
+                const fieldMap = {
+                    'PSA': PSA,
+                    'COR': COR,
+                    'TOR_previous_school': TOR_previous_school,
+                    'COG': COG,
+                    'entry_form': entry_form,
+                    'COE': COE,
+                    'authorization_letter': authorization_letter,
+                    'school_id': school_id,
+                    'med_cert': med_cert,
+                    'waiver': waiver
+                };
+                
+                if (!fieldMap[doc]) {
+                    req.flash('error', `Please upload the required document: ${doc}`);
+                    return res.redirect(`/player-register?team_id=${team_id}`);
+                }
+            }
+        } else if (organizationType === 'barangay') {
+            if (!PSA || !waiver || !med_cert) {
+                req.flash('error', 'Please upload all required documents for barangay registration');
+                return res.redirect(`/player-register?team_id=${team_id}`);
+            }
+        }
+
+        // Insert player
+        await db.execute(`
+            INSERT INTO team_players 
+            (team_id, user_id, player_name, PSA, waiver, med_cert, 
+            birthdate, age, sex, sports, school, year_level, barangay, contact_number,
+            student_type, COR, TOR_previous_school, COG, entry_form, COE, authorization_letter, school_id,
+            status, notification_viewed, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "pending", 0, NOW(), NOW())
+        `, insertValues);
 
         req.flash('success', 'Player registered successfully!');
         res.redirect('/join-team');
@@ -1335,6 +1343,7 @@ exports.uploadProfilePicture = async (req, res) => {
         res.sendStatus(500);
     }
 };
+
 
 
 
