@@ -94,7 +94,7 @@ const coachRegisterUpload = multer({
 });
 
 /**
- * Storage for Player Registration Documents (PSA, Waiver, Medical Certificate)
+ * Storage for Player Registration Documents
  */
 const playerDocsStorage = new CloudinaryStorage({
   cloudinary,
@@ -113,6 +113,20 @@ const playerDocsStorage = new CloudinaryStorage({
       folder = 'player_docs/waivers';
     } else if (file.fieldname === 'med_cert') {
       folder = 'player_docs/medical';
+    } else if (file.fieldname === 'COR') {
+      folder = 'player_docs/COR';
+    } else if (file.fieldname === 'TOR_previous_school') {
+      folder = 'player_docs/TOR';
+    } else if (file.fieldname === 'COG') {
+      folder = 'player_docs/COG';
+    } else if (file.fieldname === 'entry_form') {
+      folder = 'player_docs/entry_form';
+    } else if (file.fieldname === 'COE') {
+      folder = 'player_docs/COE';
+    } else if (file.fieldname === 'authorization_letter') {
+      folder = 'player_docs/authorization_letter';
+    } else if (file.fieldname === 'school_id') {
+      folder = 'player_docs/school_id';
     }
 
     return {
@@ -123,10 +137,18 @@ const playerDocsStorage = new CloudinaryStorage({
   },
 });
 
-// 🔹 Multer middleware for PSA, Waiver, Med Cert
+// Multer middleware for all player documents
 const playerDocsUpload = multer({
   storage: playerDocsStorage,
   limits: { fileSize: 20 * 1024 * 1024 }, // 20 MB limit
+  fileFilter: (req, file, cb) => {
+    // Only allow PDF files for all documents
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are allowed for all documents'), false);
+    }
+  }
 });
 
 /**
@@ -162,3 +184,4 @@ module.exports = {
    playerDocsUpload,
   userProfileUpload,
 };
+
