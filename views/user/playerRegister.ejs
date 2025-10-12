@@ -216,7 +216,7 @@
         </div>
     </main>
 
-    <script>
+        <script>
         // Document requirements mapping based on student type
         const documentRequirements = {
             freshman: ['PSA', 'COR', 'school_id', 'med_cert', 'waiver'],
@@ -225,7 +225,7 @@
             transferee: ['PSA', 'COR', 'TOR_previous_school', 'COG', 'school_id', 'med_cert', 'waiver'],
             working_student: ['COR', 'COG', 'COE', 'authorization_letter', 'school_id', 'med_cert', 'waiver'],
             replacement_player: ['PSA', 'COR', 'COG', 'entry_form', 'school_id', 'med_cert', 'waiver'],
-            graduating: ['COR', 'COG', 'school_id', 'med_cert', 'waiver']
+            graduating: ['COR', 'COG', 'school_id', 'med_cert', 'waiver', 'certification_lack_units']
         };
 
         // Document labels
@@ -239,7 +239,8 @@
             authorization_letter: 'Authorization Letter',
             school_id: 'School ID',
             med_cert: 'Medical Certificate',
-            waiver: 'Waiver Form'
+            waiver: 'Waiver Form',
+            certification_lack_units: 'Certification of Lack of Units'
         };
 
         // Calculate age based on birthdate
@@ -404,7 +405,7 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering Player...';
         });
     </script>
-
 </body>
 </html>
+
 
