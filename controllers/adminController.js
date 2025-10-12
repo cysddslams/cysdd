@@ -747,7 +747,7 @@ exports.getEditEvent = async (req, res) => {
     }
 };
 
-// Update Event
+// Update Event (Fixed for Cloudinary)
 exports.postUpdateEvent = async (req, res) => {
     if (!req.session.admin) {
         return res.redirect("/admin");
@@ -773,14 +773,15 @@ exports.postUpdateEvent = async (req, res) => {
         // First get the current event to maintain existing files if not updated
         const [currentEvent] = await db.execute('SELECT image, appointmentForm, status FROM events WHERE id = ?', [eventId]);
         
-        if (req.files?.image?.[0]) {
-            image = req.files.image[0].filename;
+        // Use the SAME file handling as create function
+        if (req.files?.image) {
+            image = req.files.image[0].path; // Use .path instead of .filename for Cloudinary
         } else {
             image = currentEvent[0].image;
         }
         
-        if (req.files?.appointmentForm?.[0]) {
-            appointmentForm = req.files.appointmentForm[0].filename;
+        if (req.files?.appointmentForm) {
+            appointmentForm = req.files.appointmentForm[0].path; // Use .path instead of .filename for Cloudinary
         } else {
             appointmentForm = currentEvent[0].appointmentForm;
         }
@@ -1524,6 +1525,7 @@ exports.exportEventResults = async (req, res) => {
         res.redirect('/admin/event-history');
     }
 };
+
 
 
 
