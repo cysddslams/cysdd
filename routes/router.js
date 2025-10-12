@@ -53,7 +53,8 @@ router.get('/join-team',  authMiddleware, checkTermsAccepted, userController.get
 router.get('/all-teams',  authMiddleware, checkTermsAccepted, userController.getAllTeams);
 router.get('/teams/:id',  authMiddleware, checkTermsAccepted, userController.getTeamDetails);
 router.get('/teams/:id/players',  authMiddleware, checkTermsAccepted, userController.getTeamPlayers);
-router.get('/player-register',  authMiddleware, checkTermsAccepted, userController.getPlayerRegister);
+// Update the player registration route to handle all document fields
+router.get('/player-register', authMiddleware, checkTermsAccepted, userController.getPlayerRegister);
 router.post(
   '/player-register',
   authMiddleware,
@@ -62,9 +63,18 @@ router.post(
     { name: 'PSA', maxCount: 1 },
     { name: 'waiver', maxCount: 1 },
     { name: 'med_cert', maxCount: 1 },
+    { name: 'COR', maxCount: 1 },
+    { name: 'TOR_previous_school', maxCount: 1 },
+    { name: 'COG', maxCount: 1 },
+    { name: 'entry_form', maxCount: 1 },
+    { name: 'COE', maxCount: 1 },
+    { name: 'authorization_letter', maxCount: 1 },
+    { name: 'school_id', maxCount: 1 }
   ]),
   userController.registerPlayer
 );
+
+
 router.get('/posts/mark-viewed/:id', async (req, res) => {
     const postId = req.params.id;
 
@@ -220,6 +230,7 @@ router.post("/admin/schedule/set-champion", adminAuthMiddleware, scheduleControl
 
 
 module.exports = router;
+
 
 
 
