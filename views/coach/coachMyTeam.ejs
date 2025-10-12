@@ -221,17 +221,17 @@
                                             <td>
                                                 <div class="documents-list">
                                                     <% if (player.PSA) { %>
-                                                        <a href="/<%= player.PSA %>" target="_blank" class="document-link">
+                                                        <a href="<%= player.PSA %>" target="_blank" class="document-link">
                                                             <i class="fas fa-file-pdf"></i> PSA
                                                         </a>
                                                     <% } %>
                                                     <% if (player.waiver) { %>
-                                                        <a href="/<%= player.waiver %>" target="_blank" class="document-link">
+                                                        <a href="<%= player.waiver %>" target="_blank" class="document-link">
                                                             <i class="fas fa-file-pdf"></i> Waiver
                                                         </a>
                                                     <% } %>
                                                     <% if (player.med_cert) { %>
-                                                        <a href="/<%= player.med_cert %>" target="_blank" class="document-link">
+                                                        <a href="<%= player.med_cert %>" target="_blank" class="document-link">
                                                             <i class="fas fa-file-pdf"></i> Med Cert
                                                         </a>
                                                     <% } %>
@@ -395,4 +395,5 @@
 </body>
 
 </html>
+
 
