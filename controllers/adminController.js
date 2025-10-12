@@ -762,8 +762,10 @@ exports.postUpdateEvent = async (req, res) => {
         // Get all data from req.body
         const { title, description, date_schedule, location } = req.body;
         
-        // Get sports array
-        const sports = req.body.sports || req.body['sports[]'] || [];
+        // Get arrays for sports, esports, and other activities
+        const sports = [].concat(req.body.sports || req.body['sports[]'] || []);
+        const esports = [].concat(req.body.esports || req.body['esports[]'] || []);
+        const otherActivities = [].concat(req.body.other_activities || req.body['other_activities[]'] || []);
         
         // Get file names (keep existing if no new file uploaded)
         let image, appointmentForm;
@@ -790,6 +792,8 @@ exports.postUpdateEvent = async (req, res) => {
             title,
             description,
             sports,
+            esports,
+            otherActivities,
             image,
             appointmentForm,
             date_schedule,
@@ -797,9 +801,9 @@ exports.postUpdateEvent = async (req, res) => {
             status
         });
 
-        // Validate at least one sport is selected
-        if (!sports || sports.length === 0) {
-            console.log("Validation failed: No sports selected");
+        // Validate at least one category is selected
+        if (sports.length === 0 && esports.length === 0 && otherActivities.length === 0) {
+            console.log("Validation failed: No categories selected");
             
             // Re-fetch event data to render the form again
             const [eventRows] = await db.execute('SELECT * FROM events WHERE id = ?', [eventId]);
@@ -807,18 +811,22 @@ exports.postUpdateEvent = async (req, res) => {
             event.formattedDate = new Date(event.date_schedule).toISOString().slice(0, 16);
             
             return res.render("admin/editEventDetails", {
-                messages: { error: "Please select at least one sport" },
+                messages: { error: "Please select at least one category (Sports, Esports, or Other Activities)" },
                 event: event
             });
         }
 
-        // Convert array to comma-separated string
-        const sportsString = Array.isArray(sports) ? sports.join(',') : sports;
+        // Convert arrays to comma-separated strings
+        const sportsString = sports.join(',');
+        const esportsString = esports.join(',');
+        const otherActivitiesString = otherActivities.join(',');
         
         console.log("Final data for update:", {
             title,
             description,
             sportsString,
+            esportsString,
+            otherActivitiesString,
             image,
             appointmentForm,
             date_schedule,
@@ -827,8 +835,20 @@ exports.postUpdateEvent = async (req, res) => {
         });
 
         const [result] = await db.execute(
-            'UPDATE events SET title = ?, description = ?, sports = ?, image = ?, appointmentForm = ?, date_schedule = ?, location = ?, status = ?, updated_at = NOW() WHERE id = ?',
-            [title, description, sportsString, image, appointmentForm, date_schedule, location, status, eventId]
+            `UPDATE events SET 
+                title = ?, description = ?, 
+                sports = ?, esports = ?, other_activities = ?,
+                image = ?, appointmentForm = ?, 
+                date_schedule = ?, location = ?, status = ?, 
+                updated_at = NOW() 
+            WHERE id = ?`,
+            [
+                title, description, 
+                sportsString, esportsString, otherActivitiesString,
+                image, appointmentForm, 
+                date_schedule, location, status, 
+                eventId
+            ]
         );
         
         console.log("Update successful, result:", result);
@@ -1504,6 +1524,7 @@ exports.exportEventResults = async (req, res) => {
         res.redirect('/admin/event-history');
     }
 };
+
 
 
 
