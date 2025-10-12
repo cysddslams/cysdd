@@ -15,9 +15,9 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            color: #fff;
-            background: linear-gradient(135deg, #ffffff, #c6d6d8);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            background: #f8f9fa;
             line-height: 1.6;
             display: flex;
             flex-direction: column;
@@ -25,30 +25,38 @@
         }
 
         .header {
-            background-color: #8B0039;
+            background: linear-gradient(135deg, #8B0039, #a32600);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 3px 30px;
+            padding: 8px 30px;
             width: 100%;
             position: fixed;
             top: 0;
             z-index: 1000;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
         }
 
         .header .logo {
             margin-left: 20px;
             display: flex;
             align-items: center;
-            font-family: 'Playfair Display', serif;
             gap: 12px;
         }
 
         .header .logo img {
-            width: 60px;
-            height: auto;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border: 2px solid #fff;
+        }
+
+        .slams-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #FFD700;
+            letter-spacing: 0.5px;
         }
 
         .user-profile {
@@ -71,100 +79,114 @@
             height: 100%;
             width: 240px;
             position: fixed;
-            top: 72px;
+            top: 66px;
             left: -240px;
-            background-color: #ffffff;
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
             z-index: 999;
             padding-top: 20px;
             transition: all 0.3s ease;
-            box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 2px 0px 15px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
         }
 
         .sidebar a {
             padding: 16px 24px;
             text-decoration: none;
-            color: rgb(46, 0, 0);
-            font-size: 18px;
+            color: #2e0000;
+            font-size: 16px;
             display: block;
             transition: all 0.3s ease;
-            border-bottom: 1px solid #000000;
+            border-bottom: 1px solid #eaeaea;
+            font-weight: 500;
         }
 
         .sidebar a i {
             margin-right: 15px;
+            width: 20px;
+            text-align: center;
+            color: #8B0039;
         }
 
         .sidebar a:hover {
-            background-color: #a32600;
+            background: linear-gradient(135deg, #8B0039, #a32600);
             padding-left: 32px;
+            color: white;
+        }
+
+        .sidebar a:hover i {
             color: white;
         }
 
         .sidebar a.active {
-            background-color: #581000;
+            background: linear-gradient(135deg, #8B0039, #a32600);
             color: #fff;
             padding-left: 32px;
         }
 
-        .sidebar-btn {
-            font-size: 15px;
+        .sidebar a.active i {
             color: white;
-            background-color: #8B0039;
-            padding: 5px;
-            padding-left: 10px;
-            padding-right: 10px;
+        }
+
+        .sidebar-btn {
+            font-size: 16px;
+            color: white;
+            background: #8B0039;
+            padding: 8px 12px;
             cursor: pointer;
             position: fixed;
-            top: 10px;
-            left: 10px;
+            top: 15px;
+            left: 15px;
             z-index: 1001;
-            border-radius: 5px;
-            transition: transform 0.3s ease;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .sidebar-btn:hover {
-            transform: scale(1.1);
-            background-color: #8B0039;
+            transform: scale(1.05);
+            background: #a32600;
         }
 
         /* Team dropdown styles */
         .team-dropdown-btn {
             padding: 16px 24px;
             text-decoration: none;
-            color: rgb(46, 0, 0);
-            font-size: 18px;
+            color: #2e0000;
+            font-size: 16px;
             display: block;
             cursor: pointer;
             background-color: #ffffff;
-            border-bottom: 1px solid #000000;
+            border-bottom: 1px solid #eaeaea;
             transition: all 0.3s ease;
+            font-weight: 500;
         }
 
         .team-dropdown-btn:hover {
-            background-color: #a32600;
+            background: linear-gradient(135deg, #8B0039, #a32600);
             padding-left: 32px;
             color: white;
         }
 
         .team-dropdown-content {
             display: none;
-            background-color: #f4f4f4;
+            background-color: #f8f9fa;
             padding-left: 20px;
-            border-left: 3px solid #3498db;
+            border-left: 3px solid #8B0039;
         }
 
         .team-dropdown-content a {
-            padding: 8px 15px;
+            padding: 12px 15px;
             text-decoration: none;
-            font-size: 16px;
-            color: #333;
+            font-size: 14px;
+            color: #555;
             display: block;
-            border-bottom: 1px solid #000000;
+            border-bottom: 1px solid #eaeaea;
+            font-weight: 400;
         }
 
         .team-dropdown-content a:hover {
-            background-color: #a32600;
+            background: linear-gradient(135deg, #8B0039, #a32600);
             color: white;
         }
 
@@ -176,15 +198,15 @@
         .dropdown-content {
             position: absolute;
             right: 0;
-            top: 40px;
-            background-color: #621616;
-            color: #fff;
-            min-width: 180px;
-            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.5);
-            border-radius: 0;
-            padding: 15px;
+            top: 45px;
+            background: #ffffff;
+            color: #333;
+            min-width: 200px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-radius: 8px;
+            padding: 10px 0;
             z-index: 104;
-            border: 1px solid #ffcc00;
+            border: 1px solid #e0e0e0;
             opacity: 0;
             pointer-events: none;
             transform: translateY(-10px);
@@ -198,25 +220,32 @@
         }
 
         .dropdown-content a {
-            padding: 10px 15px;
+            padding: 12px 20px;
             text-decoration: none;
-            color: #fff;
+            color: #333;
             display: flex;
             align-items: center;
             font-size: 14px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom: 1px solid #f0f0f0;
             transition: all 0.3s ease;
+            font-weight: 500;
         }
 
         .dropdown-content a i {
             margin-right: 10px;
             width: 16px;
             text-align: center;
+            color: #8B0039;
         }
 
         .dropdown-content a:hover {
-            background-color: #9a1b1b;
+            background: linear-gradient(135deg, #8B0039, #a32600);
+            color: white;
             transform: translateX(5px);
+        }
+
+        .dropdown-content a:hover i {
+            color: white;
         }
 
         /* Modal Styles */
@@ -228,8 +257,9 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding-top: 100px;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            padding: 20px;
             animation: fadeIn 0.3s ease-in-out;
         }
 
@@ -242,25 +272,31 @@
             background-color: #fff;
             margin: 0 auto;
             padding: 30px;
-            border-radius: 10px;
+            border-radius: 12px;
             width: 90%;
-            max-width: 400px;
+            max-width: 450px;
             text-align: center;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
             animation: scaleIn 0.3s ease-in-out;
             position: relative;
         }
 
         @keyframes scaleIn {
-            from { transform: scale(0.9); }
-            to { transform: scale(1); }
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
         .modal-content h3 {
             font-size: 22px;
             color: #333;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-weight: 600;
+        }
+
+        .modal-content p {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
         }
 
         .modal-buttons {
@@ -272,10 +308,10 @@
 
         .confirm-btn, .cancel-btn {
             padding: 12px 25px;
-            font-size: 16px;
-            font-weight: bold;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
-            border-radius: 6px;
+            border-radius: 8px;
             border: none;
             transition: all 0.3s;
             min-width: 100px;
@@ -286,23 +322,25 @@
         }
 
         .confirm-btn {
-            background-color: #4CAF50;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
             color: #fff;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
         }
 
         .cancel-btn {
-            background-color: #f44336;
+            background: linear-gradient(135deg, #f44336, #e53935);
             color: #fff;
+            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
         }
 
         .confirm-btn:hover {
-            background-color: #45a049;
             transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(76, 175, 80, 0.4);
         }
 
         .cancel-btn:hover {
-            background-color: #e53935;
             transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(244, 67, 54, 0.4);
         }
 
         .close-btn {
@@ -314,68 +352,85 @@
             background: none;
             border: none;
             cursor: pointer;
+            transition: color 0.2s;
         }
 
         .close-btn:hover {
             color: #333;
         }
 
-        /* Dashboard Container */
+        /* ==================== MAIN CONTENT - ENHANCED DESIGN ==================== */
         .dashboard-container {
-            padding: 20px;
+            padding: 25px;
             padding-top: 90px;
             transition: all 0.3s ease;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
             margin-left: 0;
             width: 100%;
+            background: #f8f9fa;
         }
 
-        /* Search Bar Styles */
+        /* Search Bar Styles - Enhanced */
         .search-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 20px;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         }
 
-        .search-container h1{
+        .search-container h1 {
             font-size: 28px;
-            color: #4b1515;
+            color: #8B0039;
             font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-container h1 i {
+            background: rgba(139, 0, 57, 0.1);
+            padding: 10px;
+            border-radius: 50%;
         }
         
         .search-box {
             position: relative;
-            width: 300px;
+            width: 350px;
         }
         
         .search-input {
             width: 100%;
-            padding: 10px 15px 10px 40px;
-            border: 1px solid #ddd;
+            padding: 12px 20px 12px 45px;
+            border: 2px solid #e0e0e0;
             border-radius: 25px;
             font-size: 14px;
             transition: all 0.3s;
+            background: #f8f9fa;
+            font-weight: 500;
         }
         
         .search-input:focus {
             outline: none;
-            border-color: #4A154B;
-            box-shadow: 0 0 5px rgba(74, 21, 75, 0.2);
+            border-color: #8B0039;
+            box-shadow: 0 0 0 3px rgba(139, 0, 57, 0.1);
+            background: #ffffff;
         }
         
         .search-icon {
             position: absolute;
-            left: 15px;
+            left: 18px;
             top: 50%;
             transform: translateY(-50%);
-            color: #777;
+            color: #8B0039;
         }
         
-        /* Player List Styling */
+        /* Player List Styling - Enhanced */
         .player-list {
             width: 100%;
             margin-top: 20px;
@@ -384,74 +439,81 @@
         .player-list-item {
             display: flex;
             align-items: center;
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
+            padding: 20px 25px;
+            border-bottom: 1px solid #f0f0f0;
             cursor: pointer;
             transition: all 0.3s ease;
-            border-radius: 8px;
-            margin-bottom: 5px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-left: 4px solid transparent;
         }
         
         .player-list-item:hover {
-            background-color: #f8f5ff;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(74, 21, 75, 0.1);
-            border-left: 3px solid #4A154B;
+            background: linear-gradient(135deg, #ffffff, #f8f5ff);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139, 0, 57, 0.15);
+            border-left: 4px solid #8B0039;
         }
         
         .player-avatar {
-            width: 45px;
-            height: 45px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #e0e0e0;
-            margin-right: 15px;
+            border: 3px solid #e0e0e0;
+            margin-right: 20px;
             transition: all 0.3s ease;
         }
         
         .player-list-item:hover .player-avatar {
-            border-color: #4A154B;
+            border-color: #8B0039;
             transform: scale(1.05);
         }
         
         .player-name {
-            font-weight: 500;
+            font-weight: 600;
             flex-grow: 1;
             color: #333;
             transition: color 0.3s;
+            font-size: 16px;
         }
         
         .player-list-item:hover .player-name {
-            color: #4A154B;
+            color: #8B0039;
         }
         
         .player-actions {
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
         
         .btn {
-            padding: 6px 12px;
+            padding: 8px 16px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
             font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         
         .btn-danger {
-            background-color: #e74c3c;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
+            box-shadow: 0 3px 8px rgba(231, 76, 60, 0.3);
         }
         
         .btn-danger:hover {
-            background-color: #c0392b;
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(231, 76, 60, 0.4);
         }
         
-        /* Player Details Modal */
+        /* Player Details Modal - Enhanced */
         .player-modal {
             display: none;
             position: fixed;
@@ -460,29 +522,29 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            backdrop-filter: blur(3px);
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
             padding: 20px;
             box-sizing: border-box;
             animation: fadeIn 0.3s ease-out;
         }
         
         .player-modal-content {
-            background-color: #fff;
+            background: #ffffff;
             margin: 0 auto;
-            padding: 30px;
-            border-radius: 12px;
+            padding: 0;
+            border-radius: 16px;
             width: 85%;
-            max-width: 700px;
-            max-height: 85vh;
+            max-width: 900px;
+            max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
             border: 1px solid #e0e0e0;
             animation: slideUp 0.3s ease-out;
         }
         
         @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
+            from { transform: translateY(30px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
         
@@ -490,47 +552,53 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #f0f0f0;
+            padding: 25px 30px;
+            background: linear-gradient(135deg, #8B0039, #a32600);
+            color: white;
+            border-radius: 16px 16px 0 0;
         }
         
         .player-modal-header h2 {
-            color: #4A154B;
             margin: 0;
-            font-size: 24px;
-            font-weight: 600;
+            font-size: 26px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .player-modal-body {
+            padding: 30px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 25px;
         }
         
         .player-info-group {
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }
         
         .player-info-label {
             font-weight: 600;
-            color: #666;
+            color: #8B0039;
             margin-bottom: 8px;
             font-size: 14px;
             letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
         
         .player-info-value {
-            padding: 10px;
-            background-color: #f9f9f9;
-            border-radius: 6px;
-            border-left: 3px solid #4A154B;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #8B0039;
             font-size: 15px;
             color: #333;
+            font-weight: 500;
         }
         
         .close-modal {
-            color: #aaa;
+            color: rgba(255, 255, 255, 0.8);
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
@@ -538,63 +606,146 @@
         }
         
         .close-modal:hover {
-            color: #333;
+            color: white;
         }
         
-        /* Document Links */
+        /* Document Links - Enhanced */
         .document-links {
             display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 12px;
         }
         
         .document-link {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            gap: 5px;
-            padding: 8px 12px;
-            background-color: #f0f0f0;
-            border-radius: 6px;
-            color: #4A154B;
+            gap: 12px;
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #8B0039, #a32600);
+            border-radius: 8px;
+            color: white;
             text-decoration: none;
             transition: all 0.3s;
+            font-weight: 500;
+            box-shadow: 0 3px 8px rgba(139, 0, 57, 0.3);
         }
         
         .document-link:hover {
-            background-color: #4A154B;
-            color: white;
             transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(139, 0, 57, 0.4);
+            color: white;
+        }
+
+        .document-link.missing {
+            background: linear-gradient(135deg, #e0e0e0, #d1d1d1);
+            color: #666;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .document-link.missing:hover {
+            transform: none;
+            box-shadow: 0 3px 8px rgba(139, 0, 57, 0.3);
         }
         
         /* No results message */
         .no-results {
             text-align: center;
-            padding: 30px;
-            color: #777;
-            font-style: italic;
-            background-color: #f9f9f9;
-            border-radius: 8px;
+            padding: 40px;
+            color: #666;
+            background: #ffffff;
+            border-radius: 12px;
             margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         }
+
+        .no-results i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #e0e0e0;
+        }
+
         .player-modal-profile {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            border-radius: 12px;
+            grid-column: span 2;
         }
 
         .player-modal-avatar {
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid #4A154B;
-            margin: 0 auto;
+            border: 4px solid #8B0039;
+            margin: 0 auto 15px;
             display: block;
+            box-shadow: 0 6px 15px rgba(139, 0, 57, 0.2);
+        }
+
+        .student-type-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #8B0039, #a32600);
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .organization-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #4A154B, #6a1b9a);
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .documents-section {
+            grid-column: span 2;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 4px solid #8B0039;
+        }
+
+        .documents-section h3 {
+            color: #8B0039;
+            margin-bottom: 20px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .document-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .status-complete {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        .status-missing {
+            color: #f44336;
+            font-weight: 600;
         }
         
         /* Responsive adjustments */
         @media (max-width: 1024px) {
             .header {
-                padding: 2px 20px;
+                padding: 8px 20px;
             }
 
             .header .logo img {
@@ -609,18 +760,22 @@
             }
 
             .sidebar a {
-                font-size: 16px;
+                font-size: 15px;
                 padding: 14px 20px;
             }
 
             .dashboard-container {
-                padding: 15px;
-                padding-top: 80px;
+                padding: 20px;
+                padding-top: 85px;
             }
 
             .sidebar-btn {
                 left: 15px;
                 top: 15px;
+            }
+
+            .search-box {
+                width: 300px;
             }
         }
 
@@ -643,21 +798,21 @@
             }
 
             .sidebar a {
-                font-size: 16px;
-                padding: 16px 20px;
+                font-size: 15px;
+                padding: 14px 20px;
                 min-height: 50px;
             }
 
             .sidebar a i {
                 margin-right: 12px;
-                width: 20px;
+                width: 18px;
                 text-align: center;
             }
 
             .sidebar-btn {
                 left: 10px;
                 top: 13px;
-                font-size: 18px;
+                font-size: 16px;
                 padding: 8px 12px;
                 min-width: 44px;
                 min-height: 44px;
@@ -667,13 +822,14 @@
             }
 
             .dashboard-container {
-                padding: 20px;
+                padding: 15px;
                 padding-top: 80px;
             }
 
             .search-container {
                 flex-direction: column;
                 align-items: flex-start;
+                padding: 20px;
             }
 
             .search-box {
@@ -682,17 +838,20 @@
 
             .player-modal-body {
                 grid-template-columns: 1fr;
+                padding: 20px;
+                gap: 15px;
             }
             
             .player-modal-content {
                 width: 95%;
-                padding: 20px;
+                padding: 0;
             }
             
             .player-list-item {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 10px;
+                gap: 12px;
+                padding: 15px;
             }
             
             .player-actions {
@@ -705,12 +864,23 @@
                 font-size: 14px;
                 width: 100px;
             }
+
+            .player-modal-profile {
+                grid-column: span 1;
+            }
+
+            .documents-section {
+                grid-column: span 1;
+            }
         }
 
         @media (max-width: 480px) {
             .player-modal-content {
                 width: 95%;
-                padding: 15px;
+            }
+            
+            .player-modal-header {
+                padding: 20px;
             }
             
             .player-modal-header h2 {
@@ -722,12 +892,11 @@
             }
             
             .player-info-value {
-                padding: 8px;
+                padding: 10px;
                 font-size: 14px;
             }
             
             .document-links {
-                flex-direction: column;
                 gap: 8px;
             }
             
@@ -735,6 +904,10 @@
                 padding: 10px 12px;
                 font-size: 13px;
                 width: 90px;
+            }
+
+            .player-modal-body {
+                padding: 15px;
             }
         }
 
@@ -763,17 +936,17 @@
         <a href="/admin/home"><i class="fas fa-home"></i> Home</a>
         <a href="/admin/posts"><i class="fas fa-newspaper"></i> Posts</a>
         <a href="/admin/events"><i class="fas fa-calendar-alt"></i> Events</a>
-<a href="/admin/schedule"><i class="fas fa-calendar-day"></i> Schedule</a>
+        <a href="/admin/schedule"><i class="fas fa-calendar-day"></i> Schedule</a>
         <a href="/admin/coach"><i class="fas fa-chalkboard-teacher"></i> Organization Request</a>
         
         <!-- Team dropdown section -->
         <a href="javascript:void(0);" class="team-dropdown-btn"><i class="fas fa-users-cog"></i> Teams</a>
         <div class="team-dropdown-content">
             <a href="/admin/team-request"><i class="fas fa-users"></i> Team Request</a>
-        <a href="/admin/registered-team"><i class="fas fa-landmark"></i> All Team</a>
+            <a href="/admin/registered-team"><i class="fas fa-landmark"></i> All Team</a>
         </div>
         <a href="/admin/users" class="active"><i class="fas fa-users"></i> Players</a>
- <a href="/admin/event-history"><i class="fas fa-history"></i> Event History</a>
+        <a href="/admin/event-history"><i class="fas fa-history"></i> Event History</a>
     </div>
 
     <!-- Sidebar toggle button -->
@@ -792,13 +965,13 @@
                 <% if (admin && admin.profilePic) { %>
                     <img src="<%= admin.profilePic %>" 
                         alt="Admin Profile" 
-                        style="width: 35px; height: 35px; border-radius: 50%; border: 2px solid #007bff; object-fit: cover;">
+                        style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #FFD700; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
                 <% } else { %>
                     <i class="fas fa-user-shield" style="font-size: 22px; color: white;"></i>
                 <% } %>
                 <div class="dropdown-content" id="adminDropdownMenu" style="display: none;">
                     <a href="/admin/adminProfile">
-                        <i class="fas fa-cogs" style="margin-right: 8px;"></i> Admin
+                        <i class="fas fa-cogs" style="margin-right: 8px;"></i> Admin Profile
                     </a>
                     <a href="javascript:void(0);" class="logout-btn" onclick="showLogoutModal()">
                         <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Log Out
@@ -814,7 +987,7 @@
                 <h1><i class="fas fa-users"></i> Players Management</h1>
                 <div class="search-box">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="playerSearch" class="search-input" placeholder="Search players..." autocomplete="off">
+                    <input type="text" id="playerSearch" class="search-input" placeholder="Search players by name..." autocomplete="off">
                 </div>
             </div>
             
@@ -825,8 +998,8 @@
                             <% if (user.profile) { %>
                                 <img src="<%= user.profile %>" class="player-avatar" alt="Profile">
                             <% } else { %>
-                                <div class="player-avatar" style="background-color: #e4e6eb; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-user" style="color: var(--dark-gray); font-size: 16px;"></i>
+                                <div class="player-avatar" style="background: linear-gradient(135deg, #e4e6eb, #d1d3d8); display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-user" style="color: #8B0039; font-size: 18px;"></i>
                                 </div>
                             <% } %>
                         </div>
@@ -840,8 +1013,9 @@
                 <% }); %>
             </div>
             <div id="noResults" class="no-results" style="display: none;">
-                <i class="fas fa-search" style="font-size: 24px; margin-bottom: 10px;"></i>
-                <p>No players found matching your search.</p>
+                <i class="fas fa-search" style="font-size: 48px; margin-bottom: 15px;"></i>
+                <h3 style="color: #666; margin-bottom: 10px;">No Players Found</h3>
+                <p style="color: #888;">Try adjusting your search terms</p>
             </div>
         </div>
     </main>
@@ -850,7 +1024,7 @@
     <div id="playerModal" class="player-modal">
         <div class="player-modal-content">
             <div class="player-modal-header">
-                <h2>Player Details</h2>
+                <h2><i class="fas fa-user"></i> Player Details</h2>
                 <span class="close-modal" onclick="hidePlayerModal()">&times;</span>
             </div>
             <div class="player-modal-body" id="playerModalBody">
@@ -860,23 +1034,26 @@
     </div>
 
     <!-- Modal for logout confirmation -->
-     <div id="logoutModal" class="modal">
+    <div id="logoutModal" class="modal">
         <div class="modal-content">
             <button class="close-btn" onclick="hideLogoutModal()">&times;</button>
-            <h3>Are you sure you want to log out?</h3>
+            <h3>Confirm Logout</h3>
+            <p>Are you sure you want to log out?</p>
             <div class="modal-buttons">
                 <button id="confirmLogout" class="confirm-btn">Confirm</button>
                 <button id="cancelLogout" class="cancel-btn">Cancel</button>
             </div>
         </div>
+    </div>
 
     <!-- Modal for remove player confirmation -->
     <div id="removePlayerModal" class="modal">
         <div class="modal-content">
-            <h3>Are you sure you want to remove this player?</h3>
-            <p>This action cannot be undone.</p>
-            <div style="margin-top: 20px;">
-                <button id="confirmRemove" class="confirm-btn">Yes</button>
+            <button class="close-btn" onclick="hideRemovePlayerModal()">&times;</button>
+            <h3>Remove Player</h3>
+            <p>Are you sure you want to remove this player? This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <button id="confirmRemove" class="confirm-btn">Yes, Remove</button>
                 <button id="cancelRemove" class="cancel-btn">Cancel</button>
             </div>
         </div>
@@ -981,21 +1158,85 @@
             }
         }
 
+        // Document requirements mapping (same as in your controller)
+        const DOCUMENT_REQUIREMENTS = {
+            freshman: ['PSA', 'COR', 'school_id', 'med_cert', 'waiver'],
+            old_student: ['PSA', 'COR', 'COG', 'school_id', 'med_cert', 'waiver'],
+            old_player: ['COR', 'COG', 'school_id', 'med_cert', 'waiver'],
+            transferee: ['PSA', 'COR', 'TOR_previous_school', 'COG', 'school_id', 'med_cert', 'waiver'],
+            working_student: ['COR', 'COG', 'COE', 'authorization_letter', 'school_id', 'med_cert', 'waiver'],
+            replacement_player: ['PSA', 'COR', 'COG', 'entry_form', 'school_id', 'med_cert', 'waiver'],
+            graduating: ['COR', 'COG', 'school_id', 'med_cert', 'waiver', 'certification_lack_units']
+        };
+
+        // Document display names and icons
+        const DOCUMENT_DISPLAY = {
+            'PSA': { name: 'PSA Document', icon: 'fas fa-id-card' },
+            'waiver': { name: 'Waiver Form', icon: 'fas fa-file-signature' },
+            'med_cert': { name: 'Medical Certificate', icon: 'fas fa-file-medical' },
+            'COR': { name: 'Certificate of Registration', icon: 'fas fa-file-certificate' },
+            'COG': { name: 'Certificate of Good Moral', icon: 'fas fa-award' },
+            'TOR_previous_school': { name: 'TOR from Previous School', icon: 'fas fa-graduation-cap' },
+            'entry_form': { name: 'Entry Form', icon: 'fas fa-file-import' },
+            'COE': { name: 'Certificate of Employment', icon: 'fas fa-briefcase' },
+            'authorization_letter': { name: 'Authorization Letter', icon: 'fas fa-envelope-open-text' },
+            'school_id': { name: 'School ID', icon: 'fas fa-id-badge' },
+            'certification_lack_units': { name: 'Certification of Lack of Units', icon: 'fas fa-file-contract' }
+        };
+
         // Player modal functions
         function showPlayerModal(playerId) {
             const player = usersData.find(p => p.team_player_id == playerId);
             if (!player) return;
             
             const modalBody = document.getElementById('playerModalBody');
+            
+            // Determine organization type and student type
+            const organizationType = player.organization || 'school';
+            const studentType = player.student_type || 'regular';
+            
+            // Get required documents based on organization and student type
+            let requiredDocuments = [];
+            
+            if (organizationType === 'school') {
+                requiredDocuments = DOCUMENT_REQUIREMENTS[studentType] || ['PSA', 'waiver', 'med_cert'];
+            } else if (organizationType === 'barangay') {
+                requiredDocuments = ['PSA', 'waiver', 'med_cert'];
+            }
+            
+            // Calculate document status
+            let uploadedCount = 0;
+            const documentItems = requiredDocuments.map(docKey => {
+                const docUrl = player[docKey];
+                const isUploaded = !!docUrl;
+                if (isUploaded) uploadedCount++;
+                
+                const docInfo = DOCUMENT_DISPLAY[docKey] || { name: docKey, icon: 'fas fa-file' };
+                
+                return {
+                    key: docKey,
+                    name: docInfo.name,
+                    icon: docInfo.icon,
+                    url: docUrl,
+                    uploaded: isUploaded
+                };
+            });
+
+            const documentStatus = `${uploadedCount}/${requiredDocuments.length} documents uploaded`;
+            
             modalBody.innerHTML = `
                 <div class="player-modal-profile">
                     ${player.profile ? 
                         `<img src="${player.profile}" class="player-modal-avatar" alt="Profile">` : 
-                        `<div class="player-modal-avatar" style="background-color: #e4e6eb; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-user" style="color: var(--dark-gray); font-size: 24px;"></i>
+                        `<div class="player-modal-avatar" style="background: linear-gradient(135deg, #e4e6eb, #d1d3d8); display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-user" style="color: #8B0039; font-size: 32px;"></i>
                         </div>`
                     }
-                    <h3 style="margin-top: 10px; color: #4A154B;">${player.player_name || 'N/A'}</h3>
+                    <h3 style="margin-top: 10px; color: #8B0039;">${player.player_name || 'N/A'}</h3>
+                    <div>
+                        <span class="student-type-badge">${studentType.replace('_', ' ').toUpperCase()}</span>
+                        <span class="organization-badge">${organizationType.toUpperCase()}</span>
+                    </div>
                 </div>
                 <div class="player-info-group">
                     <div class="player-info-label">Email</div>
@@ -1022,6 +1263,16 @@
                     <div class="player-info-value">${player.contact_number || 'N/A'}</div>
                 </div>
                 <div class="player-info-group">
+                    <div class="player-info-label">School/Barangay</div>
+                    <div class="player-info-value">${player.school || player.barangay || 'N/A'}</div>
+                </div>
+                ${player.year_level ? `
+                <div class="player-info-group">
+                    <div class="player-info-label">Year Level</div>
+                    <div class="player-info-value">${player.year_level}</div>
+                </div>
+                ` : ''}
+                <div class="player-info-group">
                     <div class="player-info-label">Team</div>
                     <div class="player-info-value">${player.teamName || 'N/A'}</div>
                 </div>
@@ -1029,17 +1280,33 @@
                     <div class="player-info-label">Event</div>
                     <div class="player-info-value">${player.event_title || 'N/A'}</div>
                 </div>
-                <div class="player-info-group" style="grid-column: span 2;">
-                    <div class="player-info-label">Documents</div>
-                    <div class="document-links">
-                        ${player.PSA ? `<a href="${player.PSA}" target="_blank" class="document-link"><i class="fas fa-id-card"></i> PSA Document</a>` : ''}
-                        ${player.waiver ? `<a href="${player.waiver}" target="_blank" class="document-link"><i class="fas fa-file-signature"></i> Waiver Form</a>` : ''}
-                        ${player.med_cert ? `<a href="${player.med_cert}" target="_blank" class="document-link"><i class="fas fa-file-medical"></i> Medical Certificate</a>` : ''}
-                    </div>
-                </div>
                 <div class="player-info-group">
                     <div class="player-info-label">Date Registered</div>
                     <div class="player-info-value">${player.created_at || 'N/A'}</div>
+                </div>
+                <div class="documents-section">
+                    <h3><i class="fas fa-file-alt"></i> Required Documents</h3>
+                    <div class="document-status">
+                        <span class="${uploadedCount === requiredDocuments.length ? 'status-complete' : 'status-missing'}">
+                            ${documentStatus}
+                        </span>
+                    </div>
+                    <div class="document-links">
+                        ${documentItems.map(doc => `
+                            ${doc.uploaded ? 
+                                `<a href="${doc.url}" target="_blank" class="document-link">
+                                    <i class="${doc.icon}"></i>
+                                    <span>${doc.name}</span>
+                                    <i class="fas fa-check-circle" style="margin-left: auto; color: #4CAF50;"></i>
+                                </a>` :
+                                `<div class="document-link missing">
+                                    <i class="${doc.icon}"></i>
+                                    <span>${doc.name}</span>
+                                    <i class="fas fa-times-circle" style="margin-left: auto; color: #f44336;"></i>
+                                </div>`
+                            }
+                        `).join('')}
+                    </div>
                 </div>
             `;
             
@@ -1058,8 +1325,6 @@
             if (event.target.className === 'modal') {
                 hideLogoutModal();
                 hideRemovePlayerModal();
-            }
-            if (event.target.className === 'player-modal') {
                 hidePlayerModal();
             }
         });
@@ -1076,6 +1341,4 @@
         document.getElementById('cancelRemove').addEventListener('click', hideRemovePlayerModal);
     </script>
 </body>
-
 </html>
-
