@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/userModel');
 const { validationResult } = require('express-validator');
 const db = require('../config/db'); 
+const { playerDocsUpload } = require('../config/cloudinary');
 const { PSAUpload, waiverUpload, medCertUpload  } = require('../config/multerConfig');
 const { getLatestPostNotification,getTeamStatusNotification } = require('../utils/notificationHelper');
 const fs = require('fs');
@@ -918,6 +919,17 @@ const SPORT_LIMITS = {
     'singing_contest': 1
 };
 
+// Document requirements mapping
+const DOCUMENT_REQUIREMENTS = {
+    freshman: ['PSA', 'COR', 'school_id', 'med_cert', 'waiver'],
+    old_student: ['PSA', 'COR', 'COG', 'school_id', 'med_cert', 'waiver'],
+    old_player: ['COR', 'COG', 'school_id', 'med_cert', 'waiver'],
+    transferee: ['PSA', 'COR', 'TOR_previous_school', 'COG', 'school_id', 'med_cert', 'waiver'],
+    working_student: ['COR', 'COG', 'COE', 'authorization_letter', 'school_id', 'med_cert', 'waiver'],
+    replacement_player: ['PSA', 'COR', 'COG', 'entry_form', 'school_id', 'med_cert', 'waiver'],
+    graduating: ['COR', 'COG', 'school_id', 'med_cert', 'waiver']
+};
+
 //get Player Register Page
 exports.getPlayerRegister = async (req, res) => {
     try {
@@ -1076,7 +1088,8 @@ exports.registerPlayer = async (req, res) => {
         school,
         year_level,
         barangay,
-        contact_no
+        contact_no,
+        student_type
     } = req.body;
 
     try {
@@ -1098,7 +1111,7 @@ exports.registerPlayer = async (req, res) => {
 
         // Validate fields based on organization type
         if (organizationType === 'school') {
-            if (!school || !year_level) {
+            if (!school || !year_level || !student_type) {
                 req.flash('error', 'Please fill in all required fields for school organization.');
                 return res.redirect(`/player-register?team_id=${team_id}`);
             }
@@ -1109,11 +1122,30 @@ exports.registerPlayer = async (req, res) => {
             }
         }
 
-        // Check for other required fields
-        if (!team_id || !player_name || !birthdate || !age || !sex || !sports || !contact_no ||
-            !req.files || !req.files.PSA || !req.files.waiver || !req.files.med_cert) {
-            req.flash('error', 'Please fill in all the fields and upload the required files.');
+        // Check for basic required fields
+        if (!team_id || !player_name || !birthdate || !age || !sex || !sports || !contact_no) {
+            req.flash('error', 'Please fill in all the required fields.');
             return res.redirect(`/player-register?team_id=${team_id}`);
+        }
+
+        // Validate documents based on organization and student type
+        if (organizationType === 'school') {
+            const requiredDocs = DOCUMENT_REQUIREMENTS[student_type] || [];
+            for (const doc of requiredDocs) {
+                if (!req.files || !req.files[doc]) {
+                    req.flash('error', `Please upload all required documents for ${student_type.replace('_', ' ')}`);
+                    return res.redirect(`/player-register?team_id=${team_id}`);
+                }
+            }
+        } else if (organizationType === 'barangay') {
+            // Barangay requires basic documents
+            const barangayDocs = ['PSA', 'waiver', 'med_cert'];
+            for (const doc of barangayDocs) {
+                if (!req.files || !req.files[doc]) {
+                    req.flash('error', 'Please upload all required documents for barangay registration');
+                    return res.redirect(`/player-register?team_id=${team_id}`);
+                }
+            }
         }
 
         // Map display names back to codes if needed
@@ -1152,38 +1184,60 @@ exports.registerPlayer = async (req, res) => {
 
         const userId = req.session.user.id;
 
-        const PSAFile = req.files.PSA[0];
-        const waiverFile = req.files.waiver[0];
-        const medCertFile = req.files.med_cert[0];
+        // Get file URLs from Cloudinary
+        const getFileUrl = (fieldName) => {
+            return req.files && req.files[fieldName] ? req.files[fieldName][0].path : null;
+        };
 
-        const PSAUrl = req.files.PSA[0].path;       // Cloudinary secure URL
-        const waiverUrl = req.files.waiver[0].path;
-        const medCertUrl = req.files.med_cert[0].path;
+        // Prepare document URLs based on organization type
+        let documentData = {};
+        
+        if (organizationType === 'school') {
+            const requiredDocs = DOCUMENT_REQUIREMENTS[student_type] || [];
+            requiredDocs.forEach(doc => {
+                documentData[doc] = getFileUrl(doc);
+            });
+        } else if (organizationType === 'barangay') {
+            // Barangay basic documents
+            documentData = {
+                PSA: getFileUrl('PSA'),
+                waiver: getFileUrl('waiver'),
+                med_cert: getFileUrl('med_cert')
+            };
+        }
 
-
-        // Insert player with fields based on organization type
+        // Insert player with all fields
         await db.execute(`
-        INSERT INTO team_players 
-        (team_id, user_id, player_name, PSA, waiver, med_cert, 
-        birthdate, age, sex, sports, school, year_level, barangay, contact_number,
-        status, notification_viewed, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "pending", 0, NOW(), NOW())
-    `, [
-        team_id,
-        userId,
-        player_name,
-        PSAUrl,    // ✅ Cloudinary URL
-        waiverUrl, // ✅ Cloudinary URL
-        medCertUrl,// ✅ Cloudinary URL
-        birthdate,
-        age,
-        sex,
-        sportsValue,
-        organizationType === 'school' ? school : null,
-        organizationType === 'school' ? year_level : null,
-        organizationType === 'barangay' ? barangay : null,
-        contact_no
-    ]);
+            INSERT INTO team_players 
+            (team_id, user_id, player_name, PSA, waiver, med_cert, 
+            birthdate, age, sex, sports, school, year_level, barangay, contact_number,
+            student_type, COR, TOR_previous_school, COG, entry_form, COE, authorization_letter, school_id,
+            status, notification_viewed, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "pending", 0, NOW(), NOW())
+        `, [
+            team_id,
+            userId,
+            player_name,
+            documentData.PSA,
+            documentData.waiver,
+            documentData.med_cert,
+            birthdate,
+            age,
+            sex,
+            sportsValue,
+            organizationType === 'school' ? school : null,
+            organizationType === 'school' ? year_level : null,
+            organizationType === 'barangay' ? barangay : null,
+            contact_no,
+            organizationType === 'school' ? student_type : null,
+            documentData.COR || null,
+            documentData.TOR_previous_school || null,
+            documentData.COG || null,
+            documentData.entry_form || null,
+            documentData.COE || null,
+            documentData.authorization_letter || null,
+            documentData.school_id || null
+        ]);
 
         req.flash('success', 'Player registered successfully!');
         res.redirect('/join-team');
@@ -1193,7 +1247,6 @@ exports.registerPlayer = async (req, res) => {
         res.redirect(`/player-register?team_id=${team_id}`);
     }
 };
-
 
 
 
@@ -1282,6 +1335,7 @@ exports.uploadProfilePicture = async (req, res) => {
         res.sendStatus(500);
     }
 };
+
 
 
 
