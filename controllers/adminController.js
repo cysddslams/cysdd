@@ -1080,54 +1080,71 @@ exports.getAdminUsers = async (req, res) => {
             adminData.profilePic = adminData.profilePic;
         }
 
-        // Fetch users with all required data
-       const [users] = await db.execute(`
-        SELECT 
-            u.id,
-            u.email,
-            u.profile,
-            tp.id AS team_player_id, 
-            tp.player_name,
-            tp.sports,
-            tp.age,
-            tp.sex,
-            tp.birthdate,
-            tp.PSA,
-            tp.waiver,
-            tp.med_cert,
-            tp.contact_number,
-            tp.student_type,
-            tp.organization,
-            tp.school,
-            tp.barangay,
-            tp.year_level,
-            tp.COR,
-            tp.COG,
-            tp.TOR_previous_school,
-            tp.entry_form,
-            tp.COE,
-            tp.authorization_letter,
-            tp.school_id,
-            tp.certification_lack_units,
-            t.teamName,
-            e.title AS event_title,
-            tp.created_at
-        FROM users u
-        INNER JOIN team_players tp ON u.id = tp.user_id AND tp.status = 'confirmed'
-        LEFT JOIN team t ON tp.team_id = t.id
-        LEFT JOIN events e ON t.event_id = e.id
-        ORDER BY tp.created_at DESC
-    `);
+        // Fetch users with all required data - CORRECTED QUERY
+        const [users] = await db.execute(`
+            SELECT 
+                u.id,
+                u.email,
+                u.profile,
+                tp.id AS team_player_id, 
+                tp.player_name,
+                tp.sports,
+                tp.age,
+                tp.sex,
+                tp.birthdate,
+                tp.PSA,
+                tp.waiver,
+                tp.med_cert,
+                tp.contact_number,
+                tp.student_type,
+                t.organization,  -- Get organization from team table, not team_players
+                tp.school,
+                tp.barangay,
+                tp.year_level,
+                tp.COR,
+                tp.COG,
+                tp.TOR_previous_school,
+                tp.entry_form,
+                tp.COE,
+                tp.authorization_letter,
+                tp.school_id,
+                tp.certification_lack_units,
+                t.teamName,
+                e.title AS event_title,
+                tp.created_at
+            FROM users u
+            INNER JOIN team_players tp ON u.id = tp.user_id AND tp.status = 'confirmed'
+            LEFT JOIN team t ON tp.team_id = t.id
+            LEFT JOIN events e ON t.event_id = e.id
+            ORDER BY tp.created_at DESC
+        `);
 
         const formattedUsers = users.map(user => {
+            // Create document URLs for all document types
+            const createDocumentUrl = (fieldName, documentPath) => {
+                if (documentPath) {
+                    return `/uploads/player_${fieldName.toLowerCase()}/${documentPath.split('/').pop()}`;
+                }
+                return null;
+            };
+
             return {
                 ...user,
                 team_player_id: user.team_player_id,
                 created_at: formatDate(user.created_at),
-                birthdate: user.birthdate ? formatDateOnly(user.birthdate) : 'N/A', // Changed to use formatDateOnly
-                PSA: user.PSA ? `/uploads/player_PSA/${user.PSA.split('/').pop()}` : null,
-                waiver: user.waiver ? `/uploads/player_waiver/${user.waiver.split('/').pop()}` : null,
-                med_cert: user.med_cert ? `/uploads/player_medCert/${user.med_cert.split('/').pop()}` : null
+                birthdate: user.birthdate ? formatDateOnly(user.birthdate) : 'N/A',
+                // Create URLs for all document fields
+                PSA: createDocumentUrl('PSA', user.PSA),
+                waiver: createDocumentUrl('waiver', user.waiver),
+                med_cert: createDocumentUrl('med_cert', user.med_cert),
+                COR: createDocumentUrl('COR', user.COR),
+                COG: createDocumentUrl('COG', user.COG),
+                TOR_previous_school: createDocumentUrl('TOR_previous_school', user.TOR_previous_school),
+                entry_form: createDocumentUrl('entry_form', user.entry_form),
+                COE: createDocumentUrl('COE', user.COE),
+                authorization_letter: createDocumentUrl('authorization_letter', user.authorization_letter),
+                school_id: createDocumentUrl('school_id', user.school_id),
+                certification_lack_units: createDocumentUrl('certification_lack_units', user.certification_lack_units)
             };
         });
 
@@ -1538,6 +1555,7 @@ exports.exportEventResults = async (req, res) => {
         res.redirect('/admin/event-history');
     }
 };
+
 
 
 
