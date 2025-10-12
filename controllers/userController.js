@@ -927,7 +927,7 @@ const DOCUMENT_REQUIREMENTS = {
     transferee: ['PSA', 'COR', 'TOR_previous_school', 'COG', 'school_id', 'med_cert', 'waiver'],
     working_student: ['COR', 'COG', 'COE', 'authorization_letter', 'school_id', 'med_cert', 'waiver'],
     replacement_player: ['PSA', 'COR', 'COG', 'entry_form', 'school_id', 'med_cert', 'waiver'],
-    graduating: ['COR', 'COG', 'school_id', 'med_cert', 'waiver']
+    graduating: ['COR', 'COG', 'school_id', 'med_cert', 'waiver', 'certification_lack_units']
 };
 
 //get Player Register Page
@@ -1076,7 +1076,7 @@ exports.getPlayerRegister = async (req, res) => {
     }
 };
 
-//REGISTER PLAYER FUNCTION (Alternative robust version)
+//REGISTER PLAYER FUNCTION (Updated with certification_lack_units)
 exports.registerPlayer = async (req, res) => {
     const { 
         team_id, 
@@ -1181,6 +1181,7 @@ exports.registerPlayer = async (req, res) => {
         const COE = getFileUrl('COE');
         const authorization_letter = getFileUrl('authorization_letter');
         const school_id = getFileUrl('school_id');
+        const certification_lack_units = getFileUrl('certification_lack_units');
 
         // Prepare values for database
         const insertValues = [
@@ -1205,7 +1206,8 @@ exports.registerPlayer = async (req, res) => {
             entry_form,
             COE,
             authorization_letter,
-            school_id
+            school_id,
+            certification_lack_units
         ];
 
         // Validate required documents based on organization type
@@ -1222,7 +1224,8 @@ exports.registerPlayer = async (req, res) => {
                     'authorization_letter': authorization_letter,
                     'school_id': school_id,
                     'med_cert': med_cert,
-                    'waiver': waiver
+                    'waiver': waiver,
+                    'certification_lack_units': certification_lack_units
                 };
                 
                 if (!fieldMap[doc]) {
@@ -1243,8 +1246,9 @@ exports.registerPlayer = async (req, res) => {
             (team_id, user_id, player_name, PSA, waiver, med_cert, 
             birthdate, age, sex, sports, school, year_level, barangay, contact_number,
             student_type, COR, TOR_previous_school, COG, entry_form, COE, authorization_letter, school_id,
+            certification_lack_units,
             status, notification_viewed, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "pending", 0, NOW(), NOW())
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "pending", 0, NOW(), NOW())
         `, insertValues);
 
         req.flash('success', 'Player registered successfully!');
@@ -1343,6 +1347,7 @@ exports.uploadProfilePicture = async (req, res) => {
         res.sendStatus(500);
     }
 };
+
 
 
 
