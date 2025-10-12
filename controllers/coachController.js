@@ -766,25 +766,91 @@ exports.getCoachMyTeam = async (req, res) => {
                 e.date_schedule DESC
         `, [coachId]);
 
+        // Document requirements mapping based on student type
+        const DOCUMENT_REQUIREMENTS = {
+            freshman: ['PSA', 'COR', 'school_id', 'med_cert', 'waiver'],
+            old_student: ['PSA', 'COR', 'COG', 'school_id', 'med_cert', 'waiver'],
+            old_player: ['COR', 'COG', 'school_id', 'med_cert', 'waiver'],
+            transferee: ['PSA', 'COR', 'TOR_previous_school', 'COG', 'school_id', 'med_cert', 'waiver'],
+            working_student: ['COR', 'COG', 'COE', 'authorization_letter', 'school_id', 'med_cert', 'waiver'],
+            replacement_player: ['PSA', 'COR', 'COG', 'entry_form', 'school_id', 'med_cert', 'waiver'],
+            graduating: ['COR', 'COG', 'school_id', 'med_cert', 'waiver', 'certification_lack_units']
+        };
+
+        // Document labels for display
+        const DOCUMENT_LABELS = {
+            PSA: 'PSA',
+            COR: 'COR',
+            TOR_previous_school: 'TOR',
+            COG: 'COG',
+            entry_form: 'Entry Form',
+            COE: 'COE',
+            authorization_letter: 'Auth Letter',
+            school_id: 'School ID',
+            med_cert: 'Med Cert',
+            waiver: 'Waiver',
+            certification_lack_units: 'Lack of Units'
+        };
+
         // Get player requests for each team
         const playerRequests = {};
         const playerCounts = {}; // Add this object to store player counts
         
         for (const team of teams) {
-            // Get pending player requests
+            // Get pending player requests with ALL document fields
             const [players] = await db.execute(`
                 SELECT 
                     tp.*,
-                    u.profile AS user_profile
+                    u.profile AS user_profile,
+                    tp.student_type,
+                    tp.PSA,
+                    tp.waiver,
+                    tp.med_cert,
+                    tp.COR,
+                    tp.TOR_previous_school,
+                    tp.COG,
+                    tp.entry_form,
+                    tp.COE,
+                    tp.authorization_letter,
+                    tp.school_id,
+                    tp.certification_lack_units
                 FROM team_players tp
                 LEFT JOIN users u ON tp.user_id = u.id
                 WHERE tp.team_id = ? AND tp.status = 'pending'
                 ORDER BY tp.created_at DESC
             `, [team.team_id]);
-            playerRequests[team.team_id] = players;
+
+            // Add required documents information to each player
+            const playersWithDocuments = players.map(player => {
+                let requiredDocs = [];
+                let optionalDocs = [];
+                
+                if (player.student_type && DOCUMENT_REQUIREMENTS[player.student_type]) {
+                    requiredDocs = DOCUMENT_REQUIREMENTS[player.student_type];
+                    
+                    // Optional documents are any documents that exist but aren't in required list
+                    const allDocumentFields = [
+                        'PSA', 'waiver', 'med_cert', 'COR', 'TOR_previous_school', 
+                        'COG', 'entry_form', 'COE', 'authorization_letter', 
+                        'school_id', 'certification_lack_units'
+                    ];
+                    
+                    optionalDocs = allDocumentFields.filter(doc => 
+                        player[doc] && !requiredDocs.includes(doc)
+                    );
+                }
+                
+                return {
+                    ...player,
+                    requiredDocuments: requiredDocs,
+                    optionalDocuments: optionalDocs,
+                    documentLabels: DOCUMENT_LABELS
+                };
+            });
+
+            playerRequests[team.team_id] = playersWithDocuments;
 
             // Get player counts for each sport in this team
-            // Update the player counting logic
             if (team.event_sports || team.event_esports || team.event_other_activities) {
                 const allActivities = [];
                 
@@ -857,6 +923,7 @@ exports.getCoachMyTeam = async (req, res) => {
                 teams: teams,
                 playerRequests: playerRequests,
                 playerCounts: playerCounts,
+                DOCUMENT_LABELS: DOCUMENT_LABELS, // Pass labels to view
                 notifications: [...teamNotifs, statusNotif].filter(n => n),
                 formatDate: (dateString) => {
                     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -1194,6 +1261,7 @@ exports.updatePlayerStatus = async (req, res) => {
         res.redirect(`/coach/team/${teamId}`);
     }
 };
+
 
 
 
