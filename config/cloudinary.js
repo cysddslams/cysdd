@@ -127,6 +127,8 @@ const playerDocsStorage = new CloudinaryStorage({
       folder = 'player_docs/authorization_letter';
     } else if (file.fieldname === 'school_id') {
       folder = 'player_docs/school_id';
+    } else if (file.fieldname === 'certification_lack_units') {
+      folder = 'player_docs/certification_lack_units';
     }
 
     return {
@@ -184,4 +186,5 @@ module.exports = {
    playerDocsUpload,
   userProfileUpload,
 };
+
 
