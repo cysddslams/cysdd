@@ -1080,7 +1080,7 @@ exports.getAdminUsers = async (req, res) => {
             adminData.profilePic = adminData.profilePic;
         }
 
-        // Fetch users with all required data - CORRECTED QUERY
+        // Fetch users with all required data
         const [users] = await db.execute(`
             SELECT 
                 u.id,
@@ -1097,7 +1097,7 @@ exports.getAdminUsers = async (req, res) => {
                 tp.med_cert,
                 tp.contact_number,
                 tp.student_type,
-                t.organization,  -- Get organization from team table, not team_players
+                t.organization,
                 tp.school,
                 tp.barangay,
                 tp.year_level,
@@ -1120,31 +1120,26 @@ exports.getAdminUsers = async (req, res) => {
         `);
 
         const formattedUsers = users.map(user => {
-            // Create document URLs for all document types
-            const createDocumentUrl = (fieldName, documentPath) => {
-                if (documentPath) {
-                    return `/uploads/player_${fieldName.toLowerCase()}/${documentPath.split('/').pop()}`;
-                }
-                return null;
-            };
-
+            // Use Cloudinary URLs directly as they're already stored in the database
+            // No need to transform them since they're already full URLs
             return {
                 ...user,
                 team_player_id: user.team_player_id,
                 created_at: formatDate(user.created_at),
                 birthdate: user.birthdate ? formatDateOnly(user.birthdate) : 'N/A',
-                // Create URLs for all document fields
-                PSA: createDocumentUrl('PSA', user.PSA),
-                waiver: createDocumentUrl('waiver', user.waiver),
-                med_cert: createDocumentUrl('med_cert', user.med_cert),
-                COR: createDocumentUrl('COR', user.COR),
-                COG: createDocumentUrl('COG', user.COG),
-                TOR_previous_school: createDocumentUrl('TOR_previous_school', user.TOR_previous_school),
-                entry_form: createDocumentUrl('entry_form', user.entry_form),
-                COE: createDocumentUrl('COE', user.COE),
-                authorization_letter: createDocumentUrl('authorization_letter', user.authorization_letter),
-                school_id: createDocumentUrl('school_id', user.school_id),
-                certification_lack_units: createDocumentUrl('certification_lack_units', user.certification_lack_units)
+                // All document fields are already Cloudinary URLs from registration
+                PSA: user.PSA,
+                waiver: user.waiver,
+                med_cert: user.med_cert,
+                COR: user.COR,
+                COG: user.COG,
+                TOR_previous_school: user.TOR_previous_school,
+                entry_form: user.entry_form,
+                COE: user.COE,
+                authorization_letter: user.authorization_letter,
+                school_id: user.school_id,
+                certification_lack_units: user.certification_lack_units,
+                profile: user.profile // Also use profile URL directly
             };
         });
 
@@ -1555,6 +1550,7 @@ exports.exportEventResults = async (req, res) => {
         res.redirect('/admin/event-history');
     }
 };
+
 
 
 
