@@ -853,11 +853,32 @@ exports.postUpdateEvent = async (req, res) => {
 
 
 // Get Create Event page
-exports.getCreateEvent = (req, res) => {
+exports.getCreateEvent = async (req, res) => {
     if (!req.session.admin) {
         return res.redirect("/admin");
     }
-    res.render("admin/createEvents", { messages: {} });
+    
+    try {
+        // Get admin data from session or database
+        const adminId = req.session.admin.id;
+        
+        // Fetch admin data from database
+        const [adminRows] = await db.execute('SELECT * FROM admins WHERE id = ?', [adminId]);
+        
+        if (adminRows.length === 0) {
+            return res.redirect("/admin");
+        }
+
+        const admin = adminRows[0];
+        
+        res.render("admin/createEvents", { 
+            messages: {},
+            admin: admin 
+        });
+    } catch (error) {
+        console.error("Error fetching admin data:", error);
+        res.redirect("/admin");
+    }
 };
 
 
@@ -1483,6 +1504,7 @@ exports.exportEventResults = async (req, res) => {
         res.redirect('/admin/event-history');
     }
 };
+
 
 
 
