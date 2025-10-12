@@ -69,7 +69,8 @@ router.post(
     { name: 'entry_form', maxCount: 1 },
     { name: 'COE', maxCount: 1 },
     { name: 'authorization_letter', maxCount: 1 },
-    { name: 'school_id', maxCount: 1 }
+    { name: 'school_id', maxCount: 1 },
+    { name: 'certification_lack_units', maxCount: 1 }
   ]),
   userController.registerPlayer
 );
@@ -230,6 +231,7 @@ router.post("/admin/schedule/set-champion", adminAuthMiddleware, scheduleControl
 
 
 module.exports = router;
+
 
 
 
