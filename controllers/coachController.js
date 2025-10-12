@@ -1146,6 +1146,47 @@ exports.getCoachSportsMyPlayers = async (req, res) => {
         // Get the short code if available, otherwise keep the original
         const sportCode = codeMap[sport] || sport;
 
+        // Document requirements mapping based on student type
+        const DOCUMENT_REQUIREMENTS = {
+            freshman: ['PSA', 'COR', 'school_id', 'med_cert', 'waiver'],
+            old_student: ['PSA', 'COR', 'COG', 'school_id', 'med_cert', 'waiver'],
+            old_player: ['COR', 'COG', 'school_id', 'med_cert', 'waiver'],
+            transferee: ['PSA', 'COR', 'TOR_previous_school', 'COG', 'school_id', 'med_cert', 'waiver'],
+            working_student: ['COR', 'COG', 'COE', 'authorization_letter', 'school_id', 'med_cert', 'waiver'],
+            replacement_player: ['PSA', 'COR', 'COG', 'entry_form', 'school_id', 'med_cert', 'waiver'],
+            graduating: ['COR', 'COG', 'school_id', 'med_cert', 'waiver', 'certification_lack_units']
+        };
+
+        // Document labels for display
+        const DOCUMENT_LABELS = {
+            PSA: 'PSA',
+            COR: 'COR',
+            TOR_previous_school: 'TOR',
+            COG: 'COG',
+            entry_form: 'Entry Form',
+            COE: 'COE',
+            authorization_letter: 'Auth Letter',
+            school_id: 'School ID',
+            med_cert: 'Med Cert',
+            waiver: 'Waiver',
+            certification_lack_units: 'Lack of Units'
+        };
+
+        // Document icons
+        const DOCUMENT_ICONS = {
+            PSA: 'fa-id-card',
+            COR: 'fa-file-certificate',
+            TOR_previous_school: 'fa-file-export',
+            COG: 'fa-award',
+            entry_form: 'fa-clipboard-list',
+            COE: 'fa-briefcase',
+            authorization_letter: 'fa-envelope-open-text',
+            school_id: 'fa-address-card',
+            med_cert: 'fa-file-medical',
+            waiver: 'fa-file-signature',
+            certification_lack_units: 'fa-graduation-cap'
+        };
+
         // 1. Verify coach has access to this team
         const [team] = await db.execute(`
             SELECT * FROM team 
@@ -1162,7 +1203,19 @@ exports.getCoachSportsMyPlayers = async (req, res) => {
         const [players] = await db.execute(`
             SELECT 
                 tp.*,
-                u.profile AS user_profile
+                u.profile AS user_profile,
+                tp.student_type,
+                tp.PSA,
+                tp.waiver,
+                tp.med_cert,
+                tp.COR,
+                tp.TOR_previous_school,
+                tp.COG,
+                tp.entry_form,
+                tp.COE,
+                tp.authorization_letter,
+                tp.school_id,
+                tp.certification_lack_units
             FROM team_players tp
             LEFT JOIN users u ON tp.user_id = u.id
             WHERE tp.team_id = ? 
@@ -1173,16 +1226,36 @@ exports.getCoachSportsMyPlayers = async (req, res) => {
 
         // 3. Format player data with profile picture and documents
         const playersWithProfile = players.map(player => {
-            const documents = {
-                PSA: player.PSA ? `${player.PSA}` : null,
-                waiver: player.waiver ? `${player.waiver}` : null,
-                med_cert: player.med_cert ? `${player.med_cert}` : null
-            };
+            // Get required documents based on student type
+            const requiredDocs = player.student_type ? DOCUMENT_REQUIREMENTS[player.student_type] || [] : [];
+            
+            // Get all available documents
+            const allDocuments = {};
+            const documentFields = [
+                'PSA', 'waiver', 'med_cert', 'COR', 'TOR_previous_school', 
+                'COG', 'entry_form', 'COE', 'authorization_letter', 
+                'school_id', 'certification_lack_units'
+            ];
+            
+            documentFields.forEach(field => {
+                if (player[field]) {
+                    allDocuments[field] = {
+                        url: player[field],
+                        label: DOCUMENT_LABELS[field],
+                        icon: DOCUMENT_ICONS[field],
+                        isRequired: requiredDocs.includes(field)
+                    };
+                }
+            });
 
             return {
                 ...player,
                 profile_picture: player.user_profile ? `${player.user_profile}` : null,
-                documents: documents,
+                documents: allDocuments,
+                requiredDocuments: requiredDocs,
+                student_type: player.student_type,
+                documentLabels: DOCUMENT_LABELS,
+                documentIcons: DOCUMENT_ICONS,
                 barangay: player.barangay
             };
         });
@@ -1193,6 +1266,8 @@ exports.getCoachSportsMyPlayers = async (req, res) => {
             sport: sport,
             team: team[0],
             players: playersWithProfile,
+            DOCUMENT_LABELS: DOCUMENT_LABELS,
+            DOCUMENT_ICONS: DOCUMENT_ICONS,
             helpers: {
                 formatDate: function(date) {
                     return date ? new Date(date).toLocaleDateString() : 'N/A';
@@ -1261,6 +1336,7 @@ exports.updatePlayerStatus = async (req, res) => {
         res.redirect(`/coach/team/${teamId}`);
     }
 };
+
 
 
 
