@@ -290,6 +290,24 @@
             margin-bottom: 10px;
         }
 
+        /* Fix for sidebar open state */
+        body.sidebar-open {
+            overflow: hidden;
+        }
+
+        body.sidebar-open .sidebar {
+            left: 0;
+        }
+
+        /* Ensure sidebar is above other content */
+        .sidebar {
+            z-index: 1000;
+        }
+
+        .sidebar-btn {
+            z-index: 1001;
+        }
+
         @media (max-width: 768px) {
             .brackets-grid {
                 grid-template-columns: 1fr;
@@ -476,24 +494,44 @@
     </div>
 
     <script>
-        // Sidebar functionality
+        // Sidebar functionality - FIXED VERSION
         let isSidebarOpen = false;
 
         function toggleNav() {
             const sidebar = document.getElementById("mySidebar");
             const sidebarBtn = document.querySelector(".sidebar-btn");
 
+            console.log('Toggle sidebar clicked, current state:', isSidebarOpen);
+
             if (isSidebarOpen) {
-                sidebar.style.left = "-240px";  
+                // Close sidebar
+                sidebar.style.left = "-240px";
                 document.body.classList.remove("sidebar-open");
                 sidebarBtn.innerHTML = "&#9776;";
+                isSidebarOpen = false;
             } else {
+                // Open sidebar
                 sidebar.style.left = "0";
                 document.body.classList.add("sidebar-open");
                 sidebarBtn.innerHTML = "&#9776;";
+                isSidebarOpen = true;
             }
-            isSidebarOpen = !isSidebarOpen;
         }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById("mySidebar");
+            const sidebarBtn = document.querySelector(".sidebar-btn");
+            
+            if (isSidebarOpen && window.innerWidth <= 768) {
+                if (!sidebar.contains(event.target) && !sidebarBtn.contains(event.target)) {
+                    sidebar.style.left = "-240px";
+                    document.body.classList.remove("sidebar-open");
+                    sidebarBtn.innerHTML = "&#9776;";
+                    isSidebarOpen = false;
+                }
+            }
+        });
 
         // Toggle the sub-sidebar under "Team"
         function toggleSubSidebar() {
@@ -720,6 +758,13 @@
         document.getElementById('backToBrackets').addEventListener('click', function() {
             document.getElementById('matchesSection').style.display = 'none';
             document.querySelector('.brackets-section').style.display = 'block';
+        });
+
+        // Initialize sidebar on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, sidebar initialized');
+            const sidebar = document.getElementById("mySidebar");
+            sidebar.style.left = "-240px"; // Ensure sidebar starts closed
         });
     </script>
 </body>
