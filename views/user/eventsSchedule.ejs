@@ -506,270 +506,324 @@
     </div>
 
     <script>
-        // Load all matches automatically when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            loadAllMatches();
-        });
+    // Load all matches automatically when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page loaded, starting to load matches...');
+        loadAllMatches();
+    });
 
-        async function loadAllMatches() {
-            try {
-                // Show loading
-                document.getElementById('scheduleLoading').style.display = 'block';
-                
-                // Get all brackets for this event
-                const eventId = '<%= event.id %>';
-                const brackets = <%= JSON.stringify(brackets || []) %>;
-                const userTeams = <%= JSON.stringify(userTeams || []) %>;
-
-                if (brackets.length === 0) {
-                    showNoMatchesMessage();
-                    return;
-                }
-
-                // Load matches for all brackets
-                let allMatches = [];
-                for (const bracket of brackets) {
-                    try {
-                        const response = await fetch(`/event-schedule/bracket/${bracket.id}/matches`);
-                        const data = await response.json();
-                        
-                        if (data.success) {
-                            // Add bracket info to each match
-                            data.matches.forEach(match => {
-                                match.bracket_info = data.bracket;
-                                match.bracket_id = bracket.id;
-                            });
-                            allMatches = allMatches.concat(data.matches);
-                        }
-                    } catch (error) {
-                        console.error(`Error loading matches for bracket ${bracket.id}:`, error);
-                    }
-                }
-
-                // Hide loading
-                document.getElementById('scheduleLoading').style.display = 'none';
-
-                if (allMatches.length === 0) {
-                    showNoMatchesMessage();
-                } else {
-                    displayAllMatches(allMatches, brackets, userTeams);
-                }
-
-            } catch (error) {
-                console.error('Error loading matches:', error);
-                document.getElementById('scheduleLoading').style.display = 'none';
-                showNoMatchesMessage('Error loading matches. Please try again.');
-            }
-        }
-
-        function displayAllMatches(matches, brackets, userTeams) {
-            const matchesContainer = document.getElementById('matchesContainer');
-            matchesContainer.innerHTML = '';
-
-            // Group matches by bracket and then by round
-            const bracketsWithMatches = {};
+    async function loadAllMatches() {
+        try {
+            console.log('Starting to load all matches...');
             
-            brackets.forEach(bracket => {
+            // Show loading
+            document.getElementById('scheduleLoading').style.display = 'block';
+            
+            // Get data from EJS template
+            const eventId = '<%= event.id %>';
+            const brackets = <%= JSON.stringify(brackets || []) %>;
+            const userTeams = <%= JSON.stringify(userTeams || []) %>;
+
+            console.log('Event ID:', eventId);
+            console.log('Brackets data:', brackets);
+            console.log('User teams:', userTeams);
+
+            if (!brackets || brackets.length === 0) {
+                console.log('No brackets found for this event');
+                showNoMatchesMessage('No tournament brackets have been created for this event yet.');
+                document.getElementById('scheduleLoading').style.display = 'none';
+                return;
+            }
+
+            // Load matches for all brackets
+            let allMatches = [];
+            let bracketsWithData = [];
+
+            for (const bracket of brackets) {
+                try {
+                    console.log(`Loading matches for bracket: ${bracket.id} - ${bracket.sport_type}`);
+                    
+                    const response = await fetch(`/event-schedule/bracket/${bracket.id}/matches`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log(`Bracket ${bracket.id} matches response:`, data);
+                    
+                    if (data.success && data.matches && data.matches.length > 0) {
+                        // Add bracket info to each match
+                        data.matches.forEach(match => {
+                            match.bracket_info = data.bracket;
+                            match.bracket_id = bracket.id;
+                        });
+                        allMatches = allMatches.concat(data.matches);
+                        bracketsWithData.push(bracket);
+                        console.log(`Added ${data.matches.length} matches from bracket ${bracket.id}`);
+                    } else {
+                        console.log(`No matches found for bracket ${bracket.id} or API returned error:`, data.error);
+                    }
+                } catch (error) {
+                    console.error(`Error loading matches for bracket ${bracket.id}:`, error);
+                }
+            }
+
+            // Hide loading
+            document.getElementById('scheduleLoading').style.display = 'none';
+
+            console.log('Total matches loaded:', allMatches.length);
+            console.log('Brackets with data:', bracketsWithData.length);
+
+            if (allMatches.length === 0) {
+                showNoMatchesMessage('Matches have been created but no schedule information is available yet.');
+            } else {
+                displayAllMatches(allMatches, bracketsWithData, userTeams);
+            }
+
+        } catch (error) {
+            console.error('Error loading matches:', error);
+            document.getElementById('scheduleLoading').style.display = 'none';
+            showNoMatchesMessage('Error loading match schedules. Please try again later.');
+        }
+    }
+
+    function displayAllMatches(matches, brackets, userTeams) {
+        const matchesContainer = document.getElementById('matchesContainer');
+        matchesContainer.innerHTML = '';
+
+        console.log('Displaying matches:', matches);
+        console.log('Displaying brackets:', brackets);
+
+        // Group matches by bracket and then by round
+        const bracketsWithMatches = {};
+        
+        brackets.forEach(bracket => {
+            const bracketMatches = matches.filter(match => match.bracket_id === bracket.id);
+            if (bracketMatches.length > 0) {
                 bracketsWithMatches[bracket.id] = {
                     bracket: bracket,
-                    matches: matches.filter(match => match.bracket_id === bracket.id)
+                    matches: bracketMatches
                 };
+            }
+        });
+
+        console.log('Brackets with matches:', Object.keys(bracketsWithMatches).length);
+
+        if (Object.keys(bracketsWithMatches).length === 0) {
+            showNoMatchesMessage('No scheduled matches found for this event.');
+            return;
+        }
+
+        // Display matches for each bracket
+        Object.values(bracketsWithMatches).forEach(({ bracket, matches }) => {
+            const bracketSection = document.createElement('div');
+            bracketSection.className = 'bracket-section';
+            
+            // Bracket header
+            bracketSection.innerHTML = `
+                <div class="schedule-bracket-header">
+                    <h3>${bracket.sport_type}</h3>
+                    <div class="bracket-meta">
+                        <div class="bracket-meta-item">
+                            <i class="fas fa-chess-board"></i>
+                            ${bracket.bracket_type.replace('_', ' ').toUpperCase()} Tournament
+                        </div>
+                        <div class="bracket-meta-item">
+                            <i class="fas fa-flag"></i>
+                            Status: ${bracket.is_completed ? 'Completed' : 'In Progress'} | Round: ${bracket.current_round || 1}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Group matches by round
+            const rounds = {};
+            matches.forEach(match => {
+                if (!rounds[match.round_number]) rounds[match.round_number] = [];
+                rounds[match.round_number].push(match);
             });
 
-            // Display matches for each bracket
-            Object.values(bracketsWithMatches).forEach(({ bracket, matches }) => {
-                if (matches.length === 0) return;
+            const matchesList = document.createElement('div');
+            matchesList.className = 'matches-list';
 
-                const bracketSection = document.createElement('div');
-                bracketSection.className = 'bracket-section';
+            // Sort rounds numerically and display
+            Object.keys(rounds).sort((a, b) => a - b).forEach(roundNumber => {
+                const roundSection = document.createElement('div');
+                roundSection.className = 'round-section';
                 
-                // Bracket header
-                bracketSection.innerHTML = `
-                    <div class="schedule-bracket-header">
-                        <h3>${bracket.sport_type}</h3>
-                        <div class="bracket-meta">
-                            <div class="bracket-meta-item">
-                                <i class="fas fa-chess-board"></i>
-                                ${bracket.bracket_type.replace('_', ' ').toUpperCase()} Tournament
-                            </div>
-                            <div class="bracket-meta-item">
-                                <i class="fas fa-flag"></i>
-                                Status: ${bracket.is_completed ? 'Completed' : 'In Progress'} | Round: ${bracket.current_round || 1}
-                            </div>
-                        </div>
+                roundSection.innerHTML = `
+                    <div class="round-header">
+                        <i class="fas fa-flag"></i> 
+                        Round ${roundNumber}
+                        <span style="font-size: 0.9rem; opacity: 0.9; margin-left: auto;">
+                            ${rounds[roundNumber].length} match${rounds[roundNumber].length !== 1 ? 'es' : ''}
+                        </span>
                     </div>
                 `;
 
-                // Group matches by round
-                const rounds = {};
-                matches.forEach(match => {
-                    if (!rounds[match.round_number]) rounds[match.round_number] = [];
-                    rounds[match.round_number].push(match);
-                });
+                rounds[roundNumber].forEach(match => {
+                    const isUserTeam1 = userTeams.some(team => team.id === match.team1_id);
+                    const isUserTeam2 = userTeams.some(team => team.id === match.team2_id);
 
-                const matchesList = document.createElement('div');
-                matchesList.className = 'matches-list';
+                    console.log('Processing match:', match);
+                    console.log('Team 1:', match.team1_name, 'Team 2:', match.team2_name);
+                    console.log('Match date:', match.match_date);
+                    console.log('Venue:', match.venue);
 
-                // Sort rounds numerically and display
-                Object.keys(rounds).sort((a, b) => a - b).forEach(roundNumber => {
-                    const roundSection = document.createElement('div');
-                    roundSection.className = 'round-section';
-                    
-                    roundSection.innerHTML = `
-                        <div class="round-header">
-                            <i class="fas fa-flag"></i> 
-                            Round ${roundNumber}
-                            <span style="font-size: 0.9rem; opacity: 0.9; margin-left: auto;">
-                                ${rounds[roundNumber].length} match${rounds[roundNumber].length !== 1 ? 'es' : ''}
-                            </span>
-                        </div>
-                    `;
-
-                    rounds[roundNumber].forEach(match => {
-                        const isUserTeam1 = userTeams.some(team => team.id === match.team1_id);
-                        const isUserTeam2 = userTeams.some(team => team.id === match.team2_id);
-
-                        // Format date and time
-                        let dateTimeInfo = '';
-                        if (match.match_date) {
-                            const matchDate = new Date(match.match_date);
-                            dateTimeInfo = `
-                                <div class="detail-card date-time-card">
-                                    <i class="fas fa-calendar-alt" style="color: #4caf50;"></i>
-                                    <div>
-                                        <strong>${matchDate.toLocaleDateString('en-US', { 
-                                            month: '2-digit', 
-                                            day: '2-digit', 
-                                            year: 'numeric' 
-                                        })}</strong>
-                                        <br>
-                                        <span>${matchDate.toLocaleTimeString('en-US', { 
-                                            hour: '2-digit', 
-                                            minute: '2-digit',
-                                            hour12: true
-                                        })}</span>
-                                    </div>
-                                </div>
-                            `;
-                        } else {
-                            dateTimeInfo = `
-                                <div class="detail-card date-time-card">
-                                    <i class="fas fa-calendar-times" style="color: #6c757d;"></i>
-                                    <div>
-                                        <strong>Date & Time</strong>
-                                        <br>
-                                        <span>Not yet scheduled</span>
-                                    </div>
-                                </div>
-                            `;
-                        }
-
-                        // Venue information
-                        let venueInfo = '';
-                        if (match.venue) {
-                            venueInfo = `
-                                <div class="detail-card venue-card">
-                                    <i class="fas fa-map-marker-alt" style="color: #2196f3;"></i>
-                                    <div>
-                                        <strong>Venue</strong>
-                                        <br>
-                                        <span>${match.venue}</span>
-                                    </div>
-                                </div>
-                            `;
-                        } else {
-                            venueInfo = `
-                                <div class="detail-card venue-card">
-                                    <i class="fas fa-map-marker-alt" style="color: #6c757d;"></i>
-                                    <div>
-                                        <strong>Venue</strong>
-                                        <br>
-                                        <span>To be announced</span>
-                                    </div>
-                                </div>
-                            `;
-                        }
-
-                        // Winner information
-                        let winnerInfo = '';
-                        if (match.status === 'completed' && match.winner_name) {
-                            const scoreDisplay = match.team1_score !== null ? `(${match.team1_score}-${match.team2_score})` : '';
-                            winnerInfo = `
-                                <div class="detail-card winner-card">
-                                    <i class="fas fa-trophy" style="color: #ffd700;"></i>
-                                    <div>
-                                        <strong>Winner</strong>
-                                        <br>
-                                        <span>${match.winner_name} ${scoreDisplay}</span>
-                                    </div>
-                                </div>
-                            `;
-                        }
-
-                        const matchItem = document.createElement('div');
-                        matchItem.className = 'match-item';
-                        matchItem.innerHTML = `
-                            <div class="teams-display">
-                                <div class="team ${isUserTeam1 ? 'user-team' : ''}">
-                                    ${match.team1_name || 'TBD'}
-                                    ${isUserTeam1 ? '<br><small style="color: #007bff;">(Your Team)</small>' : ''}
-                                </div>
-                                <div class="vs">VS</div>
-                                <div class="team ${isUserTeam2 ? 'user-team' : ''}">
-                                    ${match.team2_name || 'TBD'}
-                                    ${isUserTeam2 ? '<br><small style="color: #007bff;">(Your Team)</small>' : ''}
-                                </div>
-                            </div>
-                            
-                            <div class="match-details">
-                                ${dateTimeInfo}
-                                ${venueInfo}
-                                ${winnerInfo}
-                            </div>
-                            
-                            <div class="match-meta">
-                                <div class="match-meta-item">
-                                    <i class="fas fa-hashtag"></i>
-                                    Match #${match.match_number || 'N/A'}
-                                </div>
-                                <div class="match-meta-item">
-                                    <i class="fas fa-flag"></i>
-                                    Round ${match.round_number}
-                                </div>
-                                <div class="match-meta-item" style="margin-left: auto;">
-                                    <i class="fas fa-info-circle"></i>
-                                    <span style="text-transform: capitalize;">${match.status.replace('_', ' ')}</span>
+                    // Format date and time
+                    let dateTimeInfo = '';
+                    if (match.match_date) {
+                        const matchDate = new Date(match.match_date);
+                        dateTimeInfo = `
+                            <div class="detail-card date-time-card">
+                                <i class="fas fa-calendar-alt" style="color: #4caf50;"></i>
+                                <div>
+                                    <strong>${matchDate.toLocaleDateString('en-US', { 
+                                        month: '2-digit', 
+                                        day: '2-digit', 
+                                        year: 'numeric' 
+                                    })}</strong>
+                                    <br>
+                                    <span>${matchDate.toLocaleTimeString('en-US', { 
+                                        hour: '2-digit', 
+                                        minute: '2-digit',
+                                        hour12: true
+                                    })}</span>
                                 </div>
                             </div>
                         `;
+                    } else {
+                        dateTimeInfo = `
+                            <div class="detail-card date-time-card">
+                                <i class="fas fa-calendar-times" style="color: #6c757d;"></i>
+                                <div>
+                                    <strong>Date & Time</strong>
+                                    <br>
+                                    <span>Not yet scheduled</span>
+                                </div>
+                            </div>
+                        `;
+                    }
 
-                        roundSection.appendChild(matchItem);
-                    });
+                    // Venue information
+                    let venueInfo = '';
+                    if (match.venue) {
+                        venueInfo = `
+                            <div class="detail-card venue-card">
+                                <i class="fas fa-map-marker-alt" style="color: #2196f3;"></i>
+                                <div>
+                                    <strong>Venue</strong>
+                                    <br>
+                                    <span>${match.venue}</span>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        venueInfo = `
+                            <div class="detail-card venue-card">
+                                <i class="fas fa-map-marker-alt" style="color: #6c757d;"></i>
+                                <div>
+                                    <strong>Venue</strong>
+                                    <br>
+                                    <span>To be announced</span>
+                                </div>
+                            </div>
+                        `;
+                    }
 
-                    matchesList.appendChild(roundSection);
+                    // Winner information
+                    let winnerInfo = '';
+                    if (match.status === 'completed' && match.winner_name) {
+                        const scoreDisplay = match.team1_score !== null ? `(${match.team1_score}-${match.team2_score})` : '';
+                        winnerInfo = `
+                            <div class="detail-card winner-card">
+                                <i class="fas fa-trophy" style="color: #ffd700;"></i>
+                                <div>
+                                    <strong>Winner</strong>
+                                    <br>
+                                    <span>${match.winner_name} ${scoreDisplay}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    const matchItem = document.createElement('div');
+                    matchItem.className = 'match-item';
+                    matchItem.innerHTML = `
+                        <div class="teams-display">
+                            <div class="team ${isUserTeam1 ? 'user-team' : ''}">
+                                ${match.team1_name || 'TBD'}
+                                ${isUserTeam1 ? '<br><small style="color: #007bff;">(Your Team)</small>' : ''}
+                            </div>
+                            <div class="vs">VS</div>
+                            <div class="team ${isUserTeam2 ? 'user-team' : ''}">
+                                ${match.team2_name || 'TBD'}
+                                ${isUserTeam2 ? '<br><small style="color: #007bff;">(Your Team)</small>' : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="match-details">
+                            ${dateTimeInfo}
+                            ${venueInfo}
+                            ${winnerInfo}
+                        </div>
+                        
+                        <div class="match-meta">
+                            <div class="match-meta-item">
+                                <i class="fas fa-hashtag"></i>
+                                Match #${match.match_number || 'N/A'}
+                            </div>
+                            <div class="match-meta-item">
+                                <i class="fas fa-flag"></i>
+                                Round ${match.round_number}
+                            </div>
+                            <div class="match-meta-item" style="margin-left: auto;">
+                                <i class="fas fa-info-circle"></i>
+                                <span style="text-transform: capitalize;">${match.status.replace('_', ' ')}</span>
+                            </div>
+                        </div>
+                    `;
+
+                    roundSection.appendChild(matchItem);
                 });
 
-                bracketSection.appendChild(matchesList);
-                matchesContainer.appendChild(bracketSection);
+                matchesList.appendChild(roundSection);
             });
-        }
 
-        function showNoMatchesMessage(message = 'No match schedules available yet.') {
-            const matchesContainer = document.getElementById('matchesContainer');
-            matchesContainer.innerHTML = `
-                <div class="schedule-no-matches">
-                    <i class="far fa-calendar-times"></i>
-                    <h3>No Match Schedules Available</h3>
-                    <p>${message}</p>
-                    <p>Check back later for tournament schedules.</p>
-                </div>
-            `;
-        }
+            bracketSection.appendChild(matchesList);
+            matchesContainer.appendChild(bracketSection);
+        });
+    }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </script>
+    function showNoMatchesMessage(message = 'No match schedules available yet.') {
+        const matchesContainer = document.getElementById('matchesContainer');
+        matchesContainer.innerHTML = `
+            <div class="schedule-no-matches">
+                <i class="far fa-calendar-times"></i>
+                <h3>No Match Schedules Available</h3>
+                <p>${message}</p>
+                <p>Check back later for tournament schedules.</p>
+            </div>
+        `;
+    }
+
+    // Add a simple retry button
+    function addRetryButton() {
+        const matchesContainer = document.getElementById('matchesContainer');
+        const retryButton = document.createElement('button');
+        retryButton.textContent = 'Retry Loading Matches';
+        retryButton.className = 'schedule-back-btn';
+        retryButton.style.marginTop = '20px';
+        retryButton.onclick = loadAllMatches;
+        matchesContainer.appendChild(retryButton);
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</script>
 </body>
 </html>
+
