@@ -34,38 +34,6 @@ exports.getEventSchedule = async (req, res) => {
             [eventId]
         );
 
-        // Get matches for each bracket
-        const bracketsWithMatches = await Promise.all(
-            brackets.map(async (bracket) => {
-                const [matches] = await db.execute(
-                    `SELECT m.*, t1.teamName as team1_name, t2.teamName as team2_name, 
-                            winner.teamName as winner_name
-                     FROM matches m
-                     LEFT JOIN team t1 ON m.team1_id = t1.id
-                     LEFT JOIN team t2 ON m.team2_id = t2.id
-                     LEFT JOIN team winner ON m.winner_team_id = winner.id
-                     WHERE m.bracket_id = ?
-                     ORDER BY m.round_number, m.match_number`,
-                    [bracket.id]
-                );
-
-                // Group matches by round
-                const rounds = {};
-                matches.forEach(match => {
-                    if (!rounds[match.round_number]) {
-                        rounds[match.round_number] = [];
-                    }
-                    rounds[match.round_number].push(match);
-                });
-
-                return {
-                    ...bracket,
-                    matches: matches,
-                    rounds: rounds
-                };
-            })
-        );
-
         // Get user's teams for this event (to highlight user's teams)
         const [userTeams] = await db.execute(
             `SELECT t.id, t.teamName 
@@ -78,7 +46,7 @@ exports.getEventSchedule = async (req, res) => {
         res.render('user/eventsSchedule', {
             user: req.session.user,
             event: event,
-            brackets: bracketsWithMatches,
+            brackets: brackets, // Changed from bracketsWithMatches to just brackets
             userTeams: userTeams,
             success: req.flash('success'),
             error: req.flash('error')
@@ -90,7 +58,7 @@ exports.getEventSchedule = async (req, res) => {
     }
 };
 
-// Get specific bracket matches (for AJAX)
+// Get specific bracket matches (for AJAX) - UPDATED VERSION
 exports.getBracketMatches = async (req, res) => {
     try {
         const { bracketId } = req.params;
