@@ -23,23 +23,47 @@ exports.getEventSchedule = async (req, res) => {
 
         const event = events[0];
 
-        // Get all brackets for this event with match count and scheduled matches info
+        // Get all brackets for this event - FIXED QUERY (removed GROUP BY)
         const [brackets] = await db.execute(
             `SELECT 
-                tb.*, 
+                tb.id,
+                tb.event_id,
+                tb.sport_type,
+                tb.bracket_type,
+                tb.created_at,
+                tb.updated_at,
                 tp.current_round, 
                 tp.is_completed, 
-                t.teamName as champion_name,
-                COUNT(m.id) as total_matches,
-                SUM(CASE WHEN m.match_date IS NOT NULL THEN 1 ELSE 0 END) as scheduled_matches
+                t.teamName as champion_name
              FROM tournament_brackets tb
              LEFT JOIN tournament_progress tp ON tb.id = tp.bracket_id
              LEFT JOIN team t ON tp.champion_team_id = t.id
-             LEFT JOIN matches m ON tb.id = m.bracket_id
              WHERE tb.event_id = ?
-             GROUP BY tb.id
              ORDER BY tb.created_at DESC`,
             [eventId]
+        );
+
+        // Get match counts for each bracket separately
+        const bracketsWithMatchCounts = await Promise.all(
+            brackets.map(async (bracket) => {
+                // Get total matches count
+                const [totalMatches] = await db.execute(
+                    "SELECT COUNT(*) as count FROM matches WHERE bracket_id = ?",
+                    [bracket.id]
+                );
+                
+                // Get scheduled matches count
+                const [scheduledMatches] = await db.execute(
+                    "SELECT COUNT(*) as count FROM matches WHERE bracket_id = ? AND match_date IS NOT NULL",
+                    [bracket.id]
+                );
+
+                return {
+                    ...bracket,
+                    total_matches: totalMatches[0].count,
+                    scheduled_matches: scheduledMatches[0].count
+                };
+            })
         );
 
         // Get user's teams for this event (to highlight user's teams)
@@ -54,7 +78,7 @@ exports.getEventSchedule = async (req, res) => {
         res.render('user/eventsSchedule', {
             user: req.session.user,
             event: event,
-            brackets: brackets,
+            brackets: bracketsWithMatchCounts,
             userTeams: userTeams,
             success: req.flash('success'),
             error: req.flash('error')
