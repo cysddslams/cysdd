@@ -710,6 +710,7 @@
             <h3 class="schedule-section-title"><i class="fas fa-trophy"></i> Tournament Brackets</h3>
             
             <% if (brackets && brackets.length > 0) { %>
+                <!-- In the brackets section, update the bracket cards to show match counts -->
                 <div class="schedule-brackets-grid" id="bracketsGrid">
                     <% brackets.forEach(bracket => { %>
                         <div class="schedule-bracket-card" data-bracket-id="<%= bracket.id %>">
@@ -725,6 +726,10 @@
                             <div class="schedule-bracket-info">
                                 <i class="fas fa-calendar"></i>
                                 <span>Created: <%= new Date(bracket.created_at).toLocaleDateString() %></span>
+                            </div>
+                            <div class="schedule-bracket-info">
+                                <i class="fas fa-list-ol"></i>
+                                <span>Matches: <%= bracket.scheduled_matches || 0 %>/<%= bracket.total_matches || 0 %> Scheduled</span>
                             </div>
                             <% if (bracket.champion_name) { %>
                                 <div class="schedule-bracket-info">
@@ -1040,6 +1045,7 @@ document.addEventListener('keydown', function(event) {
 </script>
 </body>
 </html>
+
 
 
 
