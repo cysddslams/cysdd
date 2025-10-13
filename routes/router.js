@@ -17,7 +17,7 @@ const { adminPostUpload,
 const uploadProfile = require('../config/adminProfileMulter');
 const { combinedUpload } = require("../config/adminEventMulter");
 const scheduleController = require('../controllers/scheduleController');
-
+const userScheduleController = require('../controllers/userScheduleController');
 
 
 
@@ -106,6 +106,9 @@ router.get('/team/mark-viewed/:id', async (req, res) => {
         res.redirect('/');
     }
 });
+
+router.get("/event-schedule/:eventId", authMiddleware, checkTermsAccepted, userScheduleController.getEventSchedule);
+router.get("/event-schedule/bracket/:bracketId/matches", authMiddleware, checkTermsAccepted, userScheduleController.getBracketMatches);
 
 
 
@@ -231,6 +234,7 @@ router.post("/admin/schedule/set-champion", adminAuthMiddleware, scheduleControl
 
 
 module.exports = router;
+
 
 
 
