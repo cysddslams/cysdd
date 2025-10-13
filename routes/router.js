@@ -109,7 +109,7 @@ router.get('/team/mark-viewed/:id', async (req, res) => {
 
 // User Tournament Schedule Routes
 router.get("/event-schedule/:eventId", authMiddleware, checkTermsAccepted, userScheduleController.getEventSchedule);
-router.get("/event-schedule/bracket/:bracketId/matches", authMiddleware, checkTermsAccepted, userScheduleController.getBracketMatches);
+
 
 
 
@@ -235,6 +235,7 @@ router.post("/admin/schedule/set-champion", adminAuthMiddleware, scheduleControl
 
 
 module.exports = router;
+
 
 
 
