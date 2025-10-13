@@ -46,7 +46,7 @@ exports.getEventSchedule = async (req, res) => {
         res.render('user/eventsSchedule', {
             user: req.session.user,
             event: event,
-            brackets: brackets, // Changed from bracketsWithMatches to just brackets
+            brackets: brackets,
             userTeams: userTeams,
             success: req.flash('success'),
             error: req.flash('error')
@@ -58,11 +58,11 @@ exports.getEventSchedule = async (req, res) => {
     }
 };
 
-// Get specific bracket matches (for AJAX) - UPDATED VERSION
+// Use the same function as admin for getting bracket matches
 exports.getBracketMatches = async (req, res) => {
     try {
         const { bracketId } = req.params;
-
+        
         const [matches] = await db.execute(
             `SELECT m.*, t1.teamName as team1_name, t2.teamName as team2_name, 
                     winner.teamName as winner_name
@@ -76,10 +76,10 @@ exports.getBracketMatches = async (req, res) => {
         );
 
         const [bracket] = await db.execute(
-            `SELECT tb.*, tp.current_round, tp.is_completed, t.teamName as champion_name
+            `SELECT tb.*, e.title as event_name, tp.current_round, tp.is_completed, tp.total_rounds
              FROM tournament_brackets tb
+             LEFT JOIN events e ON tb.event_id = e.id
              LEFT JOIN tournament_progress tp ON tb.id = tp.bracket_id
-             LEFT JOIN team t ON tp.champion_team_id = t.id
              WHERE tb.id = ?`,
             [bracketId]
         );
