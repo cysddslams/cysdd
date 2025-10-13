@@ -149,281 +149,233 @@
             font-size: 1.2rem;
         }
 
-        /* Brackets Section */
-        .schedule-brackets-section {
-            margin-bottom: 50px;
+        /* Sports Navigation */
+        .schedule-sports-nav {
+            margin-bottom: 30px;
         }
 
-        .schedule-section-title {
-            color: #2c3e50;
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 3px solid #007bff;
+        .schedule-sports-tabs {
             display: flex;
-            align-items: center;
-            gap: 15px;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
         }
 
-        .schedule-section-title i {
-            color: #007bff;
-        }
-
-        .schedule-brackets-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-
-        .schedule-bracket-card {
+        .sport-tab {
             background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
-            border: 1px solid #e8ecef;
+            padding: 15px 25px;
+            border-radius: 10px;
             cursor: pointer;
+            border: 2px solid #e9ecef;
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            border-left: 6px solid #28a745;
-        }
-
-        .schedule-bracket-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, #28a745, #1e7e34);
-        }
-
-        .schedule-bracket-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
-        }
-
-        .schedule-bracket-card h3 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 1.5rem;
             font-weight: 600;
+            color: #495057;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
-        .schedule-bracket-info {
-            color: #5a6c7d;
-            margin: 12px 0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.95rem;
+        .sport-tab:hover {
+            border-color: #007bff;
+            transform: translateY(-2px);
         }
 
-        .schedule-bracket-info i {
-            color: #007bff;
-            width: 18px;
-            text-align: center;
-            font-size: 1.1rem;
+        .sport-tab.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
         }
 
-        .schedule-bracket-status {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 25px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-top: 15px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .schedule-status-completed {
-            background: #d4edda;
-            color: #155724;
-            border: 2px solid #c3e6cb;
-        }
-
-        .schedule-status-ongoing {
-            background: #fff3cd;
-            color: #856404;
-            border: 2px solid #ffeaa7;
-        }
-
-        /* Matches Section */
+        /* Match Schedule List - NEW STYLING */
         .schedule-matches-section {
-            display: none;
             margin-top: 30px;
-        }
-
-        .schedule-matches-container {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-            border: 1px solid #e8ecef;
         }
 
         .schedule-bracket-header {
             background: linear-gradient(135deg, #28a745, #1e7e34);
             color: white;
-            padding: 30px;
+            padding: 25px 30px;
             border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.2);
+            margin-bottom: 25px;
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
         }
 
         .schedule-bracket-header h3 {
             margin: 0 0 15px 0;
             font-size: 1.8rem;
             font-weight: 600;
+            text-align: center;
         }
 
-        .schedule-round {
-            margin-bottom: 40px;
+        .bracket-meta {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 1rem;
         }
 
-        .schedule-round-header {
+        .bracket-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+
+        /* Match List Styling */
+        .matches-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .round-section {
+            margin-bottom: 30px;
+        }
+
+        .round-header {
             background: linear-gradient(135deg, #007bff, #0056b3);
             color: white;
             padding: 18px 25px;
             border-radius: 12px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             font-weight: 600;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
-        .schedule-match-card {
-            background: #f8f9fa;
-            border: 1px solid #e8ecef;
+        .match-item {
+            background: white;
             border-radius: 12px;
             padding: 25px;
-            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border: 2px solid #e8ecef;
+            border-left: 6px solid #007bff;
             transition: all 0.3s ease;
-            border-left: 4px solid #007bff;
         }
 
-        .schedule-match-card:hover {
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-            transform: translateX(5px);
+        .match-item:hover {
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
+            transform: translateY(-3px);
         }
 
-        .schedule-teams-display {
+        .teams-display {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
         }
 
-        .schedule-team {
+        .team {
             flex: 1;
             text-align: center;
-            padding: 15px;
-            font-weight: 600;
+            padding: 15px 20px;
+            font-weight: 700;
             color: #2c3e50;
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             border-radius: 8px;
-            transition: all 0.3s ease;
+            background: white;
+            border: 2px solid #e9ecef;
         }
 
-        .schedule-user-team {
+        .user-team {
             background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            border: 2px solid #007bff;
+            border: 3px solid #007bff;
             color: #007bff;
             box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
         }
 
-        .schedule-vs {
-            margin: 0 20px;
+        .vs {
+            margin: 0 25px;
             font-weight: bold;
-            color: #6c757d;
+            color: #495057;
             background: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 2px solid #e9ecef;
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 2px solid #dee2e6;
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        .match-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .detail-card {
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .date-time-card {
+            background: #e8f5e8;
+            border-left-color: #4caf50;
+        }
+
+        .venue-card {
+            background: #e3f2fd;
+            border-left-color: #2196f3;
+        }
+
+        .winner-card {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .match-meta {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
             font-size: 0.9rem;
         }
 
-        .schedule-match-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e9ecef;
-        }
-
-        .schedule-info-item {
+        .match-meta-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: #5a6c7d;
-            font-size: 0.95rem;
-            padding: 8px 12px;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-        }
-
-        .schedule-score-display {
-            background: linear-gradient(135deg, #e9ecef, #dee2e6);
-            color: #2c3e50;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            text-align: center;
-            font-size: 1.1rem;
-            border: 2px solid #ced4da;
-        }
-
-        .schedule-winner-display {
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-            color: #155724;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            text-align: center;
-            font-size: 1.1rem;
-            border: 2px solid #b1dfbb;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            gap: 5px;
         }
 
         /* Empty State */
-        .schedule-no-brackets {
+        .schedule-no-matches {
             text-align: center;
-            padding: 80px 40px;
+            padding: 60px 40px;
             color: #6c757d;
             background: white;
             border-radius: 20px;
             box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+            margin: 20px 0;
         }
 
-        .schedule-no-brackets i {
-            font-size: 5rem;
-            margin-bottom: 25px;
+        .schedule-no-matches i {
+            font-size: 4rem;
+            margin-bottom: 20px;
             color: #dee2e6;
             opacity: 0.7;
         }
 
-        .schedule-no-brackets h3 {
+        .schedule-no-matches h3 {
             color: #495057;
             margin-bottom: 15px;
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 600;
-        }
-
-        .schedule-no-brackets p {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 10px;
         }
 
         /* OVERRIDE userEvents.css conflicts */
@@ -446,201 +398,31 @@
             display: none !important;
         }
 
-        /* Enhanced Responsive Design */
-        @media (max-width: 1200px) {
-            .schedule-main-container {
-                max-width: 95%;
-                margin: 80px auto 0 auto;
-            }
-        }
-
-        @media (max-width: 992px) {
-            .schedule-brackets-grid {
-                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-                gap: 20px;
-            }
-            
-            .schedule-event-hero {
-                padding: 30px;
-            }
-            
-            .schedule-event-hero h1 {
-                font-size: 2.2rem;
-            }
-            
-            .schedule-title-text {
-                font-size: 2.2rem;
-            }
-        }
-
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .schedule-main-container {
-                margin-top: 70px;
-                min-height: calc(100vh - 70px);
-                padding: 20px 15px;
-            }
-            
-            .schedule-page-header {
-                flex-direction: column;
-                gap: 20px;
-                align-items: flex-start;
-            }
-            
-            .schedule-title-section {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            
-            .schedule-title-text {
-                font-size: 2rem;
-            }
-            
-            .schedule-brackets-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .schedule-event-hero {
-                padding: 25px;
-            }
-            
-            .schedule-event-hero h1 {
-                font-size: 1.8rem;
-            }
-            
-            .schedule-event-meta {
+            .teams-display {
                 flex-direction: column;
                 gap: 15px;
             }
             
-            .schedule-meta-item {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .schedule-section-title {
-                font-size: 1.8rem;
-            }
-            
-            .schedule-teams-display {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .schedule-vs {
+            .vs {
                 margin: 0;
                 order: -1;
             }
             
-            .schedule-match-info {
+            .match-details {
                 grid-template-columns: 1fr;
             }
             
-            .schedule-matches-container {
-                padding: 25px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .schedule-main-container {
-                margin-top: 60px;
-                min-height: calc(100vh - 60px);
-                padding: 15px 10px;
+            .bracket-meta {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
             }
             
-            .schedule-title-text {
-                font-size: 1.8rem;
+            .schedule-sports-tabs {
+                justify-content: center;
             }
-            
-            .schedule-title-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 1.3rem;
-            }
-            
-            .schedule-event-hero {
-                padding: 20px;
-            }
-            
-            .schedule-event-hero h1 {
-                font-size: 1.6rem;
-            }
-            
-            .schedule-section-title {
-                font-size: 1.6rem;
-            }
-            
-            .schedule-bracket-card {
-                padding: 25px 20px;
-            }
-            
-            .schedule-round-header {
-                padding: 15px 20px;
-                font-size: 1.1rem;
-            }
-            
-            .schedule-match-card {
-                padding: 20px;
-            }
-            
-            .schedule-back-btn {
-                padding: 10px 20px;
-                font-size: 0.9rem;
-            }
-            
-            .schedule-no-brackets {
-                padding: 60px 20px;
-            }
-            
-            .schedule-no-brackets i {
-                font-size: 4rem;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .schedule-title-text {
-                font-size: 1.6rem;
-            }
-            
-            .schedule-event-hero h1 {
-                font-size: 1.4rem;
-            }
-            
-            .schedule-section-title {
-                font-size: 1.4rem;
-            }
-            
-            .schedule-bracket-card h3 {
-                font-size: 1.3rem;
-            }
-            
-            .schedule-team {
-                font-size: 1rem;
-                padding: 12px;
-            }
-        }
-
-        /* Loading Animation */
-        .schedule-loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
-        }
-
-        .schedule-loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #007bff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -700,347 +482,294 @@
         </div>
 
         <!-- Loading Animation -->
-        <div id="scheduleLoading" class="schedule-loading">
-            <div class="schedule-loading-spinner"></div>
+        <div id="scheduleLoading" class="schedule-loading" style="display: none; text-align: center; padding: 40px;">
+            <div style="width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px auto;"></div>
             <p>Loading tournament data...</p>
         </div>
 
-        <!-- Brackets Section -->
-        <section class="schedule-brackets-section" id="bracketsSection">
-            <h3 class="schedule-section-title"><i class="fas fa-trophy"></i> Tournament Brackets</h3>
-            
-            <% if (brackets && brackets.length > 0) { %>
-                <div class="schedule-brackets-grid" id="bracketsGrid">
-                    <% brackets.forEach(bracket => { %>
-                        <div class="schedule-bracket-card" data-bracket-id="<%= bracket.id %>">
-                            <h3><%= bracket.sport_type %></h3>
-                            <div class="schedule-bracket-info">
-                                <i class="fas fa-chess-board"></i>
-                                <span><%= bracket.bracket_type.replace('_', ' ').toUpperCase() %> Tournament</span>
-                            </div>
-                            <div class="schedule-bracket-info">
-                                <i class="fas fa-flag"></i>
-                                <span>Current Round: <%= bracket.current_round || 1 %></span>
-                            </div>
-                            <div class="schedule-bracket-info">
-                                <i class="fas fa-calendar"></i>
-                                <span>Created: <%= new Date(bracket.created_at).toLocaleDateString() %></span>
-                            </div>
-                            <div class="schedule-bracket-info">
-                                <i class="fas fa-list-ol"></i>
-                                <span>Matches: <%= bracket.scheduled_matches || 0 %>/<%= bracket.total_matches || 0 %> Scheduled</span>
-                            </div>
-                            <% if (bracket.champion_name) { %>
-                                <div class="schedule-bracket-info">
-                                    <i class="fas fa-trophy"></i>
-                                    <span>Champion: <%= bracket.champion_name %></span>
-                                </div>
-                            <% } %>
-                            <div class="schedule-bracket-status schedule-status-<%= bracket.is_completed ? 'completed' : 'ongoing' %>">
-                                <i class="fas fa-<%= bracket.is_completed ? 'check-circle' : 'sync-alt' %>"></i>
-                                <%= bracket.is_completed ? 'Completed' : 'In Progress' %>
-                            </div>
-                        </div>
-                    <% }); %>
-                </div>
-            <% } else { %>
-                <div class="schedule-no-brackets">
-                    <i class="far fa-calendar-times"></i>
-                    <h3>No Tournament Schedules Available</h3>
-                    <p>Tournament brackets have not been created for this event yet.</p>
-                    <p>Check back later for updates.</p>
-                </div>
-            <% } %>
+        <!-- Sports Navigation -->
+        <section class="schedule-sports-nav" id="sportsNav" style="display: none;">
+            <h3 style="color: #2c3e50; font-size: 1.8rem; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+                <i class="fas fa-basketball-ball"></i> Select Sport
+            </h3>
+            <div class="schedule-sports-tabs" id="sportsTabs">
+                <!-- Sports tabs will be loaded here -->
+            </div>
         </section>
 
-        <!-- Matches Section -->
-        <section id="matchesSection" class="schedule-matches-section">
-            <div class="schedule-matches-container">
-                <div id="bracketHeader" class="schedule-bracket-header">
-                    <!-- Dynamic content will be loaded here -->
-                </div>
-                <div id="matchesContainer">
-                    <!-- Dynamic matches will be loaded here -->
-                </div>
-                <button id="backToBrackets" class="schedule-back-btn" style="margin-top: 30px;">
-                    <i class="fas fa-arrow-left"></i> Back to Brackets
-                </button>
+        <!-- Matches Section - ALWAYS VISIBLE NOW -->
+        <section class="schedule-matches-section" id="matchesSection">
+            <div id="matchesContainer">
+                <!-- Matches will be loaded here automatically -->
             </div>
         </section>
     </div>
 
     <script>
-        // TOURNAMENT LOGIC with enhanced UX
-        let currentBracketId = null;
-        const userTeams = <%= JSON.stringify(userTeams || []) %>;
-
-        // Add loading states and better user feedback
-        document.querySelectorAll('.schedule-bracket-card').forEach(card => {
-            card.addEventListener('click', function() {
-                const bracketId = this.dataset.bracketId;
-                loadBracketMatches(bracketId);
-            });
+        // Load all matches automatically when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAllMatches();
         });
 
-        async function loadBracketMatches(bracketId) {
+        async function loadAllMatches() {
             try {
                 // Show loading
                 document.getElementById('scheduleLoading').style.display = 'block';
-                document.getElementById('bracketsSection').style.opacity = '0.6';
                 
-                const response = await fetch(`/event-schedule/bracket/${bracketId}/matches`);
-                const data = await response.json();
+                // Get all brackets for this event
+                const eventId = '<%= event.id %>';
+                const brackets = <%= JSON.stringify(brackets || []) %>;
+                const userTeams = <%= JSON.stringify(userTeams || []) %>;
+
+                if (brackets.length === 0) {
+                    showNoMatchesMessage();
+                    return;
+                }
+
+                // Load matches for all brackets
+                let allMatches = [];
+                for (const bracket of brackets) {
+                    try {
+                        const response = await fetch(`/event-schedule/bracket/${bracket.id}/matches`);
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            // Add bracket info to each match
+                            data.matches.forEach(match => {
+                                match.bracket_info = data.bracket;
+                                match.bracket_id = bracket.id;
+                            });
+                            allMatches = allMatches.concat(data.matches);
+                        }
+                    } catch (error) {
+                        console.error(`Error loading matches for bracket ${bracket.id}:`, error);
+                    }
+                }
 
                 // Hide loading
                 document.getElementById('scheduleLoading').style.display = 'none';
-                document.getElementById('bracketsSection').style.opacity = '1';
 
-                if (data.success) {
-                    displayMatches(data.matches, data.bracket);
-                    currentBracketId = bracketId;
-
-                    document.getElementById('matchesSection').style.display = 'block';
-                    document.querySelector('.schedule-brackets-section').style.display = 'none';
-                    
-                    // Smooth scroll to top of matches section
-                    document.getElementById('matchesSection').scrollIntoView({ 
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
+                if (allMatches.length === 0) {
+                    showNoMatchesMessage();
                 } else {
-                    alert('Error loading bracket matches: ' + (data.error || 'Please try again.'));
+                    displayAllMatches(allMatches, brackets, userTeams);
                 }
+
             } catch (error) {
                 console.error('Error loading matches:', error);
                 document.getElementById('scheduleLoading').style.display = 'none';
-                document.getElementById('bracketsSection').style.opacity = '1';
-                alert('Error loading matches. Please check your connection and try again.');
+                showNoMatchesMessage('Error loading matches. Please try again.');
             }
         }
 
-        function displayMatches(matches, bracket) {
-            const bracketHeader = document.getElementById('bracketHeader');
-            bracketHeader.innerHTML = `
-                <h3>${bracket.sport_type} - ${bracket.bracket_type.replace('_', ' ').toUpperCase()} Tournament</h3>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px;">
-                    <span style="display: flex; align-items: center; gap: 8px;">
-                        <i class="fas fa-flag"></i> Current Round: ${bracket.current_round || 1}
-                    </span>
-                    <span class="schedule-bracket-status schedule-status-${bracket.is_completed ? 'completed' : 'ongoing'}">
-                        <i class="fas fa-${bracket.is_completed ? 'check-circle' : 'sync-alt'}"></i>
-                        ${bracket.is_completed ? 'Completed' : 'In Progress'}
-                    </span>
-                    ${bracket.champion_name ? `
-                        <span style="display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-trophy"></i> Champion: ${bracket.champion_name}
-                        </span>
-                    ` : ''}
-                </div>
-            `;
-
-            const rounds = {};
-            matches.forEach(match => {
-                if (!rounds[match.round_number]) rounds[match.round_number] = [];
-                rounds[match.round_number].push(match);
-            });
-
+        function displayAllMatches(matches, brackets, userTeams) {
             const matchesContainer = document.getElementById('matchesContainer');
             matchesContainer.innerHTML = '';
 
-            // Sort rounds numerically
-            Object.keys(rounds).sort((a, b) => a - b).forEach(roundNumber => {
-                const roundDiv = document.createElement('div');
-                roundDiv.className = 'schedule-round';
-                roundDiv.innerHTML = `
-                    <div class="schedule-round-header">
-                        <i class="fas fa-flag"></i> 
-                        Round ${roundNumber}
-                        <span style="font-size: 0.9rem; opacity: 0.9; margin-left: auto;">
-                            ${rounds[roundNumber].length} match${rounds[roundNumber].length !== 1 ? 'es' : ''}
-                        </span>
+            // Group matches by bracket and then by round
+            const bracketsWithMatches = {};
+            
+            brackets.forEach(bracket => {
+                bracketsWithMatches[bracket.id] = {
+                    bracket: bracket,
+                    matches: matches.filter(match => match.bracket_id === bracket.id)
+                };
+            });
+
+            // Display matches for each bracket
+            Object.values(bracketsWithMatches).forEach(({ bracket, matches }) => {
+                if (matches.length === 0) return;
+
+                const bracketSection = document.createElement('div');
+                bracketSection.className = 'bracket-section';
+                
+                // Bracket header
+                bracketSection.innerHTML = `
+                    <div class="schedule-bracket-header">
+                        <h3>${bracket.sport_type}</h3>
+                        <div class="bracket-meta">
+                            <div class="bracket-meta-item">
+                                <i class="fas fa-chess-board"></i>
+                                ${bracket.bracket_type.replace('_', ' ').toUpperCase()} Tournament
+                            </div>
+                            <div class="bracket-meta-item">
+                                <i class="fas fa-flag"></i>
+                                Status: ${bracket.is_completed ? 'Completed' : 'In Progress'} | Round: ${bracket.current_round || 1}
+                            </div>
+                        </div>
                     </div>
                 `;
 
-                rounds[roundNumber].forEach(match => {
-                    const isUserTeam1 = userTeams.some(team => team.id === match.team1_id);
-                    const isUserTeam2 = userTeams.some(team => team.id === match.team2_id);
+                // Group matches by round
+                const rounds = {};
+                matches.forEach(match => {
+                    if (!rounds[match.round_number]) rounds[match.round_number] = [];
+                    rounds[match.round_number].push(match);
+                });
 
-                    // Format individual match date and time from matches table
-                    let scheduleInfo = '';
-                    if (match.match_date) {
-                        const matchDate = new Date(match.match_date);
-                        // Convert to local timezone
-                        const localDate = new Date(matchDate.getTime());
-                        
-                        scheduleInfo = `
-                            <div class="schedule-info-item" style="background: #e8f5e8; border-color: #4caf50;">
-                                <i class="fas fa-calendar-check" style="color: #4caf50;"></i> 
-                                <strong>Date:</strong> ${localDate.toLocaleDateString('en-US', { 
-                                    weekday: 'long', 
-                                    year: 'numeric', 
-                                    month: 'long', 
-                                    day: 'numeric' 
-                                })}
-                            </div>
-                            <div class="schedule-info-item" style="background: #e8f5e8; border-color: #4caf50;">
-                                <i class="fas fa-clock" style="color: #4caf50;"></i> 
-                                <strong>Time:</strong> ${localDate.toLocaleTimeString('en-US', { 
-                                    hour: '2-digit', 
-                                    minute: '2-digit',
-                                    hour12: true
-                                })}
-                            </div>
-                        `;
-                    } else {
-                        scheduleInfo = `
-                            <div class="schedule-info-item" style="color: #6c757d; background: #f8f9fa;">
-                                <i class="fas fa-calendar-times"></i> 
-                                <strong>Date & Time:</strong> Not yet scheduled
-                            </div>
-                        `;
-                    }
+                const matchesList = document.createElement('div');
+                matchesList.className = 'matches-list';
 
-                    // Venue information from matches table
-                    let venueInfo = '';
-                    if (match.venue) {
-                        venueInfo = `
-                            <div class="schedule-info-item" style="background: #e3f2fd; border-color: #2196f3;">
-                                <i class="fas fa-map-marker-alt" style="color: #2196f3;"></i> 
-                                <strong>Venue:</strong> ${match.venue}
-                            </div>
-                        `;
-                    } else {
-                        venueInfo = `
-                            <div class="schedule-info-item" style="color: #6c757d; background: #f8f9fa;">
-                                <i class="fas fa-map-marker-alt"></i> 
-                                <strong>Venue:</strong> To be announced
-                            </div>
-                        `;
-                    }
-
-                    let resultInfo = '';
-                    if (match.status === 'completed' && match.winner_name) {
-                        resultInfo = `
-                            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin: 15px 0;">
-                                <div class="schedule-score-display">
-                                    ${match.team1_score !== null ? `${match.team1_score} - ${match.team2_score}` : 'Match Completed'}
-                                </div>
-                                <div class="schedule-winner-display">
-                                    <i class="fas fa-trophy"></i> Winner: ${match.winner_name}
-                                </div>
-                            </div>
-                        `;
-                    } else if (match.status === 'in_progress') {
-                        resultInfo = `
-                            <div class="schedule-info-item" style="color: #ffc107; background: #fff3cd; border-color: #ffeaa7;">
-                                <i class="fas fa-spinner fa-spin"></i> Match In Progress
-                            </div>
-                        `;
-                    } else if (match.status === 'scheduled') {
-                        if (match.match_date) {
-                            const matchDate = new Date(match.match_date);
-                            const now = new Date();
-                            if (matchDate > now) {
-                                resultInfo = `
-                                    <div class="schedule-info-item" style="color: #17a2b8; background: #d1ecf1; border-color: #bee5eb;">
-                                        <i class="fas fa-clock"></i> Scheduled - Ready to Play
-                                    </div>
-                                `;
-                            } else {
-                                resultInfo = `
-                                    <div class="schedule-info-item" style="color: #dc3545; background: #f8d7da; border-color: #f5c6cb;">
-                                        <i class="fas fa-exclamation-triangle"></i> Match Time Passed
-                                    </div>
-                                `;
-                            }
-                        } else {
-                            resultInfo = `
-                                <div class="schedule-info-item" style="color: #6c757d; background: #e9ecef; border-color: #dee2e6;">
-                                    <i class="fas fa-clock"></i> Awaiting Schedule
-                                </div>
-                            `;
-                        }
-                    }
-
-                    const matchCard = document.createElement('div');
-                    matchCard.className = 'schedule-match-card';
-                    matchCard.innerHTML = `
-                        <div class="schedule-teams-display">
-                            <div class="schedule-team ${isUserTeam1 ? 'schedule-user-team' : ''}">
-                                ${match.team1_name || 'TBD'}
-                                ${isUserTeam1 ? '<br><small style="color: #007bff;">(Your Team)</small>' : ''}
-                            </div>
-                            <div class="schedule-vs">VS</div>
-                            <div class="schedule-team ${isUserTeam2 ? 'schedule-user-team' : ''}">
-                                ${match.team2_name || 'TBD'}
-                                ${isUserTeam2 ? '<br><small style="color: #007bff;">(Your Team)</small>' : ''}
-                            </div>
-                        </div>
-                        ${resultInfo}
-                        <div class="schedule-match-info">
-                            ${scheduleInfo}
-                            ${venueInfo}
-                            ${match.match_number ? `
-                                <div class="schedule-info-item">
-                                    <i class="fas fa-hashtag"></i> 
-                                    <strong>Match #:</strong> ${match.match_number}
-                                </div>
-                            ` : ''}
-                            <div class="schedule-info-item">
-                                <i class="fas fa-flag"></i> 
-                                <strong>Round:</strong> ${match.round_number}
-                            </div>
-                            <div class="schedule-info-item">
-                                <i class="fas fa-info-circle"></i> 
-                                <strong>Status:</strong> 
-                                <span style="text-transform: capitalize; font-weight: 600; 
-                                    color: ${
-                                        match.status === 'completed' ? '#28a745' :
-                                        match.status === 'in_progress' ? '#ffc107' :
-                                        match.status === 'scheduled' ? '#17a2b8' : '#6c757d'
-                                    }">
-                                    ${match.status.replace('_', ' ')}
-                                </span>
-                            </div>
+                // Sort rounds numerically and display
+                Object.keys(rounds).sort((a, b) => a - b).forEach(roundNumber => {
+                    const roundSection = document.createElement('div');
+                    roundSection.className = 'round-section';
+                    
+                    roundSection.innerHTML = `
+                        <div class="round-header">
+                            <i class="fas fa-flag"></i> 
+                            Round ${roundNumber}
+                            <span style="font-size: 0.9rem; opacity: 0.9; margin-left: auto;">
+                                ${rounds[roundNumber].length} match${rounds[roundNumber].length !== 1 ? 'es' : ''}
+                            </span>
                         </div>
                     `;
 
-                    roundDiv.appendChild(matchCard);
+                    rounds[roundNumber].forEach(match => {
+                        const isUserTeam1 = userTeams.some(team => team.id === match.team1_id);
+                        const isUserTeam2 = userTeams.some(team => team.id === match.team2_id);
+
+                        // Format date and time
+                        let dateTimeInfo = '';
+                        if (match.match_date) {
+                            const matchDate = new Date(match.match_date);
+                            dateTimeInfo = `
+                                <div class="detail-card date-time-card">
+                                    <i class="fas fa-calendar-alt" style="color: #4caf50;"></i>
+                                    <div>
+                                        <strong>${matchDate.toLocaleDateString('en-US', { 
+                                            month: '2-digit', 
+                                            day: '2-digit', 
+                                            year: 'numeric' 
+                                        })}</strong>
+                                        <br>
+                                        <span>${matchDate.toLocaleTimeString('en-US', { 
+                                            hour: '2-digit', 
+                                            minute: '2-digit',
+                                            hour12: true
+                                        })}</span>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            dateTimeInfo = `
+                                <div class="detail-card date-time-card">
+                                    <i class="fas fa-calendar-times" style="color: #6c757d;"></i>
+                                    <div>
+                                        <strong>Date & Time</strong>
+                                        <br>
+                                        <span>Not yet scheduled</span>
+                                    </div>
+                                </div>
+                            `;
+                        }
+
+                        // Venue information
+                        let venueInfo = '';
+                        if (match.venue) {
+                            venueInfo = `
+                                <div class="detail-card venue-card">
+                                    <i class="fas fa-map-marker-alt" style="color: #2196f3;"></i>
+                                    <div>
+                                        <strong>Venue</strong>
+                                        <br>
+                                        <span>${match.venue}</span>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            venueInfo = `
+                                <div class="detail-card venue-card">
+                                    <i class="fas fa-map-marker-alt" style="color: #6c757d;"></i>
+                                    <div>
+                                        <strong>Venue</strong>
+                                        <br>
+                                        <span>To be announced</span>
+                                    </div>
+                                </div>
+                            `;
+                        }
+
+                        // Winner information
+                        let winnerInfo = '';
+                        if (match.status === 'completed' && match.winner_name) {
+                            const scoreDisplay = match.team1_score !== null ? `(${match.team1_score}-${match.team2_score})` : '';
+                            winnerInfo = `
+                                <div class="detail-card winner-card">
+                                    <i class="fas fa-trophy" style="color: #ffd700;"></i>
+                                    <div>
+                                        <strong>Winner</strong>
+                                        <br>
+                                        <span>${match.winner_name} ${scoreDisplay}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }
+
+                        const matchItem = document.createElement('div');
+                        matchItem.className = 'match-item';
+                        matchItem.innerHTML = `
+                            <div class="teams-display">
+                                <div class="team ${isUserTeam1 ? 'user-team' : ''}">
+                                    ${match.team1_name || 'TBD'}
+                                    ${isUserTeam1 ? '<br><small style="color: #007bff;">(Your Team)</small>' : ''}
+                                </div>
+                                <div class="vs">VS</div>
+                                <div class="team ${isUserTeam2 ? 'user-team' : ''}">
+                                    ${match.team2_name || 'TBD'}
+                                    ${isUserTeam2 ? '<br><small style="color: #007bff;">(Your Team)</small>' : ''}
+                                </div>
+                            </div>
+                            
+                            <div class="match-details">
+                                ${dateTimeInfo}
+                                ${venueInfo}
+                                ${winnerInfo}
+                            </div>
+                            
+                            <div class="match-meta">
+                                <div class="match-meta-item">
+                                    <i class="fas fa-hashtag"></i>
+                                    Match #${match.match_number || 'N/A'}
+                                </div>
+                                <div class="match-meta-item">
+                                    <i class="fas fa-flag"></i>
+                                    Round ${match.round_number}
+                                </div>
+                                <div class="match-meta-item" style="margin-left: auto;">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span style="text-transform: capitalize;">${match.status.replace('_', ' ')}</span>
+                                </div>
+                            </div>
+                        `;
+
+                        roundSection.appendChild(matchItem);
+                    });
+
+                    matchesList.appendChild(roundSection);
                 });
 
-                matchesContainer.appendChild(roundDiv);
+                bracketSection.appendChild(matchesList);
+                matchesContainer.appendChild(bracketSection);
             });
-
-            // If no matches found
-            if (matches.length === 0) {
-                matchesContainer.innerHTML = `
-                    <div class="schedule-no-brackets" style="margin: 20px 0;">
-                        <i class="far fa-calendar-times"></i>
-                        <h3>No Matches Created Yet</h3>
-                        <p>Matches for this tournament bracket have not been created yet.</p>
-                        <p>Please check back later for updates.</p>
-                    </div>
-                `;
-            }
         }
 
-        document.getElementById('backToBrackets').addEventListener('click', function() {
-            document.getElementById('matchesSection').style.display = 'none';
-            document.querySelector('.schedule-brackets-section').style.display = 'block';
-            
-            // Smooth scroll back to brackets
-            document.querySelector('.schedule-brackets-section').scrollIntoView({ 
-                behavior: 'smooth',
-                block: 'start'
-            });
-        });
+        function showNoMatchesMessage(message = 'No match schedules available yet.') {
+            const matchesContainer = document.getElementById('matchesContainer');
+            matchesContainer.innerHTML = `
+                <div class="schedule-no-matches">
+                    <i class="far fa-calendar-times"></i>
+                    <h3>No Match Schedules Available</h3>
+                    <p>${message}</p>
+                    <p>Check back later for tournament schedules.</p>
+                </div>
+            `;
+        }
 
-        // Add keyboard navigation
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && document.getElementById('matchesSection').style.display === 'block') {
-                document.getElementById('backToBrackets').click();
-            }
-        });
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </script>
 </body>
 </html>
