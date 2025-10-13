@@ -194,3 +194,64 @@ exports.getBracketMatches = async (req, res) => {
         });
     }
 };
+
+// Get all sports for an event (for navigation) - ADD THIS MISSING FUNCTION
+exports.getEventSports = async (req, res) => {
+    try {
+        const { eventId } = req.params;
+        
+        const [event] = await db.execute(
+            "SELECT sports, esports, other_activities FROM events WHERE id = ?",
+            [eventId]
+        );
+
+        if (event.length === 0) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+
+        const eventData = event[0];
+        const sports = [];
+
+        // Parse sports from event data
+        if (eventData.sports && eventData.sports !== 'none' && eventData.sports !== '') {
+            const sportsList = eventData.sports.split(',').map(sport => sport.trim());
+            sportsList.forEach(sport => {
+                if (sport && sport !== 'none' && sport !== '') {
+                    sports.push({
+                        type: 'sports',
+                        name: sport
+                    });
+                }
+            });
+        }
+
+        if (eventData.esports && eventData.esports !== 'none' && eventData.esports !== '') {
+            const esportsList = eventData.esports.split(',').map(esport => esport.trim());
+            esportsList.forEach(esport => {
+                if (esport && esport !== 'none' && esport !== '') {
+                    sports.push({
+                        type: 'esports',
+                        name: esport
+                    });
+                }
+            });
+        }
+
+        if (eventData.other_activities && eventData.other_activities !== 'none' && eventData.other_activities !== '') {
+            const activitiesList = eventData.other_activities.split(',').map(activity => activity.trim());
+            activitiesList.forEach(activity => {
+                if (activity && activity !== 'none' && activity !== '') {
+                    sports.push({
+                        type: 'other_activities',
+                        name: activity
+                    });
+                }
+            });
+        }
+
+        res.json({ sports });
+    } catch (error) {
+        console.error('Error getting event sports:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
