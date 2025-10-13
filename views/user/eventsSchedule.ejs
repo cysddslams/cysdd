@@ -9,12 +9,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
     <style>
+        /* RESET and ISOLATION - Prevent userEvents.css conflicts */
+        .schedule-isolated-page {
+            all: initial;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .schedule-isolated-page * {
+            box-sizing: border-box;
+        }
+
         /* Schedule-specific container to avoid conflicts */
         .schedule-main-container {
             padding: 20px;
             max-width: 1200px;
             margin: 70px auto 0 auto;
             min-height: calc(100vh - 70px);
+            background-color: #ffffff;
         }
 
         /* Renamed to avoid conflict with userEvents.css */
@@ -292,21 +303,24 @@
             margin-bottom: 10px;
         }
 
-        /* CRITICAL FIX: Use the existing sidebar classes from userEvents.css */
-        /* Remove all the !important overrides and use the existing classes properly */
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
+        /* OVERRIDE userEvents.css conflicts */
+        .schedule-isolated-page .dashboard-container {
+            margin-top: 0 !important;
+            margin-left: 0 !important;
+            padding: 0 !important;
+            background: transparent !important;
         }
 
-        body.sidebar-open .sidebar-overlay {
-            display: block;
+        .schedule-isolated-page .page-title {
+            margin-left: 0 !important;
+            border-bottom: none !important;
+            padding-bottom: 0 !important;
+            color: #333 !important;
+        }
+
+        .schedule-isolated-page .events-list,
+        .schedule-isolated-page .event-item {
+            display: none !important;
         }
 
         @media (max-width: 768px) {
@@ -344,10 +358,9 @@
                 min-height: calc(100vh - 55px);
             }
         }
-
     </style>
 </head>
-<body>
+<body class="schedule-isolated-page">
 
     <!-- Sidebar Overlay for Mobile -->
     <div class="sidebar-overlay" onclick="toggleNav()"></div>
@@ -396,10 +409,13 @@
         </div>
     </header>
 
-    <main class="schedule-main-container">
+    <!-- Main content wrapper -->
+    <div class="schedule-main-container">
         <!-- Page Header -->
         <div class="schedule-page-header">
-            <h2 class="page-title"><i class="fas fa-calendar-day"></i> Tournament Schedules</h2>
+            <h2 style="font-size: 2.2em; margin-bottom: 0; color: #333; display: flex; align-items: center;">
+                <i class="fas fa-calendar-day" style="margin-right: 12px; color: #007bff;"></i> Tournament Schedules
+            </h2>
             <a href="/events" class="schedule-back-btn">
                 <i class="fas fa-arrow-left"></i> Back to Events
             </a>
@@ -484,7 +500,7 @@
                 </button>
             </div>
         </section>
-    </main>
+    </div>
 
     <!-- Modal for logout confirmation -->
     <div id="logoutModal" class="modal">
