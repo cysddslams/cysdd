@@ -12,7 +12,7 @@
         .schedule-container {
             padding: 20px;
             max-width: 1200px;
-            margin: 70px auto 0 auto; /* Add top margin for fixed header */
+            margin: 70px auto 0 auto;
             min-height: calc(100vh - 70px);
         }
 
@@ -290,22 +290,65 @@
             margin-bottom: 10px;
         }
 
-        /* Fix for sidebar open state */
-        body.sidebar-open {
-            overflow: hidden;
+        /* CRITICAL FIX: Override sidebar styles to ensure they work */
+        #mySidebar.sidebar {
+            height: 100% !important;
+            width: 240px !important;
+            position: fixed !important;
+            top: 70px !important;
+            left: -240px !important;
+            background-color: #ffffff !important;
+            z-index: 1000 !important;
+            padding-top: 20px !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.2) !important;
+            overflow-y: auto !important;
         }
 
-        body.sidebar-open .sidebar {
-            left: 0;
-        }
-
-        /* Ensure sidebar is above other content */
-        .sidebar {
-            z-index: 1000;
+        #mySidebar.sidebar.open {
+            left: 0 !important;
         }
 
         .sidebar-btn {
-            z-index: 1001;
+            font-size: 18px !important;
+            color: white !important;
+            background-color: #8B0039 !important;
+            padding: 8px 12px !important;
+            cursor: pointer !important;
+            position: fixed !important;
+            top: 15px !important;
+            left: 15px !important;
+            z-index: 1001 !important;
+            border-radius: 5px !important;
+            transition: transform 0.3s ease !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+            border: none !important;
+        }
+
+        .sidebar-btn:hover {
+            transform: scale(1.1) !important;
+            background-color: #8B0039 !important;
+        }
+
+        /* Ensure body doesn't scroll when sidebar is open */
+        body.sidebar-open {
+            overflow: hidden !important;
+        }
+
+        /* Overlay for mobile when sidebar is open */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        body.sidebar-open .sidebar-overlay {
+            display: block;
         }
 
         @media (max-width: 768px) {
@@ -335,6 +378,12 @@
                 margin-top: 60px;
                 min-height: calc(100vh - 60px);
             }
+
+            #mySidebar.sidebar {
+                top: 60px !important;
+                width: 220px !important;
+                left: -220px !important;
+            }
         }
 
         @media (max-width: 480px) {
@@ -342,11 +391,20 @@
                 margin-top: 55px;
                 min-height: calc(100vh - 55px);
             }
+
+            #mySidebar.sidebar {
+                top: 55px !important;
+                width: 220px !important;
+                left: -220px !important;
+            }
         }
 
     </style>
 </head>
 <body>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" onclick="toggleNav()"></div>
 
     <!-- Sidebar Menu -->
     <div id="mySidebar" class="sidebar">
@@ -374,7 +432,6 @@
             <span class="slams-title">SLAMS</span>
         </div>
 
-        <!-- FIXED: Moved dropdown INSIDE user-profile div -->
         <div class="user-profile">
             <% if (user.profile) { %>
                 <img src="<%= user.profile %>" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; cursor: pointer;">
@@ -382,7 +439,6 @@
                 <i class="fas fa-user-shield" style="font-size: 24px; cursor: pointer;"></i>
             <% } %>
             
-            <!-- Dropdown menu now INSIDE user-profile -->
             <div class="dropdown-content">
                 <a href="/profile">
                     <i class="fas fa-cogs" style="margin-right: 8px;"></i> Profile
@@ -494,38 +550,40 @@
     </div>
 
     <script>
-        // Sidebar functionality - FIXED VERSION
+        // Sidebar functionality - COMPLETELY FIXED VERSION
         let isSidebarOpen = false;
 
         function toggleNav() {
             const sidebar = document.getElementById("mySidebar");
             const sidebarBtn = document.querySelector(".sidebar-btn");
+            const body = document.body;
 
             console.log('Toggle sidebar clicked, current state:', isSidebarOpen);
 
             if (isSidebarOpen) {
                 // Close sidebar
-                sidebar.style.left = "-240px";
-                document.body.classList.remove("sidebar-open");
+                sidebar.classList.remove("open");
+                body.classList.remove("sidebar-open");
                 sidebarBtn.innerHTML = "&#9776;";
                 isSidebarOpen = false;
             } else {
                 // Open sidebar
-                sidebar.style.left = "0";
-                document.body.classList.add("sidebar-open");
+                sidebar.classList.add("open");
+                body.classList.add("sidebar-open");
                 sidebarBtn.innerHTML = "&#9776;";
                 isSidebarOpen = true;
             }
         }
 
-        // Close sidebar when clicking outside on mobile
+        // Close sidebar when clicking overlay on mobile
         document.addEventListener('click', function(event) {
             const sidebar = document.getElementById("mySidebar");
             const sidebarBtn = document.querySelector(".sidebar-btn");
+            const overlay = document.querySelector('.sidebar-overlay');
             
             if (isSidebarOpen && window.innerWidth <= 768) {
-                if (!sidebar.contains(event.target) && !sidebarBtn.contains(event.target)) {
-                    sidebar.style.left = "-240px";
+                if (event.target === overlay) {
+                    sidebar.classList.remove("open");
                     document.body.classList.remove("sidebar-open");
                     sidebarBtn.innerHTML = "&#9776;";
                     isSidebarOpen = false;
@@ -560,7 +618,6 @@
 
         // Hide dropdown when leaving both profile and dropdown
         userProfile.addEventListener('mouseleave', (e) => {
-            // Check if we're moving to the dropdown
             if (!dropdown.contains(e.relatedTarget)) {
                 hideTimeout = setTimeout(() => {
                     dropdown.style.display = 'none';
@@ -575,7 +632,6 @@
 
         // Hide dropdown when leaving it
         dropdown.addEventListener('mouseleave', (e) => {
-            // Check if we're moving to the profile
             if (!userProfile.contains(e.relatedTarget)) {
                 hideTimeout = setTimeout(() => {
                     dropdown.style.display = 'none';
@@ -647,7 +703,6 @@
                     displayMatches(data.matches, data.bracket);
                     currentBracketId = bracketId;
                     
-                    // Show matches section, hide brackets
                     document.getElementById('matchesSection').style.display = 'block';
                     document.querySelector('.brackets-section').style.display = 'none';
                 } else {
@@ -661,7 +716,6 @@
 
         // Display matches
         function displayMatches(matches, bracket) {
-            // Update bracket header
             const bracketHeader = document.getElementById('bracketHeader');
             bracketHeader.innerHTML = `
                 <h3>${bracket.sport_type} - ${bracket.bracket_type.replace('_', ' ').toUpperCase()} Tournament</h3>
@@ -674,7 +728,6 @@
                 </div>
             `;
 
-            // Group matches by round
             const rounds = {};
             matches.forEach(match => {
                 if (!rounds[match.round_number]) {
@@ -686,7 +739,6 @@
             const matchesContainer = document.getElementById('matchesContainer');
             matchesContainer.innerHTML = '';
 
-            // Display each round
             Object.keys(rounds).sort((a, b) => a - b).forEach(roundNumber => {
                 const roundDiv = document.createElement('div');
                 roundDiv.className = 'round';
@@ -696,7 +748,6 @@
                     const isUserTeam1 = userTeams.some(team => team.id === match.team1_id);
                     const isUserTeam2 = userTeams.some(team => team.id === match.team2_id);
                     
-                    // Format date if available
                     let dateInfo = '';
                     if (match.match_date) {
                         const matchDate = new Date(match.match_date);
@@ -718,7 +769,6 @@
                         `;
                     }
 
-                    // Score and winner info
                     let resultInfo = '';
                     if (match.status === 'completed' && match.winner_name) {
                         resultInfo = `
@@ -764,7 +814,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Page loaded, sidebar initialized');
             const sidebar = document.getElementById("mySidebar");
-            sidebar.style.left = "-240px"; // Ensure sidebar starts closed
+            sidebar.classList.remove("open");
+            document.body.classList.remove("sidebar-open");
         });
     </script>
 </body>
