@@ -12,8 +12,8 @@
         .schedule-container {
             padding: 20px;
             max-width: 1200px;
-            margin: 0 auto;
-            min-height: 100vh;
+            margin: 70px auto 0 auto; /* Add top margin for fixed header */
+            min-height: calc(100vh - 70px);
         }
 
         .page-header {
@@ -290,53 +290,6 @@
             margin-bottom: 10px;
         }
 
-        /* Fix for dropdown positioning */
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 100%;
-            background-color: white;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1000;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .dropdown-content.show {
-            display: block;
-        }
-
-        .dropdown-content a {
-            color: #333;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            transition: background-color 0.3s;
-        }
-
-        .dropdown-content a:hover {
-            background-color: #f1f1f1;
-        }
-
-        /* Fix for header positioning */
-        .header {
-            position: relative;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .user-profile {
-            position: relative;
-            cursor: pointer;
-        }
-
         @media (max-width: 768px) {
             .brackets-grid {
                 grid-template-columns: 1fr;
@@ -360,15 +313,23 @@
                 grid-template-columns: 1fr;
             }
             
-            .dropdown-content {
-                right: 10px;
-                left: auto;
+            .schedule-container {
+                margin-top: 60px;
+                min-height: calc(100vh - 60px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .schedule-container {
+                margin-top: 55px;
+                min-height: calc(100vh - 55px);
             }
         }
 
     </style>
 </head>
 <body>
+
     <!-- Sidebar Menu -->
     <div id="mySidebar" class="sidebar">
         <a href="/homepage"><i class="fas fa-home"></i> Home</a>
@@ -395,15 +356,16 @@
             <span class="slams-title">SLAMS</span>
         </div>
 
-        <div class="user-profile" style="position: relative;">
+        <!-- FIXED: Moved dropdown INSIDE user-profile div -->
+        <div class="user-profile">
             <% if (user.profile) { %>
                 <img src="<%= user.profile %>" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; cursor: pointer;">
             <% } else { %>
                 <i class="fas fa-user-shield" style="font-size: 24px; cursor: pointer;"></i>
             <% } %>
             
-            <!-- Dropdown Menu -->
-            <div class="dropdown-content" id="profileDropdown">
+            <!-- Dropdown menu now INSIDE user-profile -->
+            <div class="dropdown-content">
                 <a href="/profile">
                     <i class="fas fa-cogs" style="margin-right: 8px;"></i> Profile
                 </a>
@@ -514,7 +476,7 @@
     </div>
 
     <script>
-        // Sidebar and Profile Dropdown Functionality
+        // Sidebar functionality
         let isSidebarOpen = false;
 
         function toggleNav() {
@@ -547,32 +509,38 @@
             }
         }
 
-        // Profile Dropdown Functionality
+        // Profile dropdown functionality
         const userProfile = document.querySelector('.user-profile');
-        const dropdown = document.getElementById('profileDropdown');
+        const dropdown = userProfile.querySelector('.dropdown-content');
         let hideTimeout;
 
+        // Show dropdown when hovering profile
         userProfile.addEventListener('mouseenter', () => {
             clearTimeout(hideTimeout);
-            dropdown.classList.add('show');
+            dropdown.style.display = 'block';
         });
 
+        // Hide dropdown when leaving both profile and dropdown
         userProfile.addEventListener('mouseleave', (e) => {
+            // Check if we're moving to the dropdown
             if (!dropdown.contains(e.relatedTarget)) {
                 hideTimeout = setTimeout(() => {
-                    dropdown.classList.remove('show');
+                    dropdown.style.display = 'none';
                 }, 300);
             }
         });
 
+        // Keep dropdown visible when hovering over it
         dropdown.addEventListener('mouseenter', () => {
             clearTimeout(hideTimeout);
         });
 
+        // Hide dropdown when leaving it
         dropdown.addEventListener('mouseleave', (e) => {
+            // Check if we're moving to the profile
             if (!userProfile.contains(e.relatedTarget)) {
                 hideTimeout = setTimeout(() => {
-                    dropdown.classList.remove('show');
+                    dropdown.style.display = 'none';
                 }, 300);
             }
         });
@@ -581,7 +549,7 @@
         userProfile.addEventListener('click', (e) => {
             if (window.innerWidth <= 767) {
                 e.stopPropagation();
-                dropdown.classList.toggle('show');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
             }
         });
         
@@ -589,12 +557,12 @@
         document.addEventListener('click', (e) => {
             if (window.innerWidth <= 767 && 
                 !userProfile.contains(e.target) && 
-                dropdown.classList.contains('show')) {
-                dropdown.classList.remove('show');
+                dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
             }
         });
 
-        // Logout Modal Functionality
+        // Logout modal functionality
         function showLogoutModal() {
             document.getElementById('logoutModal').style.display = 'block';
         }
