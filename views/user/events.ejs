@@ -8,6 +8,53 @@
     <link rel="stylesheet" href="/styles/userEvents.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+<style>
+/* Event Actions Styles */
+.event-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 8px 12px;
+    text-align: center;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.view-btn {
+    background: #007bff;
+    color: white;
+    border: 1px solid #007bff;
+}
+
+.view-btn:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+}
+
+.schedule-btn {
+    background: #28a745;
+    color: white;
+    border: 1px solid #28a745;
+}
+
+.schedule-btn:hover {
+    background: #1e7e34;
+    transform: translateY(-2px);
+}
+</style>
 </head>
 <body>
 
@@ -97,9 +144,15 @@
                                     <span class="event-date">
                                         Posted: <%= new Date(event.created_at).toLocaleDateString() %>
                                     </span>
-                                    <span class="view-btn">
-                                        View Event <i class="fas fa-chevron-right" style="margin-left: 5px;"></i>
-                                    </span>
+                                    <!-- Add this inside the event-details div, after the event-footer -->
+                                    <div class="event-actions">
+                                        <a href="/event-details/<%= event.id %>" class="action-btn view-btn">
+                                            <i class="fas fa-info-circle"></i> Details
+                                        </a>
+                                        <a href="/event-schedule/<%= event.id %>" class="action-btn schedule-btn">
+                                            <i class="fas fa-calendar-day"></i> Schedules
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </a>
@@ -250,3 +303,4 @@
 </body>
 
 </html>
+
