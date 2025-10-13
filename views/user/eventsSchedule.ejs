@@ -9,14 +9,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
     <style>
-        .schedule-container {
+        /* Schedule-specific container to avoid conflicts */
+        .schedule-main-container {
             padding: 20px;
             max-width: 1200px;
             margin: 70px auto 0 auto;
             min-height: calc(100vh - 70px);
         }
 
-        .page-header {
+        /* Renamed to avoid conflict with userEvents.css */
+        .schedule-page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -25,7 +27,7 @@
             border-bottom: 2px solid #007bff;
         }
 
-        .back-btn {
+        .schedule-back-btn {
             background: #6c757d;
             color: white;
             padding: 10px 20px;
@@ -37,12 +39,12 @@
             transition: all 0.3s ease;
         }
 
-        .back-btn:hover {
+        .schedule-back-btn:hover {
             background: #545b62;
             transform: translateY(-2px);
         }
 
-        .event-hero {
+        .schedule-event-hero {
             background: linear-gradient(135deg, #007bff, #0056b3);
             color: white;
             padding: 30px;
@@ -51,30 +53,30 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
-        .event-hero h1 {
+        .schedule-event-hero h1 {
             margin: 0 0 10px 0;
             font-size: 2.2rem;
         }
 
-        .event-meta {
+        .schedule-event-meta {
             display: flex;
             gap: 20px;
             flex-wrap: wrap;
             margin-top: 15px;
         }
 
-        .meta-item {
+        .schedule-meta-item {
             display: flex;
             align-items: center;
             gap: 8px;
             font-size: 0.95rem;
         }
 
-        .brackets-section {
+        .schedule-brackets-section {
             margin-bottom: 40px;
         }
 
-        .section-title {
+        .schedule-section-title {
             color: #333;
             font-size: 1.8rem;
             margin-bottom: 20px;
@@ -82,14 +84,14 @@
             border-bottom: 2px solid #007bff;
         }
 
-        .brackets-grid {
+        .schedule-brackets-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
 
-        .bracket-card {
+        .schedule-bracket-card {
             background: white;
             border-radius: 12px;
             padding: 25px;
@@ -101,7 +103,7 @@
             overflow: hidden;
         }
 
-        .bracket-card::before {
+        .schedule-bracket-card::before {
             content: '';
             position: absolute;
             top: 0;
@@ -111,18 +113,18 @@
             background: linear-gradient(to bottom, #28a745, #1e7e34);
         }
 
-        .bracket-card:hover {
+        .schedule-bracket-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
 
-        .bracket-card h3 {
+        .schedule-bracket-card h3 {
             color: #333;
             margin-bottom: 10px;
             font-size: 1.3rem;
         }
 
-        .bracket-info {
+        .schedule-bracket-info {
             color: #666;
             margin: 8px 0;
             display: flex;
@@ -130,12 +132,12 @@
             gap: 8px;
         }
 
-        .bracket-info i {
+        .schedule-bracket-info i {
             color: #007bff;
             width: 16px;
         }
 
-        .bracket-status {
+        .schedule-bracket-status {
             display: inline-block;
             padding: 4px 12px;
             border-radius: 20px;
@@ -144,22 +146,22 @@
             margin-top: 10px;
         }
 
-        .status-completed {
+        .schedule-status-completed {
             background: #d4edda;
             color: #155724;
         }
 
-        .status-ongoing {
+        .schedule-status-ongoing {
             background: #fff3cd;
             color: #856404;
         }
 
-        .matches-section {
+        .schedule-matches-section {
             display: none;
             margin-top: 30px;
         }
 
-        .matches-container {
+        .schedule-matches-container {
             background: white;
             padding: 30px;
             border-radius: 12px;
@@ -167,7 +169,7 @@
             border: 1px solid #e0e0e0;
         }
 
-        .bracket-header {
+        .schedule-bracket-header {
             background: linear-gradient(135deg, #28a745, #1e7e34);
             color: white;
             padding: 20px;
@@ -175,16 +177,16 @@
             margin-bottom: 25px;
         }
 
-        .bracket-header h3 {
+        .schedule-bracket-header h3 {
             margin: 0 0 10px 0;
             font-size: 1.5rem;
         }
 
-        .round {
+        .schedule-round {
             margin-bottom: 35px;
         }
 
-        .round-header {
+        .schedule-round-header {
             background: #007bff;
             color: white;
             padding: 15px 20px;
@@ -194,7 +196,7 @@
             font-size: 1.1rem;
         }
 
-        .match-card {
+        .schedule-match-card {
             background: #f8f9fa;
             border: 1px solid #e0e0e0;
             border-radius: 10px;
@@ -203,18 +205,18 @@
             transition: all 0.3s ease;
         }
 
-        .match-card:hover {
+        .schedule-match-card:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        .teams-display {
+        .schedule-teams-display {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
         }
 
-        .team {
+        .schedule-team {
             flex: 1;
             text-align: center;
             padding: 10px;
@@ -222,13 +224,13 @@
             color: #333;
         }
 
-        .user-team {
+        .schedule-user-team {
             background: #e3f2fd;
             border: 2px solid #007bff;
             border-radius: 6px;
         }
 
-        .vs {
+        .schedule-vs {
             margin: 0 15px;
             font-weight: bold;
             color: #666;
@@ -238,7 +240,7 @@
             border: 1px solid #ddd;
         }
 
-        .match-info {
+        .schedule-match-info {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 10px;
@@ -247,7 +249,7 @@
             border-top: 1px solid #e9ecef;
         }
 
-        .info-item {
+        .schedule-info-item {
             display: flex;
             align-items: center;
             gap: 8px;
@@ -255,7 +257,7 @@
             font-size: 0.9rem;
         }
 
-        .score-display {
+        .schedule-score-display {
             background: #e9ecef;
             padding: 8px 15px;
             border-radius: 6px;
@@ -264,7 +266,7 @@
             text-align: center;
         }
 
-        .winner-display {
+        .schedule-winner-display {
             background: #d4edda;
             color: #155724;
             padding: 8px 15px;
@@ -273,69 +275,25 @@
             text-align: center;
         }
 
-        .no-brackets {
+        .schedule-no-brackets {
             text-align: center;
             padding: 60px 20px;
             color: #666;
         }
 
-        .no-brackets i {
+        .schedule-no-brackets i {
             font-size: 4rem;
             margin-bottom: 20px;
             color: #ddd;
         }
 
-        .no-brackets h3 {
+        .schedule-no-brackets h3 {
             color: #333;
             margin-bottom: 10px;
         }
 
-        /* CRITICAL FIX: Override sidebar styles to ensure they work */
-        #mySidebar.sidebar {
-            height: 100% !important;
-            width: 240px !important;
-            position: fixed !important;
-            top: 70px !important;
-            left: -240px !important;
-            background-color: #ffffff !important;
-            z-index: 1000 !important;
-            padding-top: 20px !important;
-            transition: all 0.3s ease !important;
-            box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.2) !important;
-            overflow-y: auto !important;
-        }
-
-        #mySidebar.sidebar.open {
-            left: 0 !important;
-        }
-
-        .sidebar-btn {
-            font-size: 18px !important;
-            color: white !important;
-            background-color: #8B0039 !important;
-            padding: 8px 12px !important;
-            cursor: pointer !important;
-            position: fixed !important;
-            top: 15px !important;
-            left: 15px !important;
-            z-index: 1001 !important;
-            border-radius: 5px !important;
-            transition: transform 0.3s ease !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
-            border: none !important;
-        }
-
-        .sidebar-btn:hover {
-            transform: scale(1.1) !important;
-            background-color: #8B0039 !important;
-        }
-
-        /* Ensure body doesn't scroll when sidebar is open */
-        body.sidebar-open {
-            overflow: hidden !important;
-        }
-
-        /* Overlay for mobile when sidebar is open */
+        /* CRITICAL FIX: Use the existing sidebar classes from userEvents.css */
+        /* Remove all the !important overrides and use the existing classes properly */
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -352,50 +310,38 @@
         }
 
         @media (max-width: 768px) {
-            .brackets-grid {
+            .schedule-brackets-grid {
                 grid-template-columns: 1fr;
             }
             
-            .teams-display {
+            .schedule-teams-display {
                 flex-direction: column;
                 gap: 10px;
             }
             
-            .vs {
+            .schedule-vs {
                 margin: 10px 0;
             }
             
-            .event-meta {
+            .schedule-event-meta {
                 flex-direction: column;
                 gap: 10px;
             }
             
-            .match-info {
+            .schedule-match-info {
                 grid-template-columns: 1fr;
             }
             
-            .schedule-container {
+            .schedule-main-container {
                 margin-top: 60px;
                 min-height: calc(100vh - 60px);
-            }
-
-            #mySidebar.sidebar {
-                top: 60px !important;
-                width: 220px !important;
-                left: -220px !important;
             }
         }
 
         @media (max-width: 480px) {
-            .schedule-container {
+            .schedule-main-container {
                 margin-top: 55px;
                 min-height: calc(100vh - 55px);
-            }
-
-            #mySidebar.sidebar {
-                top: 55px !important;
-                width: 220px !important;
-                left: -220px !important;
             }
         }
 
@@ -406,7 +352,7 @@
     <!-- Sidebar Overlay for Mobile -->
     <div class="sidebar-overlay" onclick="toggleNav()"></div>
 
-    <!-- Sidebar Menu -->
+    <!-- Sidebar Menu - Using existing classes from userEvents.css -->
     <div id="mySidebar" class="sidebar">
         <a href="/homepage"><i class="fas fa-home"></i> Home</a>
         <a href="/posts"><i class="fas fa-newspaper"></i> Posts</a>
@@ -421,7 +367,7 @@
         </div>
     </div>
 
-    <!-- Sidebar toggle button -->
+    <!-- Sidebar toggle button - Using existing class from userEvents.css -->
     <span class="sidebar-btn" onclick="toggleNav()">&#9776;</span>
 
     <header class="header">
@@ -450,31 +396,31 @@
         </div>
     </header>
 
-    <main class="schedule-container">
+    <main class="schedule-main-container">
         <!-- Page Header -->
-        <div class="page-header">
+        <div class="schedule-page-header">
             <h2 class="page-title"><i class="fas fa-calendar-day"></i> Tournament Schedules</h2>
-            <a href="/events" class="back-btn">
+            <a href="/events" class="schedule-back-btn">
                 <i class="fas fa-arrow-left"></i> Back to Events
             </a>
         </div>
 
         <!-- Event Hero Section -->
-        <div class="event-hero">
+        <div class="schedule-event-hero">
             <h1><%= event.title %></h1>
             <% if (event.description) { %>
                 <p style="margin: 0; opacity: 0.9;"><%= event.description %></p>
             <% } %>
-            <div class="event-meta">
-                <div class="meta-item">
+            <div class="schedule-event-meta">
+                <div class="schedule-meta-item">
                     <i class="fas fa-calendar-alt"></i>
                     <%= new Date(event.date_schedule).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %>
                 </div>
-                <div class="meta-item">
+                <div class="schedule-meta-item">
                     <i class="fas fa-clock"></i>
                     <%= new Date(event.date_schedule).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) %>
                 </div>
-                <div class="meta-item">
+                <div class="schedule-meta-item">
                     <i class="fas fa-map-marker-alt"></i>
                     <%= event.location %>
                 </div>
@@ -482,40 +428,40 @@
         </div>
 
         <!-- Brackets Section -->
-        <section class="brackets-section">
-            <h3 class="section-title"><i class="fas fa-trophy"></i> Tournament Brackets</h3>
+        <section class="schedule-brackets-section">
+            <h3 class="schedule-section-title"><i class="fas fa-trophy"></i> Tournament Brackets</h3>
             
             <% if (brackets && brackets.length > 0) { %>
-                <div class="brackets-grid" id="bracketsGrid">
+                <div class="schedule-brackets-grid" id="bracketsGrid">
                     <% brackets.forEach(bracket => { %>
-                        <div class="bracket-card" data-bracket-id="<%= bracket.id %>">
+                        <div class="schedule-bracket-card" data-bracket-id="<%= bracket.id %>">
                             <h3><%= bracket.sport_type %></h3>
-                            <div class="bracket-info">
+                            <div class="schedule-bracket-info">
                                 <i class="fas fa-chess-board"></i>
                                 <span><%= bracket.bracket_type.replace('_', ' ').toUpperCase() %> Tournament</span>
                             </div>
-                            <div class="bracket-info">
+                            <div class="schedule-bracket-info">
                                 <i class="fas fa-flag"></i>
                                 <span>Current Round: <%= bracket.current_round || 1 %></span>
                             </div>
-                            <div class="bracket-info">
+                            <div class="schedule-bracket-info">
                                 <i class="fas fa-calendar"></i>
                                 <span>Created: <%= new Date(bracket.created_at).toLocaleDateString() %></span>
                             </div>
                             <% if (bracket.champion_name) { %>
-                                <div class="bracket-info">
+                                <div class="schedule-bracket-info">
                                     <i class="fas fa-trophy"></i>
                                     <span>Champion: <%= bracket.champion_name %></span>
                                 </div>
                             <% } %>
-                            <div class="bracket-status status-<%= bracket.is_completed ? 'completed' : 'ongoing' %>">
+                            <div class="schedule-bracket-status schedule-status-<%= bracket.is_completed ? 'completed' : 'ongoing' %>">
                                 <%= bracket.is_completed ? 'Completed' : 'In Progress' %>
                             </div>
                         </div>
                     <% }); %>
                 </div>
             <% } else { %>
-                <div class="no-brackets">
+                <div class="schedule-no-brackets">
                     <i class="far fa-calendar-times"></i>
                     <h3>No Tournament Schedules Available</h3>
                     <p>Tournament brackets have not been created for this event yet.</p>
@@ -525,15 +471,15 @@
         </section>
 
         <!-- Matches Section -->
-        <section id="matchesSection" class="matches-section">
-            <div class="matches-container">
-                <div id="bracketHeader" class="bracket-header">
+        <section id="matchesSection" class="schedule-matches-section">
+            <div class="schedule-matches-container">
+                <div id="bracketHeader" class="schedule-bracket-header">
                     <!-- Dynamic content will be loaded here -->
                 </div>
                 <div id="matchesContainer">
                     <!-- Dynamic matches will be loaded here -->
                 </div>
-                <button id="backToBrackets" class="back-btn" style="margin-top: 20px;">
+                <button id="backToBrackets" class="schedule-back-btn" style="margin-top: 20px;">
                     <i class="fas fa-arrow-left"></i> Back to Brackets
                 </button>
             </div>
@@ -550,26 +496,25 @@
     </div>
 
     <script>
-        // Sidebar functionality - COMPLETELY FIXED VERSION
+        // Sidebar functionality - Using the existing implementation from userEvents.css
         let isSidebarOpen = false;
 
         function toggleNav() {
             const sidebar = document.getElementById("mySidebar");
             const sidebarBtn = document.querySelector(".sidebar-btn");
-            const body = document.body;
 
             console.log('Toggle sidebar clicked, current state:', isSidebarOpen);
 
             if (isSidebarOpen) {
-                // Close sidebar
-                sidebar.classList.remove("open");
-                body.classList.remove("sidebar-open");
+                // Close sidebar - using the CSS from userEvents.css
+                sidebar.style.left = "-240px";
+                document.body.classList.remove("sidebar-open");
                 sidebarBtn.innerHTML = "&#9776;";
                 isSidebarOpen = false;
             } else {
-                // Open sidebar
-                sidebar.classList.add("open");
-                body.classList.add("sidebar-open");
+                // Open sidebar - using the CSS from userEvents.css
+                sidebar.style.left = "0";
+                document.body.classList.add("sidebar-open");
                 sidebarBtn.innerHTML = "&#9776;";
                 isSidebarOpen = true;
             }
@@ -583,7 +528,7 @@
             
             if (isSidebarOpen && window.innerWidth <= 768) {
                 if (event.target === overlay) {
-                    sidebar.classList.remove("open");
+                    sidebar.style.left = "-240px";
                     document.body.classList.remove("sidebar-open");
                     sidebarBtn.innerHTML = "&#9776;";
                     isSidebarOpen = false;
@@ -605,56 +550,12 @@
             }
         }
 
-        // Profile dropdown functionality
+        // Profile dropdown functionality - Using existing CSS from userEvents.css
         const userProfile = document.querySelector('.user-profile');
         const dropdown = userProfile.querySelector('.dropdown-content');
-        let hideTimeout;
 
-        // Show dropdown when hovering profile
-        userProfile.addEventListener('mouseenter', () => {
-            clearTimeout(hideTimeout);
-            dropdown.style.display = 'block';
-        });
-
-        // Hide dropdown when leaving both profile and dropdown
-        userProfile.addEventListener('mouseleave', (e) => {
-            if (!dropdown.contains(e.relatedTarget)) {
-                hideTimeout = setTimeout(() => {
-                    dropdown.style.display = 'none';
-                }, 300);
-            }
-        });
-
-        // Keep dropdown visible when hovering over it
-        dropdown.addEventListener('mouseenter', () => {
-            clearTimeout(hideTimeout);
-        });
-
-        // Hide dropdown when leaving it
-        dropdown.addEventListener('mouseleave', (e) => {
-            if (!userProfile.contains(e.relatedTarget)) {
-                hideTimeout = setTimeout(() => {
-                    dropdown.style.display = 'none';
-                }, 300);
-            }
-        });
-        
-        // Touch support for dropdown on mobile
-        userProfile.addEventListener('click', (e) => {
-            if (window.innerWidth <= 767) {
-                e.stopPropagation();
-                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-            }
-        });
-        
-        // Close dropdown when tapping outside on mobile
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 767 && 
-                !userProfile.contains(e.target) && 
-                dropdown.style.display === 'block') {
-                dropdown.style.display = 'none';
-            }
-        });
+        // The dropdown functionality is handled by CSS in userEvents.css:
+        // .user-profile:hover .dropdown-content, .dropdown-content.show { display: block; }
 
         // Logout modal functionality
         function showLogoutModal() {
@@ -686,7 +587,7 @@
         const userTeams = <%= JSON.stringify(userTeams) %>;
 
         // Bracket card click handler
-        document.querySelectorAll('.bracket-card').forEach(card => {
+        document.querySelectorAll('.schedule-bracket-card').forEach(card => {
             card.addEventListener('click', function() {
                 const bracketId = this.dataset.bracketId;
                 loadBracketMatches(bracketId);
@@ -704,7 +605,7 @@
                     currentBracketId = bracketId;
                     
                     document.getElementById('matchesSection').style.display = 'block';
-                    document.querySelector('.brackets-section').style.display = 'none';
+                    document.querySelector('.schedule-brackets-section').style.display = 'none';
                 } else {
                     alert('Error loading bracket matches');
                 }
@@ -721,7 +622,7 @@
                 <h3>${bracket.sport_type} - ${bracket.bracket_type.replace('_', ' ').toUpperCase()} Tournament</h3>
                 <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px;">
                     <span><i class="fas fa-flag"></i> Current Round: ${bracket.current_round || 1}</span>
-                    <span class="bracket-status status-${bracket.is_completed ? 'completed' : 'ongoing'}">
+                    <span class="schedule-bracket-status schedule-status-${bracket.is_completed ? 'completed' : 'ongoing'}">
                         ${bracket.is_completed ? 'Completed' : 'In Progress'}
                     </span>
                     ${bracket.champion_name ? `<span><i class="fas fa-trophy"></i> Champion: ${bracket.champion_name}</span>` : ''}
@@ -741,8 +642,8 @@
 
             Object.keys(rounds).sort((a, b) => a - b).forEach(roundNumber => {
                 const roundDiv = document.createElement('div');
-                roundDiv.className = 'round';
-                roundDiv.innerHTML = `<div class="round-header"><i class="fas fa-flag"></i> Round ${roundNumber}</div>`;
+                roundDiv.className = 'schedule-round';
+                roundDiv.innerHTML = `<div class="schedule-round-header"><i class="fas fa-flag"></i> Round ${roundNumber}</div>`;
                 
                 rounds[roundNumber].forEach(match => {
                     const isUserTeam1 = userTeams.some(team => team.id === match.team1_id);
@@ -752,7 +653,7 @@
                     if (match.match_date) {
                         const matchDate = new Date(match.match_date);
                         dateInfo = `
-                            <div class="info-item">
+                            <div class="schedule-info-item">
                                 <i class="fas fa-calendar"></i> 
                                 ${matchDate.toLocaleDateString()} 
                                 <i class="fas fa-clock" style="margin-left: 10px;"></i>
@@ -763,7 +664,7 @@
 
                     if (match.venue) {
                         dateInfo += `
-                            <div class="info-item">
+                            <div class="schedule-info-item">
                                 <i class="fas fa-map-marker-alt"></i> ${match.venue}
                             </div>
                         `;
@@ -772,29 +673,29 @@
                     let resultInfo = '';
                     if (match.status === 'completed' && match.winner_name) {
                         resultInfo = `
-                            <div class="score-display">
+                            <div class="schedule-score-display">
                                 ${match.team1_score !== null ? `${match.team1_score} - ${match.team2_score}` : 'Match Completed'}
                             </div>
-                            <div class="winner-display">
+                            <div class="schedule-winner-display">
                                 <i class="fas fa-trophy"></i> Winner: ${match.winner_name}
                             </div>
                         `;
                     } else if (match.status === 'in_progress') {
-                        resultInfo = `<div class="info-item" style="color: #ffc107;"><i class="fas fa-spinner"></i> In Progress</div>`;
+                        resultInfo = `<div class="schedule-info-item" style="color: #ffc107;"><i class="fas fa-spinner"></i> In Progress</div>`;
                     } else if (match.status === 'scheduled') {
-                        resultInfo = `<div class="info-item" style="color: #17a2b8;"><i class="fas fa-clock"></i> Scheduled</div>`;
+                        resultInfo = `<div class="schedule-info-item" style="color: #17a2b8;"><i class="fas fa-clock"></i> Scheduled</div>`;
                     }
 
                     const matchCard = document.createElement('div');
-                    matchCard.className = 'match-card';
+                    matchCard.className = 'schedule-match-card';
                     matchCard.innerHTML = `
-                        <div class="teams-display">
-                            <div class="team ${isUserTeam1 ? 'user-team' : ''}">${match.team1_name || 'TBD'}</div>
-                            <div class="vs">VS</div>
-                            <div class="team ${isUserTeam2 ? 'user-team' : ''}">${match.team2_name || 'TBD'}</div>
+                        <div class="schedule-teams-display">
+                            <div class="schedule-team ${isUserTeam1 ? 'schedule-user-team' : ''}">${match.team1_name || 'TBD'}</div>
+                            <div class="schedule-vs">VS</div>
+                            <div class="schedule-team ${isUserTeam2 ? 'schedule-user-team' : ''}">${match.team2_name || 'TBD'}</div>
                         </div>
                         ${resultInfo ? `<div style="margin: 15px 0;">${resultInfo}</div>` : ''}
-                        ${dateInfo ? `<div class="match-info">${dateInfo}</div>` : ''}
+                        ${dateInfo ? `<div class="schedule-match-info">${dateInfo}</div>` : ''}
                     `;
                     
                     roundDiv.appendChild(matchCard);
@@ -807,14 +708,14 @@
         // Back to brackets button
         document.getElementById('backToBrackets').addEventListener('click', function() {
             document.getElementById('matchesSection').style.display = 'none';
-            document.querySelector('.brackets-section').style.display = 'block';
+            document.querySelector('.schedule-brackets-section').style.display = 'block';
         });
 
         // Initialize sidebar on page load
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Page loaded, sidebar initialized');
             const sidebar = document.getElementById("mySidebar");
-            sidebar.classList.remove("open");
+            sidebar.style.left = "-240px"; // Ensure sidebar starts closed
             document.body.classList.remove("sidebar-open");
         });
     </script>
