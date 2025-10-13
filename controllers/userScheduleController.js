@@ -10,6 +10,8 @@ exports.getEventSchedule = async (req, res) => {
         const eventId = req.params.eventId;
         const userId = req.session.user.id;
 
+        console.log('Loading event schedule for event:', eventId, 'user:', userId);
+
         // Get event details
         const [events] = await db.execute(
             "SELECT * FROM events WHERE id = ? AND status = 'ongoing'",
@@ -17,13 +19,15 @@ exports.getEventSchedule = async (req, res) => {
         );
 
         if (events.length === 0) {
+            console.log('Event not found or expired:', eventId);
             req.flash('error', 'Event not found or has expired');
             return res.redirect('/events');
         }
 
         const event = events[0];
+        console.log('Event found:', event.title);
 
-        // Get all brackets for this event with enhanced match counts
+        // Get all brackets for this event
         const [brackets] = await db.execute(
             `SELECT 
                 tb.id,
@@ -43,33 +47,45 @@ exports.getEventSchedule = async (req, res) => {
             [eventId]
         );
 
+        console.log('Found brackets:', brackets.length);
+
         // Get enhanced match counts for each bracket
         const bracketsWithMatchCounts = await Promise.all(
             brackets.map(async (bracket) => {
-                // Get total matches count
-                const [totalMatches] = await db.execute(
-                    "SELECT COUNT(*) as count FROM matches WHERE bracket_id = ?",
-                    [bracket.id]
-                );
-                
-                // Get scheduled matches count (with date and venue)
-                const [scheduledMatches] = await db.execute(
-                    "SELECT COUNT(*) as count FROM matches WHERE bracket_id = ? AND match_date IS NOT NULL AND venue IS NOT NULL",
-                    [bracket.id]
-                );
+                try {
+                    // Get total matches count
+                    const [totalMatches] = await db.execute(
+                        "SELECT COUNT(*) as count FROM matches WHERE bracket_id = ?",
+                        [bracket.id]
+                    );
+                    
+                    // Get scheduled matches count (with date and venue)
+                    const [scheduledMatches] = await db.execute(
+                        "SELECT COUNT(*) as count FROM matches WHERE bracket_id = ? AND match_date IS NOT NULL",
+                        [bracket.id]
+                    );
 
-                // Get completed matches count
-                const [completedMatches] = await db.execute(
-                    "SELECT COUNT(*) as count FROM matches WHERE bracket_id = ? AND status = 'completed'",
-                    [bracket.id]
-                );
+                    // Get completed matches count
+                    const [completedMatches] = await db.execute(
+                        "SELECT COUNT(*) as count FROM matches WHERE bracket_id = ? AND status = 'completed'",
+                        [bracket.id]
+                    );
 
-                return {
-                    ...bracket,
-                    total_matches: totalMatches[0].count,
-                    scheduled_matches: scheduledMatches[0].count,
-                    completed_matches: completedMatches[0].count
-                };
+                    return {
+                        ...bracket,
+                        total_matches: totalMatches[0].count,
+                        scheduled_matches: scheduledMatches[0].count,
+                        completed_matches: completedMatches[0].count
+                    };
+                } catch (error) {
+                    console.error(`Error getting match counts for bracket ${bracket.id}:`, error);
+                    return {
+                        ...bracket,
+                        total_matches: 0,
+                        scheduled_matches: 0,
+                        completed_matches: 0
+                    };
+                }
             })
         );
 
@@ -81,6 +97,8 @@ exports.getEventSchedule = async (req, res) => {
              WHERE tp.user_id = ? AND t.event_id = ? AND tp.status = 'confirmed'`,
             [userId, eventId]
         );
+
+        console.log('User teams found:', userTeams.length);
 
         res.render('user/eventsSchedule', {
             user: req.session.user,
@@ -102,7 +120,9 @@ exports.getBracketMatches = async (req, res) => {
     try {
         const { bracketId } = req.params;
         
-        // Get matches with team names and winner info - FIXED QUERY
+        console.log('Fetching matches for bracket:', bracketId);
+
+        // Get matches with team names and winner info
         const [matches] = await db.execute(
             `SELECT 
                 m.id,
@@ -133,6 +153,8 @@ exports.getBracketMatches = async (req, res) => {
             [bracketId]
         );
 
+        console.log(`Found ${matches.length} matches for bracket ${bracketId}`);
+
         // Get bracket info with event details
         const [bracket] = await db.execute(
             `SELECT 
@@ -152,6 +174,7 @@ exports.getBracketMatches = async (req, res) => {
         );
 
         if (bracket.length === 0) {
+            console.log('Bracket not found:', bracketId);
             return res.status(404).json({ 
                 success: false, 
                 error: 'Bracket not found' 
@@ -167,68 +190,7 @@ exports.getBracketMatches = async (req, res) => {
         console.error('Error getting bracket matches:', error);
         res.status(500).json({ 
             success: false,
-            error: 'Internal server error' 
+            error: 'Internal server error: ' + error.message
         });
-    }
-};
-
-// Get all sports for an event (for navigation)
-exports.getEventSports = async (req, res) => {
-    try {
-        const { eventId } = req.params;
-        
-        const [event] = await db.execute(
-            "SELECT sports, esports, other_activities FROM events WHERE id = ?",
-            [eventId]
-        );
-
-        if (event.length === 0) {
-            return res.status(404).json({ error: 'Event not found' });
-        }
-
-        const eventData = event[0];
-        const sports = [];
-
-        // Parse sports from event data
-        if (eventData.sports && eventData.sports !== 'none' && eventData.sports !== '') {
-            const sportsList = eventData.sports.split(',').map(sport => sport.trim());
-            sportsList.forEach(sport => {
-                if (sport && sport !== 'none' && sport !== '') {
-                    sports.push({
-                        type: 'sports',
-                        name: sport
-                    });
-                }
-            });
-        }
-
-        if (eventData.esports && eventData.esports !== 'none' && eventData.esports !== '') {
-            const esportsList = eventData.esports.split(',').map(esport => esport.trim());
-            esportsList.forEach(esport => {
-                if (esport && esport !== 'none' && esport !== '') {
-                    sports.push({
-                        type: 'esports',
-                        name: esport
-                    });
-                }
-            });
-        }
-
-        if (eventData.other_activities && eventData.other_activities !== 'none' && eventData.other_activities !== '') {
-            const activitiesList = eventData.other_activities.split(',').map(activity => activity.trim());
-            activitiesList.forEach(activity => {
-                if (activity && activity !== 'none' && activity !== '') {
-                    sports.push({
-                        type: 'other_activities',
-                        name: activity
-                    });
-                }
-            });
-        }
-
-        res.json({ sports });
-    } catch (error) {
-        console.error('Error getting event sports:', error);
-        res.status(500).json({ error: 'Internal server error' });
     }
 };
