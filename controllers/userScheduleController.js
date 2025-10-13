@@ -23,13 +23,21 @@ exports.getEventSchedule = async (req, res) => {
 
         const event = events[0];
 
-        // Get all brackets for this event
+        // Get all brackets for this event with match count and scheduled matches info
         const [brackets] = await db.execute(
-            `SELECT tb.*, tp.current_round, tp.is_completed, t.teamName as champion_name
+            `SELECT 
+                tb.*, 
+                tp.current_round, 
+                tp.is_completed, 
+                t.teamName as champion_name,
+                COUNT(m.id) as total_matches,
+                SUM(CASE WHEN m.match_date IS NOT NULL THEN 1 ELSE 0 END) as scheduled_matches
              FROM tournament_brackets tb
              LEFT JOIN tournament_progress tp ON tb.id = tp.bracket_id
              LEFT JOIN team t ON tp.champion_team_id = t.id
+             LEFT JOIN matches m ON tb.id = m.bracket_id
              WHERE tb.event_id = ?
+             GROUP BY tb.id
              ORDER BY tb.created_at DESC`,
             [eventId]
         );
@@ -58,31 +66,53 @@ exports.getEventSchedule = async (req, res) => {
     }
 };
 
-// Use the same function as admin for getting bracket matches
+// Get bracket matches with individual match schedules
 exports.getBracketMatches = async (req, res) => {
     try {
         const { bracketId } = req.params;
         
+        // Get matches with team names and winner info
         const [matches] = await db.execute(
-            `SELECT m.*, t1.teamName as team1_name, t2.teamName as team2_name, 
-                    winner.teamName as winner_name
+            `SELECT 
+                m.*, 
+                t1.teamName as team1_name, 
+                t2.teamName as team2_name, 
+                winner.teamName as winner_name
              FROM matches m
              LEFT JOIN team t1 ON m.team1_id = t1.id
              LEFT JOIN team t2 ON m.team2_id = t2.id
              LEFT JOIN team winner ON m.winner_team_id = winner.id
              WHERE m.bracket_id = ?
-             ORDER BY m.round_number, m.match_number`,
+             ORDER BY 
+                 m.round_number ASC, 
+                 m.match_number ASC`,
             [bracketId]
         );
 
+        // Get bracket info with event details
         const [bracket] = await db.execute(
-            `SELECT tb.*, e.title as event_name, tp.current_round, tp.is_completed, tp.total_rounds
+            `SELECT 
+                tb.*, 
+                e.title as event_name, 
+                e.location as event_location,
+                tp.current_round, 
+                tp.is_completed,
+                tp.champion_team_id,
+                t.teamName as champion_name
              FROM tournament_brackets tb
              LEFT JOIN events e ON tb.event_id = e.id
              LEFT JOIN tournament_progress tp ON tb.id = tp.bracket_id
+             LEFT JOIN team t ON tp.champion_team_id = t.id
              WHERE tb.id = ?`,
             [bracketId]
         );
+
+        if (bracket.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Bracket not found' 
+            });
+        }
 
         res.json({ 
             success: true, 
@@ -91,6 +121,9 @@ exports.getBracketMatches = async (req, res) => {
         });
     } catch (error) {
         console.error('Error getting bracket matches:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ 
+            success: false,
+            error: 'Internal server error' 
+        });
     }
 };
