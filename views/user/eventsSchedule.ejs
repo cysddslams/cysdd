@@ -496,228 +496,230 @@
     </div>
 
     <script>
-        // Sidebar functionality - Using the existing implementation from userEvents.css
-        let isSidebarOpen = false;
+    // SIDEBAR FUNCTIONALITY
+    let isSidebarOpen = false;
 
-        function toggleNav() {
-            const sidebar = document.getElementById("mySidebar");
-            const sidebarBtn = document.querySelector(".sidebar-btn");
+    function toggleNav() {
+        const sidebar = document.getElementById("mySidebar");
+        const sidebarBtn = document.querySelector(".sidebar-btn");
 
-            console.log('Toggle sidebar clicked, current state:', isSidebarOpen);
-
-            if (isSidebarOpen) {
-                // Close sidebar - using the CSS from userEvents.css
-                sidebar.style.left = "-240px";
-                document.body.classList.remove("sidebar-open");
-                sidebarBtn.innerHTML = "&#9776;";
-                isSidebarOpen = false;
-            } else {
-                // Open sidebar - using the CSS from userEvents.css
-                sidebar.style.left = "0";
-                document.body.classList.add("sidebar-open");
-                sidebarBtn.innerHTML = "&#9776;";
-                isSidebarOpen = true;
-            }
-        }
-
-        // Close sidebar when clicking overlay on mobile
-        document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById("mySidebar");
-            const sidebarBtn = document.querySelector(".sidebar-btn");
-            const overlay = document.querySelector('.sidebar-overlay');
-            
-            if (isSidebarOpen && window.innerWidth <= 768) {
-                if (event.target === overlay) {
-                    sidebar.style.left = "-240px";
-                    document.body.classList.remove("sidebar-open");
-                    sidebarBtn.innerHTML = "&#9776;";
-                    isSidebarOpen = false;
-                }
-            }
-        });
-
-        // Toggle the sub-sidebar under "Team"
-        function toggleSubSidebar() {
-            const subSidebar = document.getElementById("subSidebar");
-            const teamLink = document.querySelector(".team-link");
-
-            if (subSidebar.style.display === "block") {
-                subSidebar.style.display = "none";
-                teamLink.classList.remove("active");
-            } else {
-                subSidebar.style.display = "block";
-                teamLink.classList.add("active");
-            }
-        }
-
-        // Profile dropdown functionality - Using existing CSS from userEvents.css
-        const userProfile = document.querySelector('.user-profile');
-        const dropdown = userProfile.querySelector('.dropdown-content');
-
-        // The dropdown functionality is handled by CSS in userEvents.css:
-        // .user-profile:hover .dropdown-content, .dropdown-content.show { display: block; }
-
-        // Logout modal functionality
-        function showLogoutModal() {
-            document.getElementById('logoutModal').style.display = 'block';
-        }
-
-        function hideLogoutModal() {
-            document.getElementById('logoutModal').style.display = 'none';
-        }
-
-        document.getElementById('confirmLogout').addEventListener('click', function() {
-            window.location.href = '/logout';  
-        });
-
-        document.getElementById('cancelLogout').addEventListener('click', function() {
-            hideLogoutModal(); 
-        });
-
-        // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
-            const modal = document.getElementById('logoutModal');
-            if (event.target === modal) {
-                hideLogoutModal();
-            }
-        });
-
-        // Tournament Schedule Functionality
-        let currentBracketId = null;
-        const userTeams = <%= JSON.stringify(userTeams) %>;
-
-        // Bracket card click handler
-        document.querySelectorAll('.schedule-bracket-card').forEach(card => {
-            card.addEventListener('click', function() {
-                const bracketId = this.dataset.bracketId;
-                loadBracketMatches(bracketId);
-            });
-        });
-
-        // Load bracket matches
-        async function loadBracketMatches(bracketId) {
-            try {
-                const response = await fetch(`/event-schedule/bracket/${bracketId}/matches`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    displayMatches(data.matches, data.bracket);
-                    currentBracketId = bracketId;
-                    
-                    document.getElementById('matchesSection').style.display = 'block';
-                    document.querySelector('.schedule-brackets-section').style.display = 'none';
-                } else {
-                    alert('Error loading bracket matches');
-                }
-            } catch (error) {
-                console.error('Error loading matches:', error);
-                alert('Error loading matches');
-            }
-        }
-
-        // Display matches
-        function displayMatches(matches, bracket) {
-            const bracketHeader = document.getElementById('bracketHeader');
-            bracketHeader.innerHTML = `
-                <h3>${bracket.sport_type} - ${bracket.bracket_type.replace('_', ' ').toUpperCase()} Tournament</h3>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px;">
-                    <span><i class="fas fa-flag"></i> Current Round: ${bracket.current_round || 1}</span>
-                    <span class="schedule-bracket-status schedule-status-${bracket.is_completed ? 'completed' : 'ongoing'}">
-                        ${bracket.is_completed ? 'Completed' : 'In Progress'}
-                    </span>
-                    ${bracket.champion_name ? `<span><i class="fas fa-trophy"></i> Champion: ${bracket.champion_name}</span>` : ''}
-                </div>
-            `;
-
-            const rounds = {};
-            matches.forEach(match => {
-                if (!rounds[match.round_number]) {
-                    rounds[match.round_number] = [];
-                }
-                rounds[match.round_number].push(match);
-            });
-
-            const matchesContainer = document.getElementById('matchesContainer');
-            matchesContainer.innerHTML = '';
-
-            Object.keys(rounds).sort((a, b) => a - b).forEach(roundNumber => {
-                const roundDiv = document.createElement('div');
-                roundDiv.className = 'schedule-round';
-                roundDiv.innerHTML = `<div class="schedule-round-header"><i class="fas fa-flag"></i> Round ${roundNumber}</div>`;
-                
-                rounds[roundNumber].forEach(match => {
-                    const isUserTeam1 = userTeams.some(team => team.id === match.team1_id);
-                    const isUserTeam2 = userTeams.some(team => team.id === match.team2_id);
-                    
-                    let dateInfo = '';
-                    if (match.match_date) {
-                        const matchDate = new Date(match.match_date);
-                        dateInfo = `
-                            <div class="schedule-info-item">
-                                <i class="fas fa-calendar"></i> 
-                                ${matchDate.toLocaleDateString()} 
-                                <i class="fas fa-clock" style="margin-left: 10px;"></i>
-                                ${matchDate.toLocaleTimeString()}
-                            </div>
-                        `;
-                    }
-
-                    if (match.venue) {
-                        dateInfo += `
-                            <div class="schedule-info-item">
-                                <i class="fas fa-map-marker-alt"></i> ${match.venue}
-                            </div>
-                        `;
-                    }
-
-                    let resultInfo = '';
-                    if (match.status === 'completed' && match.winner_name) {
-                        resultInfo = `
-                            <div class="schedule-score-display">
-                                ${match.team1_score !== null ? `${match.team1_score} - ${match.team2_score}` : 'Match Completed'}
-                            </div>
-                            <div class="schedule-winner-display">
-                                <i class="fas fa-trophy"></i> Winner: ${match.winner_name}
-                            </div>
-                        `;
-                    } else if (match.status === 'in_progress') {
-                        resultInfo = `<div class="schedule-info-item" style="color: #ffc107;"><i class="fas fa-spinner"></i> In Progress</div>`;
-                    } else if (match.status === 'scheduled') {
-                        resultInfo = `<div class="schedule-info-item" style="color: #17a2b8;"><i class="fas fa-clock"></i> Scheduled</div>`;
-                    }
-
-                    const matchCard = document.createElement('div');
-                    matchCard.className = 'schedule-match-card';
-                    matchCard.innerHTML = `
-                        <div class="schedule-teams-display">
-                            <div class="schedule-team ${isUserTeam1 ? 'schedule-user-team' : ''}">${match.team1_name || 'TBD'}</div>
-                            <div class="schedule-vs">VS</div>
-                            <div class="schedule-team ${isUserTeam2 ? 'schedule-user-team' : ''}">${match.team2_name || 'TBD'}</div>
-                        </div>
-                        ${resultInfo ? `<div style="margin: 15px 0;">${resultInfo}</div>` : ''}
-                        ${dateInfo ? `<div class="schedule-match-info">${dateInfo}</div>` : ''}
-                    `;
-                    
-                    roundDiv.appendChild(matchCard);
-                });
-                
-                matchesContainer.appendChild(roundDiv);
-            });
-        }
-
-        // Back to brackets button
-        document.getElementById('backToBrackets').addEventListener('click', function() {
-            document.getElementById('matchesSection').style.display = 'none';
-            document.querySelector('.schedule-brackets-section').style.display = 'block';
-        });
-
-        // Initialize sidebar on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page loaded, sidebar initialized');
-            const sidebar = document.getElementById("mySidebar");
-            sidebar.style.left = "-240px"; // Ensure sidebar starts closed
+        if (isSidebarOpen) {
+            // Close sidebar
+            sidebar.style.left = "-240px";
             document.body.classList.remove("sidebar-open");
+            sidebarBtn.innerHTML = "&#9776;";
+            isSidebarOpen = false;
+        } else {
+            // Open sidebar
+            sidebar.style.left = "0";
+            document.body.classList.add("sidebar-open");
+            sidebarBtn.innerHTML = "&times;"; // Change to close icon for clarity
+            isSidebarOpen = true;
+        }
+    }
+
+    // Close sidebar when clicking overlay
+    document.querySelector('.sidebar-overlay').addEventListener('click', () => {
+        const sidebar = document.getElementById("mySidebar");
+        const sidebarBtn = document.querySelector(".sidebar-btn");
+        sidebar.style.left = "-240px";
+        document.body.classList.remove("sidebar-open");
+        sidebarBtn.innerHTML = "&#9776;";
+        isSidebarOpen = false;
+    });
+
+    // TOGGLE SUB-SIDEBAR
+    function toggleSubSidebar() {
+        const subSidebar = document.getElementById("subSidebar");
+        const teamLink = document.querySelector(".team-link");
+
+        subSidebar.classList.toggle("active");
+        if (subSidebar.classList.contains("active")) {
+            subSidebar.style.display = "block";
+            teamLink.classList.add("active");
+        } else {
+            subSidebar.style.display = "none";
+            teamLink.classList.remove("active");
+        }
+    }
+
+    // PROFILE DROPDOWN FIX
+    const userProfile = document.querySelector('.user-profile');
+    const dropdown = userProfile.querySelector('.dropdown-content');
+
+    let dropdownTimeout;
+
+    userProfile.addEventListener('mouseenter', () => {
+        clearTimeout(dropdownTimeout);
+        dropdown.classList.add('show');
+    });
+
+    userProfile.addEventListener('mouseleave', () => {
+        dropdownTimeout = setTimeout(() => {
+            dropdown.classList.remove('show');
+        }, 300); // adds 300ms delay before hiding
+    });
+
+    dropdown.addEventListener('mouseenter', () => {
+        clearTimeout(dropdownTimeout);
+        dropdown.classList.add('show');
+    });
+
+    dropdown.addEventListener('mouseleave', () => {
+        dropdownTimeout = setTimeout(() => {
+            dropdown.classList.remove('show');
+        }, 300);
+    });
+
+    // LOGOUT MODAL
+    function showLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'block';
+    }
+
+    function hideLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'none';
+    }
+
+    document.getElementById('confirmLogout').addEventListener('click', function() {
+        window.location.href = '/logout';
+    });
+
+    document.getElementById('cancelLogout').addEventListener('click', hideLogoutModal);
+
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('logoutModal');
+        if (event.target === modal) hideLogoutModal();
+    });
+
+    // TOURNAMENT LOGIC (unchanged)
+    let currentBracketId = null;
+    const userTeams = <%= JSON.stringify(userTeams) %>;
+
+    document.querySelectorAll('.schedule-bracket-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const bracketId = this.dataset.bracketId;
+            loadBracketMatches(bracketId);
         });
-    </script>
+    });
+
+    async function loadBracketMatches(bracketId) {
+        try {
+            const response = await fetch(`/event-schedule/bracket/${bracketId}/matches`);
+            const data = await response.json();
+
+            if (data.success) {
+                displayMatches(data.matches, data.bracket);
+                currentBracketId = bracketId;
+
+                document.getElementById('matchesSection').style.display = 'block';
+                document.querySelector('.schedule-brackets-section').style.display = 'none';
+            } else {
+                alert('Error loading bracket matches');
+            }
+        } catch (error) {
+            console.error('Error loading matches:', error);
+            alert('Error loading matches');
+        }
+    }
+
+    function displayMatches(matches, bracket) {
+        const bracketHeader = document.getElementById('bracketHeader');
+        bracketHeader.innerHTML = `
+            <h3>${bracket.sport_type} - ${bracket.bracket_type.replace('_', ' ').toUpperCase()} Tournament</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px;">
+                <span><i class="fas fa-flag"></i> Current Round: ${bracket.current_round || 1}</span>
+                <span class="schedule-bracket-status schedule-status-${bracket.is_completed ? 'completed' : 'ongoing'}">
+                    ${bracket.is_completed ? 'Completed' : 'In Progress'}
+                </span>
+                ${bracket.champion_name ? `<span><i class="fas fa-trophy"></i> Champion: ${bracket.champion_name}</span>` : ''}
+            </div>
+        `;
+
+        const rounds = {};
+        matches.forEach(match => {
+            if (!rounds[match.round_number]) rounds[match.round_number] = [];
+            rounds[match.round_number].push(match);
+        });
+
+        const matchesContainer = document.getElementById('matchesContainer');
+        matchesContainer.innerHTML = '';
+
+        Object.keys(rounds).sort((a, b) => a - b).forEach(roundNumber => {
+            const roundDiv = document.createElement('div');
+            roundDiv.className = 'schedule-round';
+            roundDiv.innerHTML = `<div class="schedule-round-header"><i class="fas fa-flag"></i> Round ${roundNumber}</div>`;
+
+            rounds[roundNumber].forEach(match => {
+                const isUserTeam1 = userTeams.some(team => team.id === match.team1_id);
+                const isUserTeam2 = userTeams.some(team => team.id === match.team2_id);
+
+                let dateInfo = '';
+                if (match.match_date) {
+                    const matchDate = new Date(match.match_date);
+                    dateInfo = `
+                        <div class="schedule-info-item">
+                            <i class="fas fa-calendar"></i> 
+                            ${matchDate.toLocaleDateString()} 
+                            <i class="fas fa-clock" style="margin-left: 10px;"></i>
+                            ${matchDate.toLocaleTimeString()}
+                        </div>
+                    `;
+                }
+
+                if (match.venue) {
+                    dateInfo += `
+                        <div class="schedule-info-item">
+                            <i class="fas fa-map-marker-alt"></i> ${match.venue}
+                        </div>
+                    `;
+                }
+
+                let resultInfo = '';
+                if (match.status === 'completed' && match.winner_name) {
+                    resultInfo = `
+                        <div class="schedule-score-display">
+                            ${match.team1_score !== null ? `${match.team1_score} - ${match.team2_score}` : 'Match Completed'}
+                        </div>
+                        <div class="schedule-winner-display">
+                            <i class="fas fa-trophy"></i> Winner: ${match.winner_name}
+                        </div>
+                    `;
+                } else if (match.status === 'in_progress') {
+                    resultInfo = `<div class="schedule-info-item" style="color: #ffc107;"><i class="fas fa-spinner"></i> In Progress</div>`;
+                } else if (match.status === 'scheduled') {
+                    resultInfo = `<div class="schedule-info-item" style="color: #17a2b8;"><i class="fas fa-clock"></i> Scheduled</div>`;
+                }
+
+                const matchCard = document.createElement('div');
+                matchCard.className = 'schedule-match-card';
+                matchCard.innerHTML = `
+                    <div class="schedule-teams-display">
+                        <div class="schedule-team ${isUserTeam1 ? 'schedule-user-team' : ''}">${match.team1_name || 'TBD'}</div>
+                        <div class="schedule-vs">VS</div>
+                        <div class="schedule-team ${isUserTeam2 ? 'schedule-user-team' : ''}">${match.team2_name || 'TBD'}</div>
+                    </div>
+                    ${resultInfo ? `<div style="margin: 15px 0;">${resultInfo}</div>` : ''}
+                    ${dateInfo ? `<div class="schedule-match-info">${dateInfo}</div>` : ''}
+                `;
+
+                roundDiv.appendChild(matchCard);
+            });
+
+            matchesContainer.appendChild(roundDiv);
+        });
+    }
+
+    document.getElementById('backToBrackets').addEventListener('click', function() {
+        document.getElementById('matchesSection').style.display = 'none';
+        document.querySelector('.schedule-brackets-section').style.display = 'block';
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById("mySidebar");
+        sidebar.style.left = "-240px";
+        document.body.classList.remove("sidebar-open");
+    });
+</script>
+
 </body>
 </html>
