@@ -3,115 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Events Schedule</title>
+    <title>Tournament Schedule - <%= event.title %></title>
     <link rel="stylesheet" href="/styles/frontpage.css">
     <link rel="stylesheet" href="/styles/userEvents.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* RESET and ISOLATION - Prevent userEvents.css conflicts */
         .schedule-isolated-page {
             all: initial;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background: #f8fafc;
         }
         
         .schedule-isolated-page * {
             box-sizing: border-box;
         }
 
-        /* Schedule-specific container to avoid conflicts */
+        /* Main container */
         .schedule-main-container {
-            padding: 20px;
+            padding: 30px 20px;
             max-width: 1200px;
-            margin: 70px auto 0 auto;
-            min-height: calc(100vh - 70px);
-            background-color: #ffffff;
+            margin: 80px auto 0 auto;
+            min-height: calc(100vh - 80px);
+            background: transparent;
         }
 
-        /* Renamed to avoid conflict with userEvents.css */
+        /* Page Header */
         .schedule-page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #007bff;
+            margin-bottom: 40px;
+            padding: 0 10px;
+        }
+
+        .schedule-title-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .schedule-title-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        .schedule-title-text {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
         }
 
         .schedule-back-btn {
-            background: #6c757d;
+            background: linear-gradient(135deg, #6c757d, #495057);
             color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
+            padding: 12px 25px;
+            border-radius: 10px;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
         }
 
         .schedule-back-btn:hover {
-            background: #545b62;
-            transform: translateY(-2px);
+            background: linear-gradient(135deg, #495057, #343a40);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
         }
 
+        /* Event Hero Section */
         .schedule-event-hero {
             background: linear-gradient(135deg, #007bff, #0056b3);
             color: white;
-            padding: 30px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 30px rgba(0, 123, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .schedule-event-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
         }
 
         .schedule-event-hero h1 {
-            margin: 0 0 10px 0;
-            font-size: 2.2rem;
+            margin: 0 0 15px 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+            position: relative;
+        }
+
+        .schedule-event-description {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin: 0 0 25px 0;
+            line-height: 1.6;
         }
 
         .schedule-event-meta {
             display: flex;
-            gap: 20px;
+            gap: 30px;
             flex-wrap: wrap;
-            margin-top: 15px;
+            position: relative;
         }
 
         .schedule-meta-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.95rem;
+            gap: 12px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
         }
 
+        .schedule-meta-item i {
+            font-size: 1.2rem;
+        }
+
+        /* Brackets Section */
         .schedule-brackets-section {
-            margin-bottom: 40px;
+            margin-bottom: 50px;
         }
 
         .schedule-section-title {
-            color: #333;
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #007bff;
+            color: #2c3e50;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #007bff;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .schedule-section-title i {
+            color: #007bff;
         }
 
         .schedule-brackets-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
             margin-bottom: 30px;
         }
 
         .schedule-bracket-card {
             background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            border: 1px solid #e0e0e0;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e8ecef;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            border-left: 6px solid #28a745;
         }
 
         .schedule-bracket-card::before {
@@ -119,54 +195,63 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 5px;
-            height: 100%;
-            background: linear-gradient(to bottom, #28a745, #1e7e34);
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #28a745, #1e7e34);
         }
 
         .schedule-bracket-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
         }
 
         .schedule-bracket-card h3 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            font-weight: 600;
         }
 
         .schedule-bracket-info {
-            color: #666;
-            margin: 8px 0;
+            color: #5a6c7d;
+            margin: 12px 0;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            font-size: 0.95rem;
         }
 
         .schedule-bracket-info i {
             color: #007bff;
-            width: 16px;
+            width: 18px;
+            text-align: center;
+            font-size: 1.1rem;
         }
 
         .schedule-bracket-status {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.85rem;
             font-weight: 600;
-            margin-top: 10px;
+            margin-top: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .schedule-status-completed {
             background: #d4edda;
             color: #155724;
+            border: 2px solid #c3e6cb;
         }
 
         .schedule-status-ongoing {
             background: #fff3cd;
             color: #856404;
+            border: 2px solid #ffeaa7;
         }
 
+        /* Matches Section */
         .schedule-matches-section {
             display: none;
             margin-top: 30px;
@@ -174,132 +259,170 @@
 
         .schedule-matches-container {
             background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            border: 1px solid #e0e0e0;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e8ecef;
         }
 
         .schedule-bracket-header {
             background: linear-gradient(135deg, #28a745, #1e7e34);
             color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.2);
         }
 
         .schedule-bracket-header h3 {
-            margin: 0 0 10px 0;
-            font-size: 1.5rem;
+            margin: 0 0 15px 0;
+            font-size: 1.8rem;
+            font-weight: 600;
         }
 
         .schedule-round {
-            margin-bottom: 35px;
+            margin-bottom: 40px;
         }
 
         .schedule-round-header {
-            background: #007bff;
+            background: linear-gradient(135deg, #007bff, #0056b3);
             color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: bold;
-            font-size: 1.1rem;
+            padding: 18px 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .schedule-match-card {
             background: #f8f9fa;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
+            border: 1px solid #e8ecef;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
             transition: all 0.3s ease;
+            border-left: 4px solid #007bff;
         }
 
         .schedule-match-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            transform: translateX(5px);
         }
 
         .schedule-teams-display {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .schedule-team {
             flex: 1;
             text-align: center;
-            padding: 10px;
+            padding: 15px;
             font-weight: 600;
-            color: #333;
+            color: #2c3e50;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
 
         .schedule-user-team {
-            background: #e3f2fd;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
             border: 2px solid #007bff;
-            border-radius: 6px;
+            color: #007bff;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
         }
 
         .schedule-vs {
-            margin: 0 15px;
+            margin: 0 20px;
             font-weight: bold;
-            color: #666;
-            background: #fff;
-            padding: 5px 12px;
+            color: #6c757d;
+            background: white;
+            padding: 8px 16px;
             border-radius: 20px;
-            border: 1px solid #ddd;
+            border: 2px solid #e9ecef;
+            font-size: 0.9rem;
         }
 
         .schedule-match-info {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            margin-top: 15px;
-            padding-top: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
             border-top: 1px solid #e9ecef;
         }
 
         .schedule-info-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            color: #666;
-            font-size: 0.9rem;
+            gap: 10px;
+            color: #5a6c7d;
+            font-size: 0.95rem;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
         }
 
         .schedule-score-display {
-            background: #e9ecef;
-            padding: 8px 15px;
-            border-radius: 6px;
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            color: #2c3e50;
+            padding: 10px 20px;
+            border-radius: 8px;
             font-weight: bold;
-            color: #333;
             text-align: center;
+            font-size: 1.1rem;
+            border: 2px solid #ced4da;
         }
 
         .schedule-winner-display {
-            background: #d4edda;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
             color: #155724;
-            padding: 8px 15px;
-            border-radius: 6px;
+            padding: 12px 20px;
+            border-radius: 8px;
             font-weight: bold;
             text-align: center;
+            font-size: 1.1rem;
+            border: 2px solid #b1dfbb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
+        /* Empty State */
         .schedule-no-brackets {
             text-align: center;
-            padding: 60px 20px;
-            color: #666;
+            padding: 80px 40px;
+            color: #6c757d;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
         }
 
         .schedule-no-brackets i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            color: #ddd;
+            font-size: 5rem;
+            margin-bottom: 25px;
+            color: #dee2e6;
+            opacity: 0.7;
         }
 
         .schedule-no-brackets h3 {
-            color: #333;
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .schedule-no-brackets p {
+            font-size: 1.1rem;
+            line-height: 1.6;
             margin-bottom: 10px;
         }
 
@@ -323,40 +446,201 @@
             display: none !important;
         }
 
-        @media (max-width: 768px) {
+        /* Enhanced Responsive Design */
+        @media (max-width: 1200px) {
+            .schedule-main-container {
+                max-width: 95%;
+                margin: 80px auto 0 auto;
+            }
+        }
+
+        @media (max-width: 992px) {
             .schedule-brackets-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                gap: 20px;
             }
             
-            .schedule-teams-display {
+            .schedule-event-hero {
+                padding: 30px;
+            }
+            
+            .schedule-event-hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .schedule-title-text {
+                font-size: 2.2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .schedule-main-container {
+                margin-top: 70px;
+                min-height: calc(100vh - 70px);
+                padding: 20px 15px;
+            }
+            
+            .schedule-page-header {
                 flex-direction: column;
+                gap: 20px;
+                align-items: flex-start;
+            }
+            
+            .schedule-title-section {
+                flex-direction: column;
+                align-items: flex-start;
                 gap: 10px;
             }
             
-            .schedule-vs {
-                margin: 10px 0;
+            .schedule-title-text {
+                font-size: 2rem;
+            }
+            
+            .schedule-brackets-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .schedule-event-hero {
+                padding: 25px;
+            }
+            
+            .schedule-event-hero h1 {
+                font-size: 1.8rem;
             }
             
             .schedule-event-meta {
                 flex-direction: column;
-                gap: 10px;
+                gap: 15px;
+            }
+            
+            .schedule-meta-item {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .schedule-section-title {
+                font-size: 1.8rem;
+            }
+            
+            .schedule-teams-display {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .schedule-vs {
+                margin: 0;
+                order: -1;
             }
             
             .schedule-match-info {
                 grid-template-columns: 1fr;
             }
             
-            .schedule-main-container {
-                margin-top: 60px;
-                min-height: calc(100vh - 60px);
+            .schedule-matches-container {
+                padding: 25px;
             }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 576px) {
             .schedule-main-container {
-                margin-top: 55px;
-                min-height: calc(100vh - 55px);
+                margin-top: 60px;
+                min-height: calc(100vh - 60px);
+                padding: 15px 10px;
             }
+            
+            .schedule-title-text {
+                font-size: 1.8rem;
+            }
+            
+            .schedule-title-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.3rem;
+            }
+            
+            .schedule-event-hero {
+                padding: 20px;
+            }
+            
+            .schedule-event-hero h1 {
+                font-size: 1.6rem;
+            }
+            
+            .schedule-section-title {
+                font-size: 1.6rem;
+            }
+            
+            .schedule-bracket-card {
+                padding: 25px 20px;
+            }
+            
+            .schedule-round-header {
+                padding: 15px 20px;
+                font-size: 1.1rem;
+            }
+            
+            .schedule-match-card {
+                padding: 20px;
+            }
+            
+            .schedule-back-btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            
+            .schedule-no-brackets {
+                padding: 60px 20px;
+            }
+            
+            .schedule-no-brackets i {
+                font-size: 4rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .schedule-title-text {
+                font-size: 1.6rem;
+            }
+            
+            .schedule-event-hero h1 {
+                font-size: 1.4rem;
+            }
+            
+            .schedule-section-title {
+                font-size: 1.4rem;
+            }
+            
+            .schedule-bracket-card h3 {
+                font-size: 1.3rem;
+            }
+            
+            .schedule-team {
+                font-size: 1rem;
+                padding: 12px;
+            }
+        }
+
+        /* Loading Animation */
+        .schedule-loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .schedule-loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -382,9 +666,12 @@
     <div class="schedule-main-container">
         <!-- Page Header -->
         <div class="schedule-page-header">
-            <h2 style="font-size: 2.2em; margin-bottom: 0; color: #333; display: flex; align-items: center;">
-                <i class="fas fa-calendar-day" style="margin-right: 12px; color: #007bff;"></i> Tournament Schedules
-            </h2>
+            <div class="schedule-title-section">
+                <div class="schedule-title-icon">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
+                <h1 class="schedule-title-text">Tournament Schedules</h1>
+            </div>
             <a href="/events" class="schedule-back-btn">
                 <i class="fas fa-arrow-left"></i> Back to Events
             </a>
@@ -394,7 +681,7 @@
         <div class="schedule-event-hero">
             <h1><%= event.title %></h1>
             <% if (event.description) { %>
-                <p style="margin: 0; opacity: 0.9;"><%= event.description %></p>
+                <p class="schedule-event-description"><%= event.description %></p>
             <% } %>
             <div class="schedule-event-meta">
                 <div class="schedule-meta-item">
@@ -412,8 +699,14 @@
             </div>
         </div>
 
+        <!-- Loading Animation -->
+        <div id="scheduleLoading" class="schedule-loading">
+            <div class="schedule-loading-spinner"></div>
+            <p>Loading tournament data...</p>
+        </div>
+
         <!-- Brackets Section -->
-        <section class="schedule-brackets-section">
+        <section class="schedule-brackets-section" id="bracketsSection">
             <h3 class="schedule-section-title"><i class="fas fa-trophy"></i> Tournament Brackets</h3>
             
             <% if (brackets && brackets.length > 0) { %>
@@ -440,6 +733,7 @@
                                 </div>
                             <% } %>
                             <div class="schedule-bracket-status schedule-status-<%= bracket.is_completed ? 'completed' : 'ongoing' %>">
+                                <i class="fas fa-<%= bracket.is_completed ? 'check-circle' : 'sync-alt' %>"></i>
                                 <%= bracket.is_completed ? 'Completed' : 'In Progress' %>
                             </div>
                         </div>
@@ -464,7 +758,7 @@
                 <div id="matchesContainer">
                     <!-- Dynamic matches will be loaded here -->
                 </div>
-                <button id="backToBrackets" class="schedule-back-btn" style="margin-top: 20px;">
+                <button id="backToBrackets" class="schedule-back-btn" style="margin-top: 30px;">
                     <i class="fas fa-arrow-left"></i> Back to Brackets
                 </button>
             </div>
@@ -472,11 +766,11 @@
     </div>
 
     <script>
-
-    // TOURNAMENT LOGIC (unchanged)
+    // TOURNAMENT LOGIC with enhanced UX
     let currentBracketId = null;
     const userTeams = <%= JSON.stringify(userTeams) %>;
 
+    // Add loading states and better user feedback
     document.querySelectorAll('.schedule-bracket-card').forEach(card => {
         card.addEventListener('click', function() {
             const bracketId = this.dataset.bracketId;
@@ -486,8 +780,16 @@
 
     async function loadBracketMatches(bracketId) {
         try {
+            // Show loading
+            document.getElementById('scheduleLoading').style.display = 'block';
+            document.getElementById('bracketsSection').style.opacity = '0.6';
+            
             const response = await fetch(`/event-schedule/bracket/${bracketId}/matches`);
             const data = await response.json();
+
+            // Hide loading
+            document.getElementById('scheduleLoading').style.display = 'none';
+            document.getElementById('bracketsSection').style.opacity = '1';
 
             if (data.success) {
                 displayMatches(data.matches, data.bracket);
@@ -495,12 +797,20 @@
 
                 document.getElementById('matchesSection').style.display = 'block';
                 document.querySelector('.schedule-brackets-section').style.display = 'none';
+                
+                // Smooth scroll to top of matches section
+                document.getElementById('matchesSection').scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
             } else {
-                alert('Error loading bracket matches');
+                alert('Error loading bracket matches. Please try again.');
             }
         } catch (error) {
             console.error('Error loading matches:', error);
-            alert('Error loading matches');
+            document.getElementById('scheduleLoading').style.display = 'none';
+            document.getElementById('bracketsSection').style.opacity = '1';
+            alert('Error loading matches. Please check your connection and try again.');
         }
     }
 
@@ -509,11 +819,18 @@
         bracketHeader.innerHTML = `
             <h3>${bracket.sport_type} - ${bracket.bracket_type.replace('_', ' ').toUpperCase()} Tournament</h3>
             <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px;">
-                <span><i class="fas fa-flag"></i> Current Round: ${bracket.current_round || 1}</span>
+                <span style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-flag"></i> Current Round: ${bracket.current_round || 1}
+                </span>
                 <span class="schedule-bracket-status schedule-status-${bracket.is_completed ? 'completed' : 'ongoing'}">
+                    <i class="fas fa-${bracket.is_completed ? 'check-circle' : 'sync-alt'}"></i>
                     ${bracket.is_completed ? 'Completed' : 'In Progress'}
                 </span>
-                ${bracket.champion_name ? `<span><i class="fas fa-trophy"></i> Champion: ${bracket.champion_name}</span>` : ''}
+                ${bracket.champion_name ? `
+                    <span style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-trophy"></i> Champion: ${bracket.champion_name}
+                    </span>
+                ` : ''}
             </div>
         `;
 
@@ -526,10 +843,19 @@
         const matchesContainer = document.getElementById('matchesContainer');
         matchesContainer.innerHTML = '';
 
+        // Sort rounds numerically
         Object.keys(rounds).sort((a, b) => a - b).forEach(roundNumber => {
             const roundDiv = document.createElement('div');
             roundDiv.className = 'schedule-round';
-            roundDiv.innerHTML = `<div class="schedule-round-header"><i class="fas fa-flag"></i> Round ${roundNumber}</div>`;
+            roundDiv.innerHTML = `
+                <div class="schedule-round-header">
+                    <i class="fas fa-flag"></i> 
+                    Round ${roundNumber}
+                    <span style="font-size: 0.9rem; opacity: 0.9; margin-left: auto;">
+                        ${rounds[roundNumber].length} match${rounds[roundNumber].length !== 1 ? 'es' : ''}
+                    </span>
+                </div>
+            `;
 
             rounds[roundNumber].forEach(match => {
                 const isUserTeam1 = userTeams.some(team => team.id === match.team1_id);
@@ -559,28 +885,44 @@
                 let resultInfo = '';
                 if (match.status === 'completed' && match.winner_name) {
                     resultInfo = `
-                        <div class="schedule-score-display">
-                            ${match.team1_score !== null ? `${match.team1_score} - ${match.team2_score}` : 'Match Completed'}
-                        </div>
-                        <div class="schedule-winner-display">
-                            <i class="fas fa-trophy"></i> Winner: ${match.winner_name}
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin: 15px 0;">
+                            <div class="schedule-score-display">
+                                ${match.team1_score !== null ? `${match.team1_score} - ${match.team2_score}` : 'Match Completed'}
+                            </div>
+                            <div class="schedule-winner-display">
+                                <i class="fas fa-trophy"></i> Winner: ${match.winner_name}
+                            </div>
                         </div>
                     `;
                 } else if (match.status === 'in_progress') {
-                    resultInfo = `<div class="schedule-info-item" style="color: #ffc107;"><i class="fas fa-spinner"></i> In Progress</div>`;
+                    resultInfo = `
+                        <div class="schedule-info-item" style="color: #ffc107; background: #fff3cd; border-color: #ffeaa7;">
+                            <i class="fas fa-spinner fa-spin"></i> Match In Progress
+                        </div>
+                    `;
                 } else if (match.status === 'scheduled') {
-                    resultInfo = `<div class="schedule-info-item" style="color: #17a2b8;"><i class="fas fa-clock"></i> Scheduled</div>`;
+                    resultInfo = `
+                        <div class="schedule-info-item" style="color: #17a2b8; background: #d1ecf1; border-color: #bee5eb;">
+                            <i class="fas fa-clock"></i> Match Scheduled
+                        </div>
+                    `;
                 }
 
                 const matchCard = document.createElement('div');
                 matchCard.className = 'schedule-match-card';
                 matchCard.innerHTML = `
                     <div class="schedule-teams-display">
-                        <div class="schedule-team ${isUserTeam1 ? 'schedule-user-team' : ''}">${match.team1_name || 'TBD'}</div>
+                        <div class="schedule-team ${isUserTeam1 ? 'schedule-user-team' : ''}">
+                            ${match.team1_name || 'TBD'}
+                            ${isUserTeam1 ? '<br><small style="color: #007bff;">(Your Team)</small>' : ''}
+                        </div>
                         <div class="schedule-vs">VS</div>
-                        <div class="schedule-team ${isUserTeam2 ? 'schedule-user-team' : ''}">${match.team2_name || 'TBD'}</div>
+                        <div class="schedule-team ${isUserTeam2 ? 'schedule-user-team' : ''}">
+                            ${match.team2_name || 'TBD'}
+                            ${isUserTeam2 ? '<br><small style="color: #007bff;">(Your Team)</small>' : ''}
+                        </div>
                     </div>
-                    ${resultInfo ? `<div style="margin: 15px 0;">${resultInfo}</div>` : ''}
+                    ${resultInfo}
                     ${dateInfo ? `<div class="schedule-match-info">${dateInfo}</div>` : ''}
                 `;
 
@@ -594,8 +936,21 @@
     document.getElementById('backToBrackets').addEventListener('click', function() {
         document.getElementById('matchesSection').style.display = 'none';
         document.querySelector('.schedule-brackets-section').style.display = 'block';
+        
+        // Smooth scroll back to brackets
+        document.querySelector('.schedule-brackets-section').scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+        });
     });
-</script>
+
+    // Add keyboard navigation
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && document.getElementById('matchesSection').style.display === 'block') {
+            document.getElementById('backToBrackets').click();
+        }
+    });
+    </script>
 
 </body>
 </html>
