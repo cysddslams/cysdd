@@ -870,50 +870,73 @@ exports.getTeamPlayers = async (req, res) => {
     }
 };
 
-// Sport player limits configuration
+// Sport player limits configuration - Updated with Men/Women categories
 const SPORT_LIMITS = {
     // Basketball
-    'basketball': 12,
+    'basketball_men': 12,
+    'basketball_women': 12,
     
     // Volleyball
-    'volleyball': 12,
+    'volleyball_men': 12,
+    'volleyball_women': 12,
     
     // Soccer
-    'soccer': 11,
+    'soccer_men': 11,
+    'soccer_women': 11,
     
     // Badminton
-    'badminton_single': 1,
-    'badminton_double': 2,
+    'badminton_men': 2,
+    'badminton_women': 2,
     
     // Other sports
-    'sepak_takraw': 9,
-    'table_tennis': 1,
-    'chess': 1,
-    'taekwondo': 1,
-    'arnis': 1,
-    'gymnastic': 1,
+    'sepak_takraw_men': 9,
+    'sepak_takraw_women': 9,
+    'table_tennis_men': 1,
+    'table_tennis_women': 1,
+    'chess_men': 1,
+    'chess_women': 1,
+    'taekwondo_men': 1,
+    'taekwondo_women': 1,
+    'arnis_men': 1,
+    'arnis_women': 1,
+    'gymnastic_men': 1,
+    'gymnastic_women': 1,
     
     // Athletics (track and field)
-    'athletics_100m': 1,
-    'athletics_200m': 1,
-    'athletics_400m': 1,
-    'athletics_800m': 1,
-    'athletics_1500m': 1,
-    'athletics_5000m': 1,
-    'athletics_longjump': 1,
-    'athletics_highjump': 1,
-    'athletics_triplejump': 1,
-    'athletics_shotput': 1,
-    'athletics_javelin': 1,
-    'athletics_discusthrow': 1,
-    'athletics_4x100': 4,
-    'athletics_4x400': 4,
+    'athletics_100m_men': 1,
+    'athletics_100m_women': 1,
+    'athletics_200m_men': 1,
+    'athletics_200m_women': 1,
+    'athletics_400m_men': 1,
+    'athletics_400m_women': 1,
+    'athletics_800m_men': 1,
+    'athletics_800m_women': 1,
+    'athletics_1500m_men': 1,
+    'athletics_1500m_women': 1,
+    'athletics_5000m_men': 1,
+    'athletics_5000m_women': 1,
+    'athletics_longjump_men': 1,
+    'athletics_longjump_women': 1,
+    'athletics_highjump_men': 1,
+    'athletics_highjump_women': 1,
+    'athletics_triplejump_men': 1,
+    'athletics_triplejump_women': 1,
+    'athletics_shotput_men': 1,
+    'athletics_shotput_women': 1,
+    'athletics_javelin_men': 1,
+    'athletics_javelin_women': 1,
+    'athletics_discusthrow_men': 1,
+    'athletics_discusthrow_women': 1,
+    'athletics_4x100_men': 4,
+    'athletics_4x100_women': 4,
+    'athletics_4x400_men': 4,
+    'athletics_4x400_women': 4,
     
-    // Esports
+    // Esports (no gender separation)
     'ml': 5,       // Mobile Legends
     'codm': 5,     // CODM
     
-    // Other activities
+    // Other activities (no gender separation)
     'cheerdance': 15,
     'dance_competition': 15,
     'singing_contest': 1
@@ -966,7 +989,9 @@ exports.getPlayerRegister = async (req, res) => {
         if (teamData.event_id) {
             // Process sports
             if (teamData.sports) {
-                sports = sports.concat(teamData.sports.split(',').map(s => s.trim()).filter(s => s.length > 0));
+                const sportCodes = teamData.sports.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                // Convert sport codes to display names with gender categories
+                sports = sports.concat(convertSportCodesToDisplayNames(sportCodes));
             }
             
             // Process esports
@@ -1010,7 +1035,8 @@ exports.getPlayerRegister = async (req, res) => {
 
             events.forEach(event => {
                 if (event.sports) {
-                    allSports.push(...event.sports.split(',').map(s => s.trim()));
+                    const sportCodes = event.sports.split(',').map(s => s.trim());
+                    allSports.push(...convertSportCodesToDisplayNames(sportCodes));
                 }
                 if (event.esports) {
                     allSports.push(...event.esports.split(',').map(code => esportsMap[code] || code));
@@ -1029,22 +1055,7 @@ exports.getPlayerRegister = async (req, res) => {
         // Get current player counts for each sport in this team
         const sportData = await Promise.all(sports.map(async (sport) => {
             // Map display name back to code
-            let sportCode = sport;
-            const reverseEsportsMap = {
-                'Mobile Legends': 'ml',
-                'CODM': 'codm'
-            };
-            const reverseActivitiesMap = {
-                'Cheerdance': 'cheerdance',
-                'Dance Competition': 'dance_competition',
-                'Singing Contest': 'singing_contest'
-            };
-
-            if (reverseEsportsMap[sport]) {
-                sportCode = reverseEsportsMap[sport];
-            } else if (reverseActivitiesMap[sport]) {
-                sportCode = reverseActivitiesMap[sport];
-            }
+            const sportCode = convertDisplayNameToSportCode(sport);
 
             const [count] = await db.execute(`
                 SELECT COUNT(*) as count 
@@ -1076,7 +1087,161 @@ exports.getPlayerRegister = async (req, res) => {
     }
 };
 
-//REGISTER PLAYER FUNCTION (Updated with certification_lack_units)
+// Helper function to convert sport codes to display names with gender
+function convertSportCodesToDisplayNames(sportCodes) {
+    const displayNames = [];
+    
+    const sportDisplayMap = {
+        // Basketball
+        'basketball_men': 'Basketball Men',
+        'basketball_women': 'Basketball Women',
+        
+        // Volleyball
+        'volleyball_men': 'Volleyball Men',
+        'volleyball_women': 'Volleyball Women',
+        
+        // Soccer
+        'soccer_men': 'Soccer Men',
+        'soccer_women': 'Soccer Women',
+        
+        // Badminton
+        'badminton_men': 'Badminton Men',
+        'badminton_women': 'Badminton Women',
+        
+        // Other sports
+        'sepak_takraw_men': 'Sepak Takraw Men',
+        'sepak_takraw_women': 'Sepak Takraw Women',
+        'table_tennis_men': 'Table Tennis Men',
+        'table_tennis_women': 'Table Tennis Women',
+        'chess_men': 'Chess Men',
+        'chess_women': 'Chess Women',
+        'taekwondo_men': 'Taekwondo Men',
+        'taekwondo_women': 'Taekwondo Women',
+        'arnis_men': 'Arnis Men',
+        'arnis_women': 'Arnis Women',
+        'gymnastic_men': 'Gymnastic Men',
+        'gymnastic_women': 'Gymnastic Women',
+        
+        // Athletics
+        'athletics_100m_men': 'Athletics 100m Men',
+        'athletics_100m_women': 'Athletics 100m Women',
+        'athletics_200m_men': 'Athletics 200m Men',
+        'athletics_200m_women': 'Athletics 200m Women',
+        'athletics_400m_men': 'Athletics 400m Men',
+        'athletics_400m_women': 'Athletics 400m Women',
+        'athletics_800m_men': 'Athletics 800m Men',
+        'athletics_800m_women': 'Athletics 800m Women',
+        'athletics_1500m_men': 'Athletics 1500m Men',
+        'athletics_1500m_women': 'Athletics 1500m Women',
+        'athletics_5000m_men': 'Athletics 5000m Men',
+        'athletics_5000m_women': 'Athletics 5000m Women',
+        'athletics_longjump_men': 'Athletics Long Jump Men',
+        'athletics_longjump_women': 'Athletics Long Jump Women',
+        'athletics_highjump_men': 'Athletics High Jump Men',
+        'athletics_highjump_women': 'Athletics High Jump Women',
+        'athletics_triplejump_men': 'Athletics Triple Jump Men',
+        'athletics_triplejump_women': 'Athletics Triple Jump Women',
+        'athletics_shotput_men': 'Athletics Shot Put Men',
+        'athletics_shotput_women': 'Athletics Shot Put Women',
+        'athletics_javelin_men': 'Athletics Javelin Men',
+        'athletics_javelin_women': 'Athletics Javelin Women',
+        'athletics_discusthrow_men': 'Athletics Discus Throw Men',
+        'athletics_discusthrow_women': 'Athletics Discus Throw Women',
+        'athletics_4x100_men': 'Athletics 4x100 Relay Men',
+        'athletics_4x100_women': 'Athletics 4x100 Relay Women',
+        'athletics_4x400_men': 'Athletics 4x400 Relay Men',
+        'athletics_4x400_women': 'Athletics 4x400 Relay Women'
+    };
+
+    sportCodes.forEach(code => {
+        if (sportDisplayMap[code]) {
+            displayNames.push(sportDisplayMap[code]);
+        } else {
+            // For backward compatibility with old codes
+            displayNames.push(code);
+        }
+    });
+
+    return displayNames;
+}
+
+// Helper function to convert display names back to sport codes
+function convertDisplayNameToSportCode(displayName) {
+    const reverseSportMap = {
+        // Basketball
+        'Basketball Men': 'basketball_men',
+        'Basketball Women': 'basketball_women',
+        
+        // Volleyball
+        'Volleyball Men': 'volleyball_men',
+        'Volleyball Women': 'volleyball_women',
+        
+        // Soccer
+        'Soccer Men': 'soccer_men',
+        'Soccer Women': 'soccer_women',
+        
+        // Badminton
+        'Badminton Men': 'badminton_men',
+        'Badminton Women': 'badminton_women',
+        
+        // Other sports
+        'Sepak Takraw Men': 'sepak_takraw_men',
+        'Sepak Takraw Women': 'sepak_takraw_women',
+        'Table Tennis Men': 'table_tennis_men',
+        'Table Tennis Women': 'table_tennis_women',
+        'Chess Men': 'chess_men',
+        'Chess Women': 'chess_women',
+        'Taekwondo Men': 'taekwondo_men',
+        'Taekwondo Women': 'taekwondo_women',
+        'Arnis Men': 'arnis_men',
+        'Arnis Women': 'arnis_women',
+        'Gymnastic Men': 'gymnastic_men',
+        'Gymnastic Women': 'gymnastic_women',
+        
+        // Athletics
+        'Athletics 100m Men': 'athletics_100m_men',
+        'Athletics 100m Women': 'athletics_100m_women',
+        'Athletics 200m Men': 'athletics_200m_men',
+        'Athletics 200m Women': 'athletics_200m_women',
+        'Athletics 400m Men': 'athletics_400m_men',
+        'Athletics 400m Women': 'athletics_400m_women',
+        'Athletics 800m Men': 'athletics_800m_men',
+        'Athletics 800m Women': 'athletics_800m_women',
+        'Athletics 1500m Men': 'athletics_1500m_men',
+        'Athletics 1500m Women': 'athletics_1500m_women',
+        'Athletics 5000m Men': 'athletics_5000m_men',
+        'Athletics 5000m Women': 'athletics_5000m_women',
+        'Athletics Long Jump Men': 'athletics_longjump_men',
+        'Athletics Long Jump Women': 'athletics_longjump_women',
+        'Athletics High Jump Men': 'athletics_highjump_men',
+        'Athletics High Jump Women': 'athletics_highjump_women',
+        'Athletics Triple Jump Men': 'athletics_triplejump_men',
+        'Athletics Triple Jump Women': 'athletics_triplejump_women',
+        'Athletics Shot Put Men': 'athletics_shotput_men',
+        'Athletics Shot Put Women': 'athletics_shotput_women',
+        'Athletics Javelin Men': 'athletics_javelin_men',
+        'Athletics Javelin Women': 'athletics_javelin_women',
+        'Athletics Discus Throw Men': 'athletics_discusthrow_men',
+        'Athletics Discus Throw Women': 'athletics_discusthrow_women',
+        'Athletics 4x100 Relay Men': 'athletics_4x100_men',
+        'Athletics 4x100 Relay Women': 'athletics_4x100_women',
+        'Athletics 4x400 Relay Men': 'athletics_4x400_men',
+        'Athletics 4x400 Relay Women': 'athletics_4x400_women',
+        
+        // Esports
+        'Mobile Legends': 'ml',
+        'CODM': 'codm',
+        
+        // Activities
+        'Cheerdance': 'cheerdance',
+        'Dance Competition': 'dance_competition',
+        'Singing Contest': 'singing_contest'
+    };
+
+    return reverseSportMap[displayName] || displayName;
+}
+
+//REGISTER PLAYER FUNCTION 
 exports.registerPlayer = async (req, res) => {
     const { 
         team_id, 
@@ -1128,23 +1293,8 @@ exports.registerPlayer = async (req, res) => {
             return res.redirect(`/player-register?team_id=${team_id}`);
         }
 
-        // Map display names back to codes if needed
-        let sportsValue = sports;
-        const reverseEsportsMap = {
-            'Mobile Legends': 'ml',
-            'CODM': 'codm'
-        };
-        const reverseActivitiesMap = {
-            'Cheerdance': 'cheerdance',
-            'Dance Competition': 'dance_competition',
-            'Singing Contest': 'singing_contest'
-        };
-
-        if (reverseEsportsMap[sports]) {
-            sportsValue = reverseEsportsMap[sports];
-        } else if (reverseActivitiesMap[sports]) {
-            sportsValue = reverseActivitiesMap[sports];
-        }
+        // Map display names back to codes
+        const sportsValue = convertDisplayNameToSportCode(sports);
 
         // Check if sport has player limit
         if (SPORT_LIMITS[sportsValue]) {
@@ -1209,8 +1359,6 @@ exports.registerPlayer = async (req, res) => {
             school_id,
             certification_lack_units
         ];
-
-        // REMOVED: Document validation logic - no longer checking for required documents
 
         // Insert player
         await db.execute(`
@@ -1319,6 +1467,7 @@ exports.uploadProfilePicture = async (req, res) => {
         res.sendStatus(500);
     }
 };
+
 
 
 
