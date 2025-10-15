@@ -885,12 +885,12 @@ const SPORT_LIMITS = {
     'soccer_women': 11,
     
     // Badminton
-    'badminton_men': 2,
-    'badminton_women': 2,
+    'badminton_men': 8,
+    'badminton_women': 8,
     
     // Other sports
-    'sepak_takraw_men': 9,
-    'sepak_takraw_women': 9,
+    'sepak_takraw_men': 12,
+    'sepak_takraw_women': 12,
     'table_tennis_men': 1,
     'table_tennis_women': 1,
     'chess_men': 1,
@@ -1467,6 +1467,7 @@ exports.uploadProfilePicture = async (req, res) => {
         res.sendStatus(500);
     }
 };
+
 
 
 
