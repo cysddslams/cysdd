@@ -1167,10 +1167,10 @@ exports.registerPlayer = async (req, res) => {
             if (req.files && req.files[fieldName] && req.files[fieldName][0] && req.files[fieldName][0].path) {
                 return req.files[fieldName][0].path;
             }
-            return null;
+            return null; // Return null if no file uploaded
         };
 
-        // Get all document URLs
+        // Get all document URLs (they can be null if not uploaded)
         const PSA = getFileUrl('PSA');
         const waiver = getFileUrl('waiver');
         const med_cert = getFileUrl('med_cert');
@@ -1210,35 +1210,7 @@ exports.registerPlayer = async (req, res) => {
             certification_lack_units
         ];
 
-        // Validate required documents based on organization type
-        if (organizationType === 'school') {
-            const requiredDocs = DOCUMENT_REQUIREMENTS[student_type] || [];
-            for (const doc of requiredDocs) {
-                const fieldMap = {
-                    'PSA': PSA,
-                    'COR': COR,
-                    'TOR_previous_school': TOR_previous_school,
-                    'COG': COG,
-                    'entry_form': entry_form,
-                    'COE': COE,
-                    'authorization_letter': authorization_letter,
-                    'school_id': school_id,
-                    'med_cert': med_cert,
-                    'waiver': waiver,
-                    'certification_lack_units': certification_lack_units
-                };
-                
-                if (!fieldMap[doc]) {
-                    req.flash('error', `Please upload the required document: ${doc}`);
-                    return res.redirect(`/player-register?team_id=${team_id}`);
-                }
-            }
-        } else if (organizationType === 'barangay') {
-            if (!PSA || !waiver || !med_cert) {
-                req.flash('error', 'Please upload all required documents for barangay registration');
-                return res.redirect(`/player-register?team_id=${team_id}`);
-            }
-        }
+        // REMOVED: Document validation logic - no longer checking for required documents
 
         // Insert player
         await db.execute(`
@@ -1347,6 +1319,7 @@ exports.uploadProfilePicture = async (req, res) => {
         res.sendStatus(500);
     }
 };
+
 
 
 
