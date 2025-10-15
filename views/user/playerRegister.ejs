@@ -161,7 +161,7 @@
                                         <option value="graduating">Graduating</option>
                                     </select>
                                 </div>
-                                <div class="info-text">Select your student type to see required documents</div>
+                                <div class="info-text">Select your student type to see recommended documents</div>
                             </div>
                         <% } else if (organizationType === 'barangay') { %>
                             <div class="form-group">
@@ -216,7 +216,7 @@
         </div>
     </main>
 
-        <script>
+    <script>
         // Document requirements mapping based on student type
         const documentRequirements = {
             freshman: ['PSA', 'COR', 'school_id', 'med_cert', 'waiver'],
@@ -289,14 +289,14 @@
             const documentsSection = document.getElementById('documents-section');
             
             if (!studentType) {
-                documentsSection.innerHTML = '<div class="info-text">Please select your student type to see required documents</div>';
+                documentsSection.innerHTML = '<div class="info-text">Please select your student type to see recommended documents</div>';
                 return;
             }
 
             const requiredDocs = documentRequirements[studentType] || [];
             
             let html = '<div class="document-section required-doc">';
-            html += '<h4>Required Documents (PDF Format Only)</h4>';
+            html += '<h4>Recommended Documents (PDF Format Only)</h4>';
             
             requiredDocs.forEach(doc => {
                 html += `
@@ -336,7 +336,7 @@
             <% if (organizationType === 'barangay') { %>
                 setupBarangayDocuments();
             <% } else { %>
-                documentsSection.innerHTML = '<div class="info-text">Please select your student type to see required documents</div>';
+                documentsSection.innerHTML = '<div class="info-text">Please select your student type to see recommended documents</div>';
             <% } %>
         });
 
@@ -358,7 +358,7 @@
         function setupBarangayDocuments() {
             const documentsSection = document.getElementById('documents-section');
             let html = '<div class="document-section required-doc">';
-            html += '<h4>Required Documents (PDF Format Only)</h4>';
+            html += '<h4>Recommended Documents (PDF Format Only)</h4>';
             
             const barangayDocs = ['PSA', 'waiver', 'med_cert'];
             const barangayLabels = {
@@ -376,7 +376,7 @@
                                 <i class="fas fa-file-pdf"></i>
                                 <span class="file-text">Click to upload ${barangayLabels[doc]}</span>
                             </div>
-                            <input type="file" id="${doc}" name="${doc}" accept=".pdf"
+                            <input type="file" id="${doc}" name="${doc}" accept=".pdf">
                             <div id="${doc}-filename" class="file-name"></div>
                         </div>
                     </div>
@@ -407,6 +407,3 @@
     </script>
 </body>
 </html>
-
-
-
