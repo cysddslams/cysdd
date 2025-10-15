@@ -190,7 +190,7 @@ exports.getCoachHomepage = async (req, res) => {
         if (coachPostNotif.length > 0) notifications.push(...coachPostNotif);
 
         res.render('coach/coachHomepage', {
-            coach: coach, // Add this line to pass the coach object
+            coach: coach,
             coachStatus: coach.status,
             notifications,
             coachId: coach.id
@@ -201,6 +201,7 @@ exports.getCoachHomepage = async (req, res) => {
         res.redirect('/coach/login');
     }
 };
+
 // Get coach profile
 exports.getCoachProfile = async (req, res) => {
     try {
@@ -214,6 +215,32 @@ exports.getCoachProfile = async (req, res) => {
         console.error('Error fetching coach profile:', error);
         req.flash('error', 'Failed to load profile');
         res.redirect('/coach/homepage');
+    }
+};
+
+// Mark notification as viewed
+exports.markNotificationViewed = async (req, res) => {
+    try {
+        const { coachId } = req.body;
+        
+        if (!coachId) {
+            return res.status(400).json({ success: false, message: 'Coach ID is required' });
+        }
+
+        // Update the notification_viewed field in the database
+        const [result] = await db.execute(
+            'UPDATE coach SET notification_viewed = 1 WHERE id = ?',
+            [coachId]
+        );
+
+        if (result.affectedRows > 0) {
+            res.json({ success: true, message: 'Notification marked as viewed' });
+        } else {
+            res.status(404).json({ success: false, message: 'Coach not found' });
+        }
+    } catch (error) {
+        console.error('Error marking notification as viewed:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
 
@@ -1336,6 +1363,7 @@ exports.updatePlayerStatus = async (req, res) => {
         res.redirect(`/coach/team/${teamId}`);
     }
 };
+
 
 
 
