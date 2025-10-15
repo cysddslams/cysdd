@@ -301,13 +301,13 @@
             requiredDocs.forEach(doc => {
                 html += `
                     <div class="form-group">
-                        <label>${documentLabels[doc]} <span class="required-star">*</span></label>
+                        <label>${documentLabels[doc]}</label>
                         <div class="file-input-wrapper">
                             <div class="file-input-label">
                                 <i class="fas fa-file-pdf"></i>
                                 <span class="file-text">Click to upload ${documentLabels[doc]}</span>
                             </div>
-                            <input type="file" id="${doc}" name="${doc}" accept=".pdf" required>
+                            <input type="file" id="${doc}" name="${doc}" accept=".pdf">
                             <div id="${doc}-filename" class="file-name"></div>
                         </div>
                     </div>
@@ -370,13 +370,13 @@
             barangayDocs.forEach(doc => {
                 html += `
                     <div class="form-group">
-                        <label>${barangayLabels[doc]} <span class="required-star">*</span></label>
+                        <label>${barangayLabels[doc]}</label>
                         <div class="file-input-wrapper">
                             <div class="file-input-label">
                                 <i class="fas fa-file-pdf"></i>
                                 <span class="file-text">Click to upload ${barangayLabels[doc]}</span>
                             </div>
-                            <input type="file" id="${doc}" name="${doc}" accept=".pdf" required>
+                            <input type="file" id="${doc}" name="${doc}" accept=".pdf"
                             <div id="${doc}-filename" class="file-name"></div>
                         </div>
                     </div>
@@ -407,5 +407,6 @@
     </script>
 </body>
 </html>
+
 
 
