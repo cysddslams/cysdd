@@ -68,12 +68,15 @@
     <div id="notificationDropdown" style="display: none; position: fixed; right: 20px; top: 70px; background: #621616; width: 320px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); z-index: 2001; overflow: hidden; border: 1px solid #ffcc00; border-radius: 0;">
         <div style="padding: 15px;">
             <h4 style="margin: 0 0 10px 0; font-size: 16px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; color: #fff;">Notifications</h4>
-
+    
             <% if (notifications && notifications.length > 0) { %>
                 <% notifications.forEach(n => { %>
-                    <p style="font-size: 14px; color: #fff; margin: 10px 0;">
-                        🔔 <a href="<%= n.link %>" style="color: #ffcc00; text-decoration: none;"><%= n.message %></a>
-                    </p>
+                    <div class="notif-item" style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer;" 
+                         onclick="handleNotificationClick('<%= n.link %>', <%= coachId %>)">
+                        <p style="font-size: 14px; color: #fff; margin: 0;">
+                            🔔 <span style="color: #ffcc00;"><%= n.message %></span>
+                        </p>
+                    </div>
                 <% }); %>
             <% } else { %>
                 <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin: 10px 0;">No new notifications.</p>
@@ -185,33 +188,47 @@
 
         // Handle notification viewed and redirect
         window.handleNotificationClick = function (link, coachId) {
+            // Mark notification as viewed
             fetch('/coach/notification/viewed', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ coachId })
+                body: JSON.stringify({ coachId: coachId })
             })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    const dot = document.querySelector('.fa-bell + span');
-                    if (dot) dot.style.display = 'none';
-
-                    const notifItems = document.querySelectorAll('.notif-item');
-                    notifItems.forEach(item => {
-                        item.style.backgroundColor = 'transparent';
-                        item.style.cursor = 'default';
-                        item.onclick = null;
-                    });
-
-                    if (link) {
+                    // Remove the notification dot
+                    const notificationDot = document.querySelector('.fa-bell + span');
+                    if (notificationDot) {
+                        notificationDot.style.display = 'none';
+                    }
+                    
+                    // Hide the notification dropdown
+                    notificationDropdown.style.display = 'none';
+                    
+                    // Redirect to the notification link if it exists
+                    if (link && link !== 'undefined' && link !== '') {
+                        window.location.href = link;
+                    }
+                } else {
+                    console.error('Failed to mark notification as viewed:', data.message);
+                    // Still redirect even if marking as viewed fails
+                    if (link && link !== 'undefined' && link !== '') {
                         window.location.href = link;
                     }
                 }
             })
-            .catch(err => console.error('Notification mark error:', err));
+            .catch(err => {
+                console.error('Notification mark error:', err);
+                // Still redirect even if there's an error
+                if (link && link !== 'undefined' && link !== '') {
+                    window.location.href = link;
+                }
+            });
         };
     });
 </script>
 
 </body>
 </html>
+
