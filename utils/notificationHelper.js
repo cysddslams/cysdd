@@ -19,18 +19,23 @@ exports.getCoachStatusNotification = async (coachId) => {
 
     const coach = result[0];
 
-    if (coach.status === 'confirmed' && !coach.notification_viewed) {
-        return {
-            type: 'success',
-            message: 'Your account is now registered as Coordinator.',
-            viewed: false
-        };
-    } else if (coach.status === 'rejected' && !coach.notification_viewed) {
-        return {
-            type: 'error',
-            message: 'Your account has been rejected.',
-            viewed: false
-        };
+    // Only show notification if it hasn't been viewed
+    if (coach.notification_viewed === 0) {
+        if (coach.status === 'confirmed') {
+            return {
+                type: 'success',
+                message: 'Your account is now registered as Coordinator.',
+                link: '/coach/profile',
+                viewed: false
+            };
+        } else if (coach.status === 'rejected') {
+            return {
+                type: 'error',
+                message: 'Your account has been rejected.',
+                link: '/coach/profile',
+                viewed: false
+            };
+        }
     }
 
     return null;
@@ -39,10 +44,10 @@ exports.getCoachStatusNotification = async (coachId) => {
 //notification for player wants to join a team
 exports.getPlayerJoinNotifications = async (coachId) => {
     const [players] = await db.execute(
-        `SELECT tp.player_name
+        `SELECT tp.player_name, tp.notification_viewed
          FROM team_players tp
          JOIN team t ON tp.team_id = t.id
-         WHERE t.coach_id = ? AND tp.status = 'pending'`,
+         WHERE t.coach_id = ? AND tp.status = 'pending' AND tp.notification_viewed = 0`,
         [coachId]
     );
 
@@ -154,4 +159,5 @@ exports.getTeamStatusNotification = async (userId) => {
     }
     return [];
 };
+
 
