@@ -141,20 +141,8 @@ router.get('/coach/sport-players', coachAuthMiddleware, coachController.getCoach
 // View player details
 router.get('/player/:id', coachController.viewPlayerDetails);
 router.post('/coach/team/:teamId/player/:playerId/update-status', coachController.updatePlayerStatus);
-router.post('/coach/notification/viewed', async (req, res) => {
-    const { coachId } = req.body;
-
-    try {
-        // Only mark coach-specific notifications as viewed
-        await db.execute("UPDATE coach SET notification_viewed = 1 WHERE id = ?", [coachId]);
-        await db.execute("UPDATE team SET notification_viewed = 1 WHERE coach_id = ?", [coachId]);
-        
-        res.json({ success: true });
-    } catch (err) {
-        console.error('Notification update error:', err);
-        res.status(500).json({ success: false });
-    }
-});
+// In routes/coach.js
+router.post('/notification/viewed', coachController.markNotificationViewed);
 // Mark latest post as viewed by coach
 router.get('/coach/posts/mark-viewed/:id', async (req, res) => {
     const postId = req.params.id;
@@ -235,6 +223,7 @@ router.post("/admin/schedule/set-champion", adminAuthMiddleware, scheduleControl
 
 
 module.exports = router;
+
 
 
 
