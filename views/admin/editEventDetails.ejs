@@ -429,137 +429,275 @@
                     <label>
                         <i class="fas fa-basketball-ball"></i> Sports Included:
                     </label>
-                   <div class="sports-container">
+                    <div class="sports-container">
                         <% 
                         const selectedSports = event.sports ? event.sports.split(',') : [];
                         %>
-                    <div class="sport-option">
-                        <input type="checkbox" id="basketball" name="sports[]" value="basketball" 
-                            <%= selectedSports.includes('basketball') ? 'checked' : '' %>>
-                        <label for="basketball">Basketball</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="volleyball" name="sports[]" value="volleyball" 
-                            <%= selectedSports.includes('volleyball') ? 'checked' : '' %>>
-                        <label for="volleyball">Volleyball</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="soccer" name="sports[]" value="soccer" 
-                            <%= selectedSports.includes('soccer') ? 'checked' : '' %>>
-                        <label for="soccer">Soccer</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="badminton_single" name="sports[]" value="badminton_single" 
-                            <%= selectedSports.includes('badminton_single') ? 'checked' : '' %>>
-                        <label for="badminton_single">Badminton (Single)</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="badminton_double" name="sports[]" value="badminton_double" 
-                            <%= selectedSports.includes('badminton_double') ? 'checked' : '' %>>
-                        <label for="badminton_double">Badminton (Double)</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="sepak_takraw" name="sports[]" value="sepak_takraw" 
-                            <%= selectedSports.includes('sepak_takraw') ? 'checked' : '' %>>
-                        <label for="sepak_takraw">Sepak Takraw</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="table_tennis" name="sports[]" value="table_tennis" 
-                            <%= selectedSports.includes('table_tennis') ? 'checked' : '' %>>
-                        <label for="table_tennis">Table Tennis</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="chess" name="sports[]" value="chess" 
-                            <%= selectedSports.includes('chess') ? 'checked' : '' %>>
-                        <label for="chess">Chess</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="athletics_100m" name="sports[]" value="athletics_100m" 
-                            <%= selectedSports.includes('athletics_100m') ? 'checked' : '' %>>
-                        <label for="athletics_100m">Athletics - 100m Sprint</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="athletics_200m" name="sports[]" value="athletics_200m" 
-                            <%= selectedSports.includes('athletics_200m') ? 'checked' : '' %>>
-                        <label for="athletics_200m">Athletics - 200m Sprint</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="athletics_400m" name="sports[]" value="athletics_400m" 
-                            <%= selectedSports.includes('athletics_400m') ? 'checked' : '' %>>
-                        <label for="athletics_400m">Athletics - 400m Sprint</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="athletics_800m" name="sports[]" value="athletics_800m" 
-                            <%= selectedSports.includes('athletics_800m') ? 'checked' : '' %>>
-                        <label for="athletics_800m">Athletics - 800m Run</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="athletics_1500m" name="sports[]" value="athletics_1500m" 
-                            <%= selectedSports.includes('athletics_1500m') ? 'checked' : '' %>>
-                        <label for="athletics_1500m">Athletics - 1500m Run</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="athletics_5000m" name="sports[]" value="athletics_5000m" 
-                            <%= selectedSports.includes('athletics_5000m') ? 'checked' : '' %>>
-                        <label for="athletics_5000m">Athletics - 5000m Run</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="athletics_longjump" name="sports[]" value="athletics_longjump" 
-                            <%= selectedSports.includes('athletics_longjump') ? 'checked' : '' %>>
-                        <label for="athletics_longjump">Athletics - Long Jump</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="athletics_highjump" name="sports[]" value="athletics_highjump" 
-                            <%= selectedSports.includes('athletics_highjump') ? 'checked' : '' %>>
-                        <label for="athletics_highjump">Athletics - High Jump</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="athletics_triplejump" name="sports[]" value="athletics_triplejump" 
-                            <%= selectedSports.includes('athletics_triplejump') ? 'checked' : '' %>>
-                        <label for="athletics_triplejump">Athletics - Triple Jump</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="athletics_shotput" name="sports[]" value="athletics_shotput" 
-                            <%= selectedSports.includes('athletics_shotput') ? 'checked' : '' %>>
-                        <label for="athletics_shotput">Athletics - Shot Put</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="athletics_javelin" name="sports[]" value="athletics_javelin" 
-                            <%= selectedSports.includes('athletics_javelin') ? 'checked' : '' %>>
-                        <label for="athletics_javelin">Athletics - Javelin Throw</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="athletics_discusthrow" name="sports[]" value="athletics_discusthrow" 
-                            <%= selectedSports.includes('athletics_discusthrow') ? 'checked' : '' %>>
-                        <label for="athletics_discusthrow">Athletics - Discus Throw</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="athletics_4x100" name="sports[]" value="athletics_4x100" 
-                            <%= selectedSports.includes('athletics_4x100') ? 'checked' : '' %>>
-                        <label for="athletics_4x100">Athletics - 4x100m Relay</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="athletics_4x400" name="sports[]" value="athletics_4x400" 
-                            <%= selectedSports.includes('athletics_4x400') ? 'checked' : '' %>>
-                        <label for="athletics_4x400">Athletics - 4x400m Relay</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="taekwondo" name="sports[]" value="taekwondo" 
-                            <%= selectedSports.includes('taekwondo') ? 'checked' : '' %>>
-                        <label for="taekwondo">Taekwondo</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="arnis" name="sports[]" value="arnis" 
-                            <%= selectedSports.includes('arnis') ? 'checked' : '' %>>
-                        <label for="arnis">Arnis</label>
-                    </div>
-                    <div class="sport-option">
-                        <input type="checkbox" id="gymnastic" name="sports[]" value="gymnastic" 
-                            <%= selectedSports.includes('gymnastic') ? 'checked' : '' %>>
-                        <label for="gymnastic">Gymnastic</label>
+                        <!-- Basketball -->
+                        <div class="sport-option">
+                            <input type="checkbox" id="basketball_men" name="sports[]" value="basketball_men" 
+                                <%= selectedSports.includes('basketball_men') ? 'checked' : '' %>>
+                            <label for="basketball_men">Basketball Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="basketball_women" name="sports[]" value="basketball_women" 
+                                <%= selectedSports.includes('basketball_women') ? 'checked' : '' %>>
+                            <label for="basketball_women">Basketball Women</label>
+                        </div>
+                        
+                        <!-- Volleyball -->
+                        <div class="sport-option">
+                            <input type="checkbox" id="volleyball_men" name="sports[]" value="volleyball_men" 
+                                <%= selectedSports.includes('volleyball_men') ? 'checked' : '' %>>
+                            <label for="volleyball_men">Volleyball Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="volleyball_women" name="sports[]" value="volleyball_women" 
+                                <%= selectedSports.includes('volleyball_women') ? 'checked' : '' %>>
+                            <label for="volleyball_women">Volleyball Women</label>
+                        </div>
+                        
+                        <!-- Soccer -->
+                        <div class="sport-option">
+                            <input type="checkbox" id="soccer_men" name="sports[]" value="soccer_men" 
+                                <%= selectedSports.includes('soccer_men') ? 'checked' : '' %>>
+                            <label for="soccer_men">Soccer Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="soccer_women" name="sports[]" value="soccer_women" 
+                                <%= selectedSports.includes('soccer_women') ? 'checked' : '' %>>
+                            <label for="soccer_women">Soccer Women</label>
+                        </div>
+                        
+                        <!-- Badminton -->
+                        <div class="sport-option">
+                            <input type="checkbox" id="badminton_men" name="sports[]" value="badminton_men" 
+                                <%= selectedSports.includes('badminton_men') ? 'checked' : '' %>>
+                            <label for="badminton_men">Badminton Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="badminton_women" name="sports[]" value="badminton_women" 
+                                <%= selectedSports.includes('badminton_women') ? 'checked' : '' %>>
+                            <label for="badminton_women">Badminton Women</label>
+                        </div>
+                
+                        <!-- Sepak Takraw -->
+                        <div class="sport-option">
+                            <input type="checkbox" id="sepak_takraw_men" name="sports[]" value="sepak_takraw_men" 
+                                <%= selectedSports.includes('sepak_takraw_men') ? 'checked' : '' %>>
+                            <label for="sepak_takraw_men">Sepak Takraw Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="sepak_takraw_women" name="sports[]" value="sepak_takraw_women" 
+                                <%= selectedSports.includes('sepak_takraw_women') ? 'checked' : '' %>>
+                            <label for="sepak_takraw_women">Sepak Takraw Women</label>
+                        </div>
+                        
+                        <!-- Table Tennis -->
+                        <div class="sport-option">
+                            <input type="checkbox" id="table_tennis_men" name="sports[]" value="table_tennis_men" 
+                                <%= selectedSports.includes('table_tennis_men') ? 'checked' : '' %>>
+                            <label for="table_tennis_men">Table Tennis Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="table_tennis_women" name="sports[]" value="table_tennis_women" 
+                                <%= selectedSports.includes('table_tennis_women') ? 'checked' : '' %>>
+                            <label for="table_tennis_women">Table Tennis Women</label>
+                        </div>
+                        
+                        <!-- Chess -->
+                        <div class="sport-option">
+                            <input type="checkbox" id="chess_men" name="sports[]" value="chess_men" 
+                                <%= selectedSports.includes('chess_men') ? 'checked' : '' %>>
+                            <label for="chess_men">Chess Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="chess_women" name="sports[]" value="chess_women" 
+                                <%= selectedSports.includes('chess_women') ? 'checked' : '' %>>
+                            <label for="chess_women">Chess Women</label>
+                        </div>
+                
+                        <!-- Athletics - Men -->
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_100m_men" name="sports[]" value="athletics_100m_men" 
+                                <%= selectedSports.includes('athletics_100m_men') ? 'checked' : '' %>>
+                            <label for="athletics_100m_men">Athletics - 100m Sprint Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_200m_men" name="sports[]" value="athletics_200m_men" 
+                                <%= selectedSports.includes('athletics_200m_men') ? 'checked' : '' %>>
+                            <label for="athletics_200m_men">Athletics - 200m Sprint Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_400m_men" name="sports[]" value="athletics_400m_men" 
+                                <%= selectedSports.includes('athletics_400m_men') ? 'checked' : '' %>>
+                            <label for="athletics_400m_men">Athletics - 400m Sprint Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_800m_men" name="sports[]" value="athletics_800m_men" 
+                                <%= selectedSports.includes('athletics_800m_men') ? 'checked' : '' %>>
+                            <label for="athletics_800m_men">Athletics - 800m Run Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_1500m_men" name="sports[]" value="athletics_1500m_men" 
+                                <%= selectedSports.includes('athletics_1500m_men') ? 'checked' : '' %>>
+                            <label for="athletics_1500m_men">Athletics - 1500m Run Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_5000m_men" name="sports[]" value="athletics_5000m_men" 
+                                <%= selectedSports.includes('athletics_5000m_men') ? 'checked' : '' %>>
+                            <label for="athletics_5000m_men">Athletics - 5000m Run Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_longjump_men" name="sports[]" value="athletics_longjump_men" 
+                                <%= selectedSports.includes('athletics_longjump_men') ? 'checked' : '' %>>
+                            <label for="athletics_longjump_men">Athletics - Long Jump Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_highjump_men" name="sports[]" value="athletics_highjump_men" 
+                                <%= selectedSports.includes('athletics_highjump_men') ? 'checked' : '' %>>
+                            <label for="athletics_highjump_men">Athletics - High Jump Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_triplejump_men" name="sports[]" value="athletics_triplejump_men" 
+                                <%= selectedSports.includes('athletics_triplejump_men') ? 'checked' : '' %>>
+                            <label for="athletics_triplejump_men">Athletics - Triple Jump Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_shotput_men" name="sports[]" value="athletics_shotput_men" 
+                                <%= selectedSports.includes('athletics_shotput_men') ? 'checked' : '' %>>
+                            <label for="athletics_shotput_men">Athletics - Shot Put Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_javelin_men" name="sports[]" value="athletics_javelin_men" 
+                                <%= selectedSports.includes('athletics_javelin_men') ? 'checked' : '' %>>
+                            <label for="athletics_javelin_men">Athletics - Javelin Throw Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_discusthrow_men" name="sports[]" value="athletics_discusthrow_men" 
+                                <%= selectedSports.includes('athletics_discusthrow_men') ? 'checked' : '' %>>
+                            <label for="athletics_discusthrow_men">Athletics - Discus Throw Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_4x100_men" name="sports[]" value="athletics_4x100_men" 
+                                <%= selectedSports.includes('athletics_4x100_men') ? 'checked' : '' %>>
+                            <label for="athletics_4x100_men">Athletics - 4x100m Relay Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_4x400_men" name="sports[]" value="athletics_4x400_men" 
+                                <%= selectedSports.includes('athletics_4x400_men') ? 'checked' : '' %>>
+                            <label for="athletics_4x400_men">Athletics - 4x400m Relay Men</label>
+                        </div>
+                
+                        <!-- Athletics - Women -->
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_100m_women" name="sports[]" value="athletics_100m_women" 
+                                <%= selectedSports.includes('athletics_100m_women') ? 'checked' : '' %>>
+                            <label for="athletics_100m_women">Athletics - 100m Sprint Women</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_200m_women" name="sports[]" value="athletics_200m_women" 
+                                <%= selectedSports.includes('athletics_200m_women') ? 'checked' : '' %>>
+                            <label for="athletics_200m_women">Athletics - 200m Sprint Women</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_400m_women" name="sports[]" value="athletics_400m_women" 
+                                <%= selectedSports.includes('athletics_400m_women') ? 'checked' : '' %>>
+                            <label for="athletics_400m_women">Athletics - 400m Sprint Women</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_800m_women" name="sports[]" value="athletics_800m_women" 
+                                <%= selectedSports.includes('athletics_800m_women') ? 'checked' : '' %>>
+                            <label for="athletics_800m_women">Athletics - 800m Run Women</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_1500m_women" name="sports[]" value="athletics_1500m_women" 
+                                <%= selectedSports.includes('athletics_1500m_women') ? 'checked' : '' %>>
+                            <label for="athletics_1500m_women">Athletics - 1500m Run Women</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_5000m_women" name="sports[]" value="athletics_5000m_women" 
+                                <%= selectedSports.includes('athletics_5000m_women') ? 'checked' : '' %>>
+                            <label for="athletics_5000m_women">Athletics - 5000m Run Women</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_longjump_women" name="sports[]" value="athletics_longjump_women" 
+                                <%= selectedSports.includes('athletics_longjump_women') ? 'checked' : '' %>>
+                            <label for="athletics_longjump_women">Athletics - Long Jump Women</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_highjump_women" name="sports[]" value="athletics_highjump_women" 
+                                <%= selectedSports.includes('athletics_highjump_women') ? 'checked' : '' %>>
+                            <label for="athletics_highjump_women">Athletics - High Jump Women</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_triplejump_women" name="sports[]" value="athletics_triplejump_women" 
+                                <%= selectedSports.includes('athletics_triplejump_women') ? 'checked' : '' %>>
+                            <label for="athletics_triplejump_women">Athletics - Triple Jump Women</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_shotput_women" name="sports[]" value="athletics_shotput_women" 
+                                <%= selectedSports.includes('athletics_shotput_women') ? 'checked' : '' %>>
+                            <label for="athletics_shotput_women">Athletics - Shot Put Women</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_javelin_women" name="sports[]" value="athletics_javelin_women" 
+                                <%= selectedSports.includes('athletics_javelin_women') ? 'checked' : '' %>>
+                            <label for="athletics_javelin_women">Athletics - Javelin Throw Women</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_discusthrow_women" name="sports[]" value="athletics_discusthrow_women" 
+                                <%= selectedSports.includes('athletics_discusthrow_women') ? 'checked' : '' %>>
+                            <label for="athletics_discusthrow_women">Athletics - Discus Throw Women</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_4x100_women" name="sports[]" value="athletics_4x100_women" 
+                                <%= selectedSports.includes('athletics_4x100_women') ? 'checked' : '' %>>
+                            <label for="athletics_4x100_women">Athletics - 4x100m Relay Women</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="athletics_4x400_women" name="sports[]" value="athletics_4x400_women" 
+                                <%= selectedSports.includes('athletics_4x400_women') ? 'checked' : '' %>>
+                            <label for="athletics_4x400_women">Athletics - 4x400m Relay Women</label>
+                        </div>
+                
+                        <!-- Taekwondo -->
+                        <div class="sport-option">
+                            <input type="checkbox" id="taekwondo_men" name="sports[]" value="taekwondo_men" 
+                                <%= selectedSports.includes('taekwondo_men') ? 'checked' : '' %>>
+                            <label for="taekwondo_men">Taekwondo Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="taekwondo_women" name="sports[]" value="taekwondo_women" 
+                                <%= selectedSports.includes('taekwondo_women') ? 'checked' : '' %>>
+                            <label for="taekwondo_women">Taekwondo Women</label>
+                        </div>
+                        
+                        <!-- Arnis -->
+                        <div class="sport-option">
+                            <input type="checkbox" id="arnis_men" name="sports[]" value="arnis_men" 
+                                <%= selectedSports.includes('arnis_men') ? 'checked' : '' %>>
+                            <label for="arnis_men">Arnis Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="arnis_women" name="sports[]" value="arnis_women" 
+                                <%= selectedSports.includes('arnis_women') ? 'checked' : '' %>>
+                            <label for="arnis_women">Arnis Women</label>
+                        </div>
+                        
+                        <!-- Gymnastic -->
+                        <div class="sport-option">
+                            <input type="checkbox" id="gymnastic_men" name="sports[]" value="gymnastic_men" 
+                                <%= selectedSports.includes('gymnastic_men') ? 'checked' : '' %>>
+                            <label for="gymnastic_men">Gymnastic Men</label>
+                        </div>
+                        <div class="sport-option">
+                            <input type="checkbox" id="gymnastic_women" name="sports[]" value="gymnastic_women" 
+                                <%= selectedSports.includes('gymnastic_women') ? 'checked' : '' %>>
+                            <label for="gymnastic_women">Gymnastic Women</label>
+                        </div>
                     </div>
                 </div>
-            </div>
 
             <!-- Esports Section -->
             <div class="form-group">
@@ -722,5 +860,6 @@
     </script>
 </body>
 </html>
+
 
 
