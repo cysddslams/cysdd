@@ -8,9 +8,6 @@ const db = require('../config/db');
 const { getPendingCoachNotifications, getPendingTeamNotifications } = require("../utils/notificationHelper");
 
 
-
-
-
 // GET: Admin login page
 exports.getAdminLogin = async (req, res) => {
     if (req.session.admin && req.session.admin.id) {
@@ -46,10 +43,8 @@ exports.postAdminLogin = async (req, res) => {
                 id: admin.id,
                 username: admin.username
             };
-
             req.session.success = "Successfully logged in✅";
 
-            // ✅ Save session explicitly
             return req.session.save(err => {
                 if (err) {
                     console.error("Session save error:", err);
@@ -371,113 +366,6 @@ exports.postAdminProfile = async (req, res) => {
 };
 
 
-// Helper function to format date like Facebook
-function formatTimeAgo(dateString) {
-    const now = new Date();
-    const postDate = new Date(dateString);
-    const seconds = Math.floor((now - postDate) / 1000);
-    
-    let interval = Math.floor(seconds / 31536000);
-    if (interval >= 1) {
-        return interval === 1 ? "1yr" : `${interval}yrs`;
-    }
-    
-    interval = Math.floor(seconds / 2592000);
-    if (interval >= 1) {
-        return interval === 1 ? "1mon" : `${interval}mons`;
-    }
-    
-    interval = Math.floor(seconds / 86400);
-    if (interval >= 1) {
-        return interval === 1 ? "1d" : `${interval}d`;
-    }
-    
-    interval = Math.floor(seconds / 3600);
-    if (interval >= 1) {
-        return interval === 1 ? "1h" : `${interval}h`;
-    }
-    
-    interval = Math.floor(seconds / 60);
-    if (interval >= 1) {
-        return interval === 1 ? "1m" : `${interval}m`;
-    }
-    
-    return "just now";
-};
-
-
-//React to Post
-exports.reactToPost = async (req, res) => {
-    if (!req.session.admin) {
-        return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    const adminId = req.session.admin.id;
-    const { postId, reactionType } = req.params;
-
-    try {
-        // First check current reaction state
-        const [currentReaction] = await db.execute(`
-            SELECT reaction_type 
-            FROM post_reactions 
-            WHERE post_id = ? AND admin_id = ?
-        `, [postId, adminId]);
-
-        // Determine the action
-        let shouldRemove = false;
-        if (currentReaction.length > 0) {
-            shouldRemove = currentReaction[0].reaction_type === reactionType;
-        }
-
-        // Perform the action
-        if (shouldRemove) {
-            await db.execute(`
-                DELETE FROM post_reactions 
-                WHERE post_id = ? AND admin_id = ?
-            `, [postId, adminId]);
-        } else {
-            // Remove any existing reaction first
-            await db.execute(`
-                DELETE FROM post_reactions 
-                WHERE post_id = ? AND admin_id = ?
-            `, [postId, adminId]);
-            
-            // Add new reaction
-            await db.execute(`
-                INSERT INTO post_reactions 
-                (post_id, admin_id, reaction_type) 
-                VALUES (?, ?, ?)
-            `, [postId, adminId, reactionType]);
-        }
-
-        // Get updated counts and status
-        const [reactions] = await db.execute(`
-            SELECT 
-                SUM(reaction_type = 'like') AS likes,
-                SUM(reaction_type = 'dislike') AS dislikes,
-                EXISTS(SELECT 1 FROM post_reactions 
-                       WHERE post_id = ? AND admin_id = ? 
-                       AND reaction_type = 'like') AS has_liked,
-                EXISTS(SELECT 1 FROM post_reactions 
-                       WHERE post_id = ? AND admin_id = ? 
-                       AND reaction_type = 'dislike') AS has_disliked
-            FROM post_reactions
-            WHERE post_id = ?
-        `, [postId, adminId, postId, adminId, postId]);
-
-        res.json({
-            likes: reactions[0].likes || 0,
-            dislikes: reactions[0].dislikes || 0,
-            hasLiked: Boolean(reactions[0].has_liked),
-            hasDisliked: Boolean(reactions[0].has_disliked)
-        });
-
-    } catch (err) {
-        console.error("Error reacting to post:", err);
-        res.status(500).json({ error: 'Failed to process reaction' });
-    }
-};
-
 
 // Get admin Posts page
 exports.getAdminPosts = async (req, res) => {
@@ -486,8 +374,6 @@ exports.getAdminPosts = async (req, res) => {
     }
     const username = req.session.admin.username;
     const adminId = req.session.admin.id;
-
-    // ✅ Retrieve and clear flash messages before rendering
     const success = req.session.success;
     const error = req.session.error;
     req.session.success = null;
@@ -529,7 +415,6 @@ exports.getAdminPosts = async (req, res) => {
                 reactionsData[reaction.post_id].likes = reaction.likes || 0;
                 reactionsData[reaction.post_id].dislikes = reaction.dislikes || 0;
             });
-
             const [adminReactions] = await db.execute(`
                 SELECT post_id, reaction_type 
                 FROM post_reactions 
@@ -541,7 +426,6 @@ exports.getAdminPosts = async (req, res) => {
                 reactionsData[reaction.post_id].hasDisliked = reaction.reaction_type === 'dislike';
             });
         }
-
         posts = posts.map(post => {
             const reactions = reactionsData[post.id];
             return {
@@ -569,9 +453,6 @@ exports.getAdminPosts = async (req, res) => {
 };
 
 
-
-
-
 //Get Add post page
 exports.getAdminAddPost = (req, res) => {
     if (!req.session.admin) {
@@ -579,7 +460,6 @@ exports.getAdminAddPost = (req, res) => {
     }
     res.render("admin/adminAddPost", { messages: {} });
 };
-
 
 
 // POST Add Post
@@ -592,8 +472,8 @@ exports.postAdminAddPost = async (req, res) => {
     const images = mediaFiles
       .filter(file => file.mimetype.startsWith('image'))
       .map(file => ({
-        url: file.path,         // ✅ Cloudinary URL
-        public_id: file.filename // ✅ Cloudinary public_id
+        url: file.path,        
+        public_id: file.filename 
       }));
 
     const videos = mediaFiles
@@ -602,8 +482,6 @@ exports.postAdminAddPost = async (req, res) => {
         url: file.path,
         public_id: file.filename
       }));
-
-    // Save to DB (store JSON with URLs + public_ids)
     await db.execute(
       "INSERT INTO posts (images, videos, caption) VALUES (?, ?, ?)",
       [JSON.stringify(images), JSON.stringify(videos), caption]
@@ -614,6 +492,100 @@ exports.postAdminAddPost = async (req, res) => {
     console.error("Error uploading post:", error);
     res.status(500).send("Error saving the post.");
   }
+};
+
+// Helper function to format date 
+function formatTimeAgo(dateString) {
+    const now = new Date();
+    const postDate = new Date(dateString);
+    const seconds = Math.floor((now - postDate) / 1000);
+    
+    let interval = Math.floor(seconds / 31536000);
+    if (interval >= 1) {
+        return interval === 1 ? "1yr" : `${interval}yrs`;
+    }
+    interval = Math.floor(seconds / 2592000);
+    if (interval >= 1) {
+        return interval === 1 ? "1mon" : `${interval}mons`;
+    } 
+    interval = Math.floor(seconds / 86400);
+    if (interval >= 1) {
+        return interval === 1 ? "1d" : `${interval}d`;
+    }
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1) {
+        return interval === 1 ? "1h" : `${interval}h`;
+    }
+    
+    interval = Math.floor(seconds / 60);
+    if (interval >= 1) {
+        return interval === 1 ? "1m" : `${interval}m`;
+    }
+    return "just now";
+};
+
+
+//React to Post
+exports.reactToPost = async (req, res) => {
+    if (!req.session.admin) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const adminId = req.session.admin.id;
+    const { postId, reactionType } = req.params;
+
+    try {
+        const [currentReaction] = await db.execute(`
+            SELECT reaction_type 
+            FROM post_reactions 
+            WHERE post_id = ? AND admin_id = ?
+        `, [postId, adminId]);
+
+        let shouldRemove = false;
+        if (currentReaction.length > 0) {
+            shouldRemove = currentReaction[0].reaction_type === reactionType;
+        }
+
+        if (shouldRemove) {
+            await db.execute(`
+                DELETE FROM post_reactions 
+                WHERE post_id = ? AND admin_id = ?
+            `, [postId, adminId]);
+        } else {
+            await db.execute(`
+                DELETE FROM post_reactions 
+                WHERE post_id = ? AND admin_id = ?
+            `, [postId, adminId]);
+            
+            await db.execute(`
+                INSERT INTO post_reactions 
+                (post_id, admin_id, reaction_type) 
+                VALUES (?, ?, ?)
+            `, [postId, adminId, reactionType]);
+        }
+
+        const [reactions] = await db.execute(`
+            SELECT 
+                SUM(reaction_type = 'like') AS likes,
+                SUM(reaction_type = 'dislike') AS dislikes,
+                EXISTS(SELECT 1 FROM post_reactions 
+                       WHERE post_id = ? AND admin_id = ? 
+                       AND reaction_type = 'like') AS has_liked,
+                EXISTS(SELECT 1 FROM post_reactions 
+                       WHERE post_id = ? AND admin_id = ? 
+                       AND reaction_type = 'dislike') AS has_disliked
+            FROM post_reactions
+            WHERE post_id = ?
+        `, [postId, adminId, postId, adminId, postId]);
+        res.json({
+            likes: reactions[0].likes || 0,
+            dislikes: reactions[0].dislikes || 0,
+            hasLiked: Boolean(reactions[0].has_liked),
+            hasDisliked: Boolean(reactions[0].has_disliked)
+        });
+    } catch (err) {
+        console.error("Error reacting to post:", err);
+        res.status(500).json({ error: 'Failed to process reaction' });
+    }
 };
 
 //Delete posts
@@ -678,21 +650,15 @@ exports.getEventDetails = async (req, res) => {
     if (!req.session.admin) {
         return res.redirect("/admin");
     }
-    
     const eventId = req.params.id;
     const username = req.session.admin.username;
-
     try {
-        // Get event details
         const [eventRows] = await db.execute('SELECT * FROM events WHERE id = ?', [eventId]);
         
         if (eventRows.length === 0) {
             return res.redirect('/admin/events');
         }
-
         const event = eventRows[0];
-        
-        // Format date for display
         event.formattedDate = new Date(event.date_schedule).toLocaleString('en-US', {
             weekday: 'long',
             year: 'numeric',
@@ -701,8 +667,6 @@ exports.getEventDetails = async (req, res) => {
             hour: '2-digit',
             minute: '2-digit'
         });
-
-        // Get admin data for profile
         const [adminRows] = await db.execute("SELECT * FROM admins WHERE username = ?", [username]);
         const admin = adminRows[0];
 
@@ -722,20 +686,14 @@ exports.getCreateEvent = async (req, res) => {
     if (!req.session.admin) {
         return res.redirect("/admin");
     }
-    
     try {
-        // Get admin data from session or database
         const adminId = req.session.admin.id;
-        
-        // Fetch admin data from database
         const [adminRows] = await db.execute('SELECT * FROM admins WHERE id = ?', [adminId]);
         
         if (adminRows.length === 0) {
             return res.redirect("/admin");
         }
-
         const admin = adminRows[0];
-        
         res.render("admin/createEvents", { 
             messages: {},
             admin: admin 
@@ -746,7 +704,7 @@ exports.getCreateEvent = async (req, res) => {
     }
 };
 
-// Post Create Event (updated for gender-specific sports)
+// Post Create Event 
 exports.postCreateEvent = async (req, res) => {
     if (!req.session.admin) {
         return res.redirect("/admin");
@@ -755,7 +713,6 @@ exports.postCreateEvent = async (req, res) => {
     try {
         console.log("Raw form data:", req.body);
         console.log("Uploaded files:", req.files);
-
         const { title, description, date_schedule, location } = req.body;
 
         // Ensure arrays are always arrays, even if only one checkbox is selected
@@ -831,21 +788,14 @@ exports.getEditEvent = async (req, res) => {
     if (!req.session.admin) {
         return res.redirect("/admin");
     }
-
     const eventId = req.params.id;
-    
     try {
         const [eventRows] = await db.execute('SELECT * FROM events WHERE id = ?', [eventId]);
-        
         if (eventRows.length === 0) {
             return res.redirect('/admin/events');
         }
-
         const event = eventRows[0];
-        
-        // Format date for datetime-local input
         event.formattedDate = new Date(event.date_schedule).toISOString().slice(0, 16);
-        
         res.render("admin/editEventDetails", {
             event: event,
             messages: {}
@@ -856,19 +806,15 @@ exports.getEditEvent = async (req, res) => {
     }
 };
 
-// Update Event (Fixed for Cloudinary)
+// Update Event 
 exports.postUpdateEvent = async (req, res) => {
     if (!req.session.admin) {
         return res.redirect("/admin");
     }
-
     const eventId = req.params.id;
-    
     try {
         console.log("Raw form data:", req.body);
         console.log("Uploaded files:", req.files);
-
-        // Get all data from req.body
         const { title, description, date_schedule, location } = req.body;
         
         // Get arrays for sports, esports, and other activities
@@ -878,24 +824,19 @@ exports.postUpdateEvent = async (req, res) => {
         
         // Get file names (keep existing if no new file uploaded)
         let image, appointmentForm;
-        
-        // First get the current event to maintain existing files if not updated
         const [currentEvent] = await db.execute('SELECT image, appointmentForm, status FROM events WHERE id = ?', [eventId]);
         
-        // Use the SAME file handling as create function
         if (req.files?.image) {
-            image = req.files.image[0].path; // Use .path instead of .filename for Cloudinary
+            image = req.files.image[0].path; 
         } else {
             image = currentEvent[0].image;
         }
         
         if (req.files?.appointmentForm) {
-            appointmentForm = req.files.appointmentForm[0].path; // Use .path instead of .filename for Cloudinary
+            appointmentForm = req.files.appointmentForm[0].path; 
         } else {
             appointmentForm = currentEvent[0].appointmentForm;
         }
-
-        // Use existing status if not provided in form
         const status = req.body.status || currentEvent[0].status || null;
 
         console.log("Processed data:", {
@@ -925,7 +866,6 @@ exports.postUpdateEvent = async (req, res) => {
                 event: event
             });
         }
-
         // Convert arrays to comma-separated strings
         const sportsString = sports.join(',');
         const esportsString = esports.join(',');
@@ -981,7 +921,7 @@ exports.postUpdateEvent = async (req, res) => {
     }
 };
 
-// Helper function to convert display names to sport codes (for consistency)
+// Helper function to convert display names to sport codes 
 function convertDisplayNameToSportCode(displayName) {
     const reverseSportMap = {
         // Basketball
@@ -1143,16 +1083,12 @@ exports.getCreateEvent = async (req, res) => {
     }
     
     try {
-        // Get admin data from session or database
         const adminId = req.session.admin.id;
-        
-        // Fetch admin data from database
         const [adminRows] = await db.execute('SELECT * FROM admins WHERE id = ?', [adminId]);
         
         if (adminRows.length === 0) {
             return res.redirect("/admin");
         }
-
         const admin = adminRows[0];
         
         res.render("admin/createEvents", { 
@@ -1165,7 +1101,7 @@ exports.getCreateEvent = async (req, res) => {
     }
 };
 
-// Post Create Event (updated for gender-specific sports)
+// Post Create Event 
 exports.postCreateEvent = async (req, res) => {
     if (!req.session.admin) {
         return res.redirect("/admin");
@@ -1176,8 +1112,6 @@ exports.postCreateEvent = async (req, res) => {
         console.log("Uploaded files:", req.files);
 
         const { title, description, date_schedule, location } = req.body;
-
-        // Ensure arrays are always arrays, even if only one checkbox is selected
         const sports = [].concat(req.body.sports || req.body['sports[]'] || []);
         const esports = [].concat(req.body.esports || req.body['esports[]'] || []);
         const otherActivities = [].concat(req.body.other_activities || req.body['other_activities[]'] || []);
@@ -1961,6 +1895,7 @@ exports.exportEventResults = async (req, res) => {
         res.redirect('/admin/event-history');
     }
 };
+
 
 
 
