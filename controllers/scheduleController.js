@@ -16,7 +16,6 @@ exports.getSchedulePage = async (req, res) => {
             "SELECT * FROM events WHERE status = 'ongoing' ORDER BY created_at DESC"
         );
 
-        // Get notification data
         const newCoachRequests = await getPendingCoachNotifications();
         const newTeamRequests = await getPendingTeamNotifications();
         
@@ -51,10 +50,8 @@ exports.getEventSports = async (req, res) => {
 
         const eventData = event[0];
         const sports = [];
+        console.log('Event data:', eventData);
         
-        console.log('Event data:', eventData); // Debug log
-        
-        // Parse the actual sports from the event data - IMPROVED PARSING
         if (eventData.sports && eventData.sports !== 'none' && eventData.sports !== '') {
             const sportsList = eventData.sports.split(',').map(sport => sport.trim());
             console.log('Sports list:', sportsList); // Debug log
@@ -97,7 +94,7 @@ exports.getEventSports = async (req, res) => {
             });
         }
 
-        console.log('Final sports array:', sports); // Debug log
+        console.log('Final sports array:', sports);
         res.json({ sports });
     } catch (error) {
         console.error('Error getting event sports:', error);
@@ -201,8 +198,6 @@ async function generateSingleEliminationMatches(connection, bracketId, teams, ro
                 );
                 console.log(`Created match ${matchNumber}: ${shuffledTeams[i]} vs ${shuffledTeams[i + 1]}`);
             } else {
-                // Handle odd number of teams - team automatically advances to next round
-                // Create a special match record for the bye
                 await connection.execute(
                     `INSERT INTO matches (bracket_id, round_number, match_number, team1_id, team2_id, winner_team_id, status) 
                      VALUES (?, ?, ?, ?, NULL, ?, 'completed')`,
@@ -218,7 +213,7 @@ async function generateSingleEliminationMatches(connection, bracketId, teams, ro
     }
 }
 
-// Generate round robin matches - TRADITIONAL VERSION (All matches in Round 1)
+// Generate round robin matches 
 async function generateRoundRobinMatches(connection, bracketId, teams) {
     console.log(`Generating traditional round robin matches for ${teams.length} teams`);
     
@@ -242,8 +237,6 @@ async function generateRoundRobinMatches(connection, bracketId, teams) {
     }
     
     console.log(`Traditional round robin complete: ${matchNumber - 1} matches created in Round 1`);
-    
-    // For round robin, set total rounds to 1 since all matches are in the first round
     await connection.execute(
         "UPDATE tournament_progress SET total_rounds = 1 WHERE bracket_id = ?",
         [bracketId]
@@ -654,3 +647,4 @@ exports.setChampionManually = async (req, res) => {
     }
 
 };
+
