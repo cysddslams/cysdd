@@ -1065,6 +1065,7 @@
                     <div class="time-filter">
                         <button class="time-filter-btn active" data-period="weekly">Last 7 Days</button>
                         <button class="time-filter-btn" data-period="monthly">Last 30 Days</button>
+                        <button class="time-filter-btn" data-period="all">All Time</button>
                     </div>
                 </div>
             </div>
@@ -1239,235 +1240,265 @@
     
     <script>
         let isSidebarOpen = false;
-        let registrationChart = null;
+    let registrationChart = null;
 
-        // Registration Analytics Data
-        const analyticsData = {
-            weekly: <%- JSON.stringify(registrationAnalytics.weekly) %>,
-            monthly: <%- JSON.stringify(registrationAnalytics.monthly) %>
-        };
+    // Registration Analytics Data - NOW INCLUDES 'all'
+    const analyticsData = {
+        weekly: <%- JSON.stringify(registrationAnalytics.weekly) %>,
+        monthly: <%- JSON.stringify(registrationAnalytics.monthly) %>,
+        all: <%- JSON.stringify(registrationAnalytics.all) %>
+    };
 
-        function toggleNav() {
-            const sidebar = document.getElementById("mySidebar");
-            const content = document.querySelector(".dashboard-container");
-            const sidebarBtn = document.querySelector(".sidebar-btn");
+    function toggleNav() {
+        const sidebar = document.getElementById("mySidebar");
+        const content = document.querySelector(".dashboard-container");
+        const sidebarBtn = document.querySelector(".sidebar-btn");
 
-            if (isSidebarOpen) {
-                sidebar.style.left = "-240px";  
-                content.style.marginLeft = "0"; 
-                sidebarBtn.innerHTML = "&#9776;"; 
-            } else {
-                sidebar.style.left = "0";  
-                content.style.marginLeft = "0";  
-                sidebarBtn.innerHTML = "&#9776;"; 
-            }
-            isSidebarOpen = !isSidebarOpen;  
+        if (isSidebarOpen) {
+            sidebar.style.left = "-240px";  
+            content.style.marginLeft = "0"; 
+            sidebarBtn.innerHTML = "&#9776;"; 
+        } else {
+            sidebar.style.left = "0";  
+            content.style.marginLeft = "0";  
+            sidebarBtn.innerHTML = "&#9776;"; 
         }
-        
-        // Toggle the team dropdown
-        const teamDropdownBtn = document.querySelector('.team-dropdown-btn');
-        const teamDropdownContent = document.querySelector('.team-dropdown-content');
-        teamDropdownBtn.addEventListener('click', function() {
-            teamDropdownBtn.classList.toggle('active');
-            if (teamDropdownContent.style.display === "block") {
-                teamDropdownContent.style.display = "none";
-            } else {
-                teamDropdownContent.style.display = "block";
-            }
-        });
-        
-        // Show the logout confirmation modal
-        function showLogoutModal() {
-            document.getElementById('logoutModal').style.display = 'block';
+        isSidebarOpen = !isSidebarOpen;  
+    }
+    
+    // Toggle the team dropdown
+    const teamDropdownBtn = document.querySelector('.team-dropdown-btn');
+    const teamDropdownContent = document.querySelector('.team-dropdown-content');
+    teamDropdownBtn.addEventListener('click', function() {
+        teamDropdownBtn.classList.toggle('active');
+        if (teamDropdownContent.style.display === "block") {
+            teamDropdownContent.style.display = "none";
+        } else {
+            teamDropdownContent.style.display = "block";
         }
-        
-        function hideLogoutModal() {
-            document.getElementById('logoutModal').style.display = 'none';
+    });
+    
+    // Show the logout confirmation modal
+    function showLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'block';
+    }
+    
+    function hideLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'none';
+    }
+    
+    document.getElementById('confirmLogout').addEventListener('click', function() {
+        window.location.href = '/admin/logout';  
+    });
+    
+    document.getElementById('cancelLogout').addEventListener('click', function() {
+        hideLogoutModal(); 
+    });
+    
+    //Success message 
+    window.addEventListener("DOMContentLoaded", () => {
+        const successAlert = document.querySelector(".alert-success");
+        if (successAlert) {
+            setTimeout(() => {
+                successAlert.style.transition = "opacity 0.5s ease";
+                successAlert.style.opacity = "0";
+                setTimeout(() => successAlert.remove(), 500);
+            }, 1000);
         }
+    });
+    
+    //Notification toggle
+    function toggleNotificationForm() {
+        const dropdown = document.getElementById('notificationDropdown');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    }
+    
+    function closeNotificationForm() {
+        const dropdown = document.getElementById('notificationDropdown');
+        dropdown.style.display = 'none';
+    }
+    
+    window.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('notificationDropdown');
+        const bell = document.querySelector('.fa-bell');
         
-        document.getElementById('confirmLogout').addEventListener('click', function() {
-            window.location.href = '/admin/logout';  
-        });
-        
-        document.getElementById('cancelLogout').addEventListener('click', function() {
-            hideLogoutModal(); 
-        });
-        
-        //Success message 
-        window.addEventListener("DOMContentLoaded", () => {
-            const successAlert = document.querySelector(".alert-success");
-            if (successAlert) {
-                setTimeout(() => {
-                    successAlert.style.transition = "opacity 0.5s ease";
-                    successAlert.style.opacity = "0";
-                    setTimeout(() => successAlert.remove(), 500);
-                }, 1000);
-            }
-        });
-        
-        //Notification toggle
-        function toggleNotificationForm() {
-            const dropdown = document.getElementById('notificationDropdown');
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        }
-        
-        function closeNotificationForm() {
-            const dropdown = document.getElementById('notificationDropdown');
+        // Close notification dropdown if clicked outside
+        if (dropdown && !dropdown.contains(event.target) && !bell.contains(event.target)) {
             dropdown.style.display = 'none';
         }
         
-        window.addEventListener('click', function(event) {
-            const dropdown = document.getElementById('notificationDropdown');
-            const bell = document.querySelector('.fa-bell');
-            
-            // Close notification dropdown if clicked outside
-            if (dropdown && !dropdown.contains(event.target) && !bell.contains(event.target)) {
-                dropdown.style.display = 'none';
-            }
-            
-            // Close admin dropdown if clicked outside
-            const adminProfileContainer = document.getElementById('adminProfileContainer');
-            const adminDropdownMenu = document.getElementById('adminDropdownMenu');
-            
-            if (adminProfileContainer && adminDropdownMenu && 
-                !adminProfileContainer.contains(event.target) && 
-                adminDropdownMenu.style.display === 'block') {
-                adminDropdownMenu.style.display = 'none';
-            }
-        });
+        // Close admin dropdown if clicked outside
+        const adminProfileContainer = document.getElementById('adminProfileContainer');
+        const adminDropdownMenu = document.getElementById('adminDropdownMenu');
         
-        //admin profile dropdown - Fixed for desktop
-        document.addEventListener('DOMContentLoaded', () => {
-            const profileContainer = document.getElementById('adminProfileContainer');
-            const dropdownMenu = document.getElementById('adminDropdownMenu');
-            
-            profileContainer.addEventListener('click', function(e) {
-                e.stopPropagation();
-                // Toggle dropdown display
-                if (dropdownMenu.style.display === 'block') {
-                    dropdownMenu.style.display = 'none';
-                } else {
-                    dropdownMenu.style.display = 'block';
-                }
-            });
+        if (adminProfileContainer && adminDropdownMenu && 
+            !adminProfileContainer.contains(event.target) && 
+            adminDropdownMenu.style.display === 'block') {
+            adminDropdownMenu.style.display = 'none';
+        }
+    });
+    
+    //admin profile dropdown - Fixed for desktop
+    document.addEventListener('DOMContentLoaded', () => {
+        const profileContainer = document.getElementById('adminProfileContainer');
+        const dropdownMenu = document.getElementById('adminDropdownMenu');
+        
+        profileContainer.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // Toggle dropdown display
+            if (dropdownMenu.style.display === 'block') {
+                dropdownMenu.style.display = 'none';
+            } else {
+                dropdownMenu.style.display = 'block';
+            }
         });
+    });
 
-        // Registration Analytics Chart
-        function initializeAnalyticsChart() {
-            const ctx = document.getElementById('registrationChart').getContext('2d');
-            
-            // Format date for display
-            function formatDate(dateString) {
-                const date = new Date(dateString);
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    // Registration Analytics Chart - UPDATED TO HANDLE 'ALL' PERIOD
+    function initializeAnalyticsChart() {
+        const ctx = document.getElementById('registrationChart').getContext('2d');
+        
+        // Format date for display
+        function formatDate(dateString, period) {
+            const date = new Date(dateString);
+            if (period === 'all') {
+                // For all-time view, show month and year
+                return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
             }
-
-            // Calculate statistics
-            function calculateStats(data) {
-                const counts = data.map(item => item.count);
-                const total = counts.reduce((sum, count) => sum + count, 0);
-                const average = total / data.length;
-                const peak = Math.max(...counts);
-                
-                // Calculate growth rate (comparing last period with previous period)
-                const halfLength = Math.floor(data.length / 2);
-                const firstHalf = data.slice(0, halfLength).reduce((sum, item) => sum + item.count, 0);
-                const secondHalf = data.slice(halfLength).reduce((sum, item) => sum + item.count, 0);
-                const growthRate = firstHalf > 0 ? ((secondHalf - firstHalf) / firstHalf * 100).toFixed(1) : 0;
-
-                return { total, average, peak, growthRate };
-            }
-
-            // Update statistics display
-            function updateStats(data) {
-                const stats = calculateStats(data);
-                document.getElementById('totalRegistrations').textContent = stats.total;
-                document.getElementById('averageDaily').textContent = stats.average.toFixed(1);
-                document.getElementById('peakDay').textContent = stats.peak;
-                document.getElementById('growthRate').textContent = stats.growthRate + '%';
-            }
-
-            // Create or update chart
-            function updateChart(period) {
-                const data = analyticsData[period];
-                const labels = data.map(item => formatDate(item.date));
-                const counts = data.map(item => item.count);
-
-                if (registrationChart) {
-                    registrationChart.destroy();
-                }
-
-                registrationChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Player Registrations',
-                            data: counts,
-                            backgroundColor: 'rgba(139, 0, 57, 0.7)',
-                            borderColor: 'rgba(139, 0, 57, 1)',
-                            borderWidth: 1,
-                            borderRadius: 4,
-                            borderSkipped: false,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                titleColor: '#fff',
-                                bodyColor: '#fff',
-                                borderColor: '#8B0039',
-                                borderWidth: 1
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: {
-                                    color: 'rgba(0, 0, 0, 0.1)'
-                                },
-                                ticks: {
-                                    stepSize: 1
-                                }
-                            },
-                            x: {
-                                grid: {
-                                    display: false
-                                }
-                            }
-                        },
-                        animation: {
-                            duration: 1000,
-                            easing: 'easeInOutQuart'
-                        }
-                    }
-                });
-
-                updateStats(data);
-            }
-
-            // Time filter functionality
-            const timeFilterBtns = document.querySelectorAll('.time-filter-btn');
-            timeFilterBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    timeFilterBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    updateChart(this.dataset.period);
-                });
-            });
-
-            // Initialize with weekly data
-            updateChart('weekly');
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         }
 
-        // Initialize analytics chart when page loads
-        document.addEventListener('DOMContentLoaded', initializeAnalyticsChart);
+        // Calculate statistics
+        function calculateStats(data) {
+            const counts = data.map(item => item.count);
+            const total = counts.reduce((sum, count) => sum + count, 0);
+            const average = total / data.length;
+            const peak = Math.max(...counts);
+            
+            // Calculate growth rate (comparing last period with previous period)
+            const halfLength = Math.floor(data.length / 2);
+            const firstHalf = data.slice(0, halfLength).reduce((sum, item) => sum + item.count, 0);
+            const secondHalf = data.slice(halfLength).reduce((sum, item) => sum + item.count, 0);
+            const growthRate = firstHalf > 0 ? ((secondHalf - firstHalf) / firstHalf * 100).toFixed(1) : 0;
+
+            return { total, average, peak, growthRate };
+        }
+
+        // Update statistics display
+        function updateStats(data) {
+            const stats = calculateStats(data);
+            document.getElementById('totalRegistrations').textContent = stats.total;
+            document.getElementById('averageDaily').textContent = stats.average.toFixed(1);
+            document.getElementById('peakDay').textContent = stats.peak;
+            document.getElementById('growthRate').textContent = stats.growthRate + '%';
+        }
+
+        // Create or update chart
+        function updateChart(period) {
+            let data = analyticsData[period];
+            
+            // For all-time data, group by month if there are many data points
+            if (period === 'all' && data.length > 30) {
+                // Group data by month
+                const monthlyGrouped = {};
+                data.forEach(item => {
+                    const date = new Date(item.date);
+                    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    if (!monthlyGrouped[monthKey]) {
+                        monthlyGrouped[monthKey] = 0;
+                    }
+                    monthlyGrouped[monthKey] += item.count;
+                });
+                
+                // Convert back to array format
+                data = Object.keys(monthlyGrouped).sort().map(monthKey => ({
+                    date: monthKey + '-01',
+                    count: monthlyGrouped[monthKey]
+                }));
+            }
+            
+            const labels = data.map(item => formatDate(item.date, period));
+            const counts = data.map(item => item.count);
+
+            if (registrationChart) {
+                registrationChart.destroy();
+            }
+
+            registrationChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Player Registrations',
+                        data: counts,
+                        backgroundColor: 'rgba(139, 0, 57, 0.7)',
+                        borderColor: 'rgba(139, 0, 57, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: '#8B0039',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                stepSize: 1
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                maxRotation: period === 'all' ? 45 : 0,
+                                minRotation: period === 'all' ? 45 : 0
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+
+            updateStats(analyticsData[period]); // Use original data for stats
+        }
+
+        // Time filter functionality
+        const timeFilterBtns = document.querySelectorAll('.time-filter-btn');
+        timeFilterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                timeFilterBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                updateChart(this.dataset.period);
+            });
+        });
+
+        // Initialize with weekly data
+        updateChart('weekly');
+    }
+
+    // Initialize analytics chart when page loads
+    document.addEventListener('DOMContentLoaded', initializeAnalyticsChart);
     </script>
 </body>
 </html>
