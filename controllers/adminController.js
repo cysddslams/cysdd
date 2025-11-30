@@ -146,6 +146,16 @@ exports.getAdminHome = async (req, res) => {
             ORDER BY date
         `);
 
+        // All-time registration data for team players
+        const [allTimeRegistrations] = await db.execute(`
+            SELECT 
+                DATE(created_at) as date,
+                COUNT(*) as count
+            FROM team_players 
+            GROUP BY DATE(created_at)
+            ORDER BY date
+        `);
+
         // Registration by sport type
         const [sportRegistrations] = await db.execute(`
             SELECT 
@@ -181,7 +191,7 @@ exports.getAdminHome = async (req, res) => {
             last7Days.push(date.toISOString().split('T')[0]);
         }
 
-        // Generate last 30 days dates (last 4 weeks)
+        // Generate last 30 days dates
         for (let i = 29; i >= 0; i--) {
             const date = new Date();
             date.setDate(date.getDate() - i);
@@ -205,6 +215,12 @@ exports.getAdminHome = async (req, res) => {
                 count: found ? found.count : 0
             };
         });
+
+        // Map all-time data
+        const allTimeData = allTimeRegistrations.map(reg => ({
+            date: reg.date.toISOString().split('T')[0],
+            count: reg.count
+        }));
 
         // Get notifications
         const newCoachRequests = await getPendingCoachNotifications();
@@ -231,6 +247,7 @@ exports.getAdminHome = async (req, res) => {
             registrationAnalytics: {
                 weekly: weeklyData,
                 monthly: monthlyData,
+                all: allTimeData,
                 bySport: sportRegistrations,
                 byOrganization: organizationRegistrations
             }
@@ -258,6 +275,7 @@ exports.getAdminHome = async (req, res) => {
             registrationAnalytics: {
                 weekly: [],
                 monthly: [],
+                all: [],
                 bySport: [],
                 byOrganization: []
             }
@@ -1895,6 +1913,7 @@ exports.exportEventResults = async (req, res) => {
         res.redirect('/admin/event-history');
     }
 };
+
 
 
 
