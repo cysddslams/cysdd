@@ -1094,8 +1094,29 @@
             </div>
         </section>
         
-        <!-- Dashboard Statistics -->
+       <!-- Dashboard Statistics -->
         <section class="dashboard-stats">
+            <!-- Total Users Card -->
+            <div class="stat-card users">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-title">Total Users</div>
+                        <div class="stat-value"><%= dashboardStats.totalUsers %></div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                </div>
+                <div class="stat-footer">
+                    <span class="stat-change">
+                        <i class="fas fa-database"></i> All registered users
+                    </span>
+                    <a href="/admin/users" class="stat-link">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+            
             <!-- Total Players Card -->
             <div class="stat-card players">
                 <div class="stat-header">
