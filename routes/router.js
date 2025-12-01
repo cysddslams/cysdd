@@ -201,11 +201,12 @@ router.post("/admin/coach/updateStatus", adminAuthMiddleware, adminController.up
 router.get("/admin/users", adminAuthMiddleware, adminController.getAdminUsers);
 router.post('/admin/users/remove/:player_id', adminAuthMiddleware, adminController.removePlayer);
 router.get("/admin/team-request", adminAuthMiddleware, adminController.getAdminTeamRequest);
-router.post('/admin/handle-team-request', adminController.handleTeamRequest);
+router.post('/admin/handle-team-request',adminAuthMiddleware, adminController.handleTeamRequest);
 router.get("/admin/registered-team", adminAuthMiddleware, adminController.getAdminRegisteredTeam);
-router.get('/admin/event-history', adminController.getEventHistory);
-router.get('/admin/event-history/results/:eventId', adminController.getEventResults);
-router.get('/admin/event-history/export/:eventId', adminController.exportEventResults);
+router.get('/admin/event-history',adminAuthMiddleware, adminController.getEventHistory);
+router.get('/admin/event-history/results/:eventId',adminAuthMiddleware, adminController.getEventResults);
+router.get('/event-history/leaderboard/:eventId',adminAuthMiddleware, adminController.getEventLeaderboard);
+router.get('/admin/event-history/export/:eventId',adminAuthMiddleware, adminController.exportEventResults);
 
 
 // Schedule and Tournament Management Routes
@@ -223,6 +224,7 @@ router.post("/admin/schedule/set-champion", adminAuthMiddleware, scheduleControl
 
 
 module.exports = router;
+
 
 
 
