@@ -555,6 +555,63 @@
         margin: 10% auto;
     }
 }
+
+
+
+
+/* Add to your existing CSS in schedule.ejs */
+.sport-category-group {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.sport-category-group h5 {
+    color: #495057;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #007bff;
+    text-align: center;
+}
+
+.sport-card.badminton {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border: 1px solid #90caf9;
+}
+
+.sport-card.badminton.selected {
+    background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+    border: 2px solid #1976d2;
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+}
+
+.sport-card.badminton h5 {
+    color: #1565c0;
+}
+
+.category-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+.category-singles {
+    background-color: #4caf50;
+    color: white;
+}
+
+.category-doubles {
+    background-color: #ff9800;
+    color: white;
+}
 </style>
 </head>
 <body>
@@ -1579,6 +1636,7 @@
 </body>
 
 </html>
+
 
 
 
