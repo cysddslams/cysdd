@@ -953,148 +953,7 @@ const DOCUMENT_REQUIREMENTS = {
     graduating: ['COR', 'COG', 'school_id', 'med_cert', 'waiver', 'certification_lack_units']
 };
 
-//get Player Register Page
-exports.getPlayerRegister = async (req, res) => {
-    try {
-        const { team_id } = req.query;
-        
-        if (!req.user || !req.user.id) {
-            req.flash('error', 'You must be logged in to register a player.');
-            return res.redirect('/login');
-        }
 
-        if (!team_id || isNaN(team_id)) {
-            req.flash('error', 'Invalid team selection.');
-            return res.redirect('/all-teams');
-        }
-
-        // Get team info with event_id and organization type
-        const [team] = await db.execute(`
-            SELECT t.id, t.teamName, t.event_id, t.organization, e.sports, e.esports, e.other_activities 
-            FROM team t
-            LEFT JOIN events e ON t.event_id = e.id
-            WHERE t.id = ?`, 
-            [team_id]
-        );
-
-        if (!team || team.length === 0) {
-            req.flash('error', 'Team not found.');
-            return res.redirect('/all-teams');
-        }
-
-        const teamData = team[0];
-        let sports = [];
-
-        // If team is associated with an event and has sports/esports/activities defined
-        if (teamData.event_id) {
-            // Process sports
-            if (teamData.sports) {
-                const sportCodes = teamData.sports.split(',').map(s => s.trim()).filter(s => s.length > 0);
-                // Convert sport codes to display names with gender categories
-                sports = sports.concat(convertSportCodesToDisplayNames(sportCodes));
-            }
-            
-            // Process esports
-            if (teamData.esports) {
-                const esports = teamData.esports.split(',').map(s => s.trim()).filter(s => s.length > 0);
-                // Map esports codes to full names
-                const esportsMap = {
-                    'ml': 'Mobile Legends',
-                    'codm': 'CODM'
-                };
-                sports = sports.concat(esports.map(code => esportsMap[code] || code));
-            }
-            
-            // Process other activities
-            if (teamData.other_activities) {
-                const activities = teamData.other_activities.split(',').map(s => s.trim()).filter(s => s.length > 0);
-                // Map activity codes to full names
-                const activitiesMap = {
-                    'cheerdance': 'Cheerdance',
-                    'dance_competition': 'Dance Competition',
-                    'singing_contest': 'Singing Contest'
-                };
-                sports = sports.concat(activities.map(code => activitiesMap[code] || code));
-            }
-        } else {
-            // Fallback to all sports if no event
-            const [events] = await db.execute(
-                'SELECT sports, esports, other_activities FROM events WHERE sports IS NOT NULL OR esports IS NOT NULL OR other_activities IS NOT NULL'
-            );
-            
-            const allSports = [];
-            const esportsMap = {
-                'ml': 'Mobile Legends',
-                'codm': 'CODM'
-            };
-            const activitiesMap = {
-                'cheerdance': 'Cheerdance',
-                'dance_competition': 'Dance Competition',
-                'singing_contest': 'Singing Contest'
-            };
-
-            events.forEach(event => {
-                if (event.sports) {
-                    const sportCodes = event.sports.split(',').map(s => s.trim());
-                    allSports.push(...convertSportCodesToDisplayNames(sportCodes));
-                }
-                if (event.esports) {
-                    allSports.push(...event.esports.split(',').map(code => esportsMap[code] || code));
-                }
-                if (event.other_activities) {
-                    allSports.push(...event.other_activities.split(',').map(code => activitiesMap[code] || code));
-                }
-            });
-            
-            sports = [...new Set(allSports)]; // Remove duplicates
-        }
-
-        // Sort alphabetically
-        sports.sort();
-
-        // Get current player counts for each sport in this team
-        const sportData = await Promise.all(sports.map(async (sport) => {
-            // Map display name back to code
-            const sportCode = convertDisplayNameToSportCode(sport);
-
-            const [count] = await db.execute(`
-                SELECT COUNT(*) as count 
-                FROM team_players 
-                WHERE team_id = ? AND sports = ?
-            `, [team_id, sportCode]);
-
-            const limit = SPORT_LIMITS[sportCode] || 'No limit';
-            
-            // Create sport object with additional properties for badminton
-            const sportObj = {
-                name: sport,
-                currentCount: count[0].count,
-                limit: limit,
-                full: limit !== 'No limit' && count[0].count >= limit
-            };
-            
-            // Add badminton category information
-            if (sport.includes('Badminton')) {
-                sportObj.isBadminton = true;
-                sportObj.categoryOptions = ['Singles', 'Doubles'];
-            }
-            
-            return sportObj;
-        }));
-
-        res.render('user/playerRegister', {
-            team_id: team_id,
-            sports: sportData.filter(s => !s.full), // Only show sports that aren't full
-            teamName: teamData.teamName,
-            organizationType: teamData.organization,
-            errorMessage: req.flash('error')
-        });
-    } catch (error) {
-        console.error('Error in getPlayerRegister:', error);
-        req.flash('error', 'Error loading registration form');
-        res.redirect('/all-teams');
-    }
-};
 
 // Helper function to convert sport codes to display names with gender
 function convertSportCodesToDisplayNames(sportCodes) {
@@ -1250,6 +1109,151 @@ function convertDisplayNameToSportCode(displayName) {
     return reverseSportMap[displayName] || displayName;
 }
 
+
+//get Player Register Page
+exports.getPlayerRegister = async (req, res) => {
+    try {
+        const { team_id } = req.query;
+        
+        if (!req.user || !req.user.id) {
+            req.flash('error', 'You must be logged in to register a player.');
+            return res.redirect('/login');
+        }
+
+        if (!team_id || isNaN(team_id)) {
+            req.flash('error', 'Invalid team selection.');
+            return res.redirect('/all-teams');
+        }
+
+        // Get team info with event_id and organization type
+        const [team] = await db.execute(`
+            SELECT t.id, t.teamName, t.event_id, t.organization, e.sports, e.esports, e.other_activities 
+            FROM team t
+            LEFT JOIN events e ON t.event_id = e.id
+            WHERE t.id = ?`, 
+            [team_id]
+        );
+
+        if (!team || team.length === 0) {
+            req.flash('error', 'Team not found.');
+            return res.redirect('/all-teams');
+        }
+
+        const teamData = team[0];
+        let sports = [];
+
+        // If team is associated with an event and has sports/esports/activities defined
+        if (teamData.event_id) {
+            // Process sports
+            if (teamData.sports) {
+                const sportCodes = teamData.sports.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                // Convert sport codes to display names with gender categories
+                sports = sports.concat(convertSportCodesToDisplayNames(sportCodes));
+            }
+            
+            // Process esports
+            if (teamData.esports) {
+                const esports = teamData.esports.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                // Map esports codes to full names
+                const esportsMap = {
+                    'ml': 'Mobile Legends',
+                    'codm': 'CODM'
+                };
+                sports = sports.concat(esports.map(code => esportsMap[code] || code));
+            }
+            
+            // Process other activities
+            if (teamData.other_activities) {
+                const activities = teamData.other_activities.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                // Map activity codes to full names
+                const activitiesMap = {
+                    'cheerdance': 'Cheerdance',
+                    'dance_competition': 'Dance Competition',
+                    'singing_contest': 'Singing Contest'
+                };
+                sports = sports.concat(activities.map(code => activitiesMap[code] || code));
+            }
+        } else {
+            // Fallback to all sports if no event
+            const [events] = await db.execute(
+                'SELECT sports, esports, other_activities FROM events WHERE sports IS NOT NULL OR esports IS NOT NULL OR other_activities IS NOT NULL'
+            );
+            
+            const allSports = [];
+            const esportsMap = {
+                'ml': 'Mobile Legends',
+                'codm': 'CODM'
+            };
+            const activitiesMap = {
+                'cheerdance': 'Cheerdance',
+                'dance_competition': 'Dance Competition',
+                'singing_contest': 'Singing Contest'
+            };
+
+            events.forEach(event => {
+                if (event.sports) {
+                    const sportCodes = event.sports.split(',').map(s => s.trim());
+                    allSports.push(...convertSportCodesToDisplayNames(sportCodes));
+                }
+                if (event.esports) {
+                    allSports.push(...event.esports.split(',').map(code => esportsMap[code] || code));
+                }
+                if (event.other_activities) {
+                    allSports.push(...event.other_activities.split(',').map(code => activitiesMap[code] || code));
+                }
+            });
+            
+            sports = [...new Set(allSports)]; // Remove duplicates
+        }
+
+        // Sort alphabetically
+        sports.sort();
+
+        // Get current player counts for each sport in this team
+        const sportData = await Promise.all(sports.map(async (sport) => {
+            // Map display name back to code
+            const sportCode = convertDisplayNameToSportCode(sport);
+
+            const [count] = await db.execute(`
+                SELECT COUNT(*) as count 
+                FROM team_players 
+                WHERE team_id = ? AND sports = ?
+            `, [team_id, sportCode]);
+
+            const limit = SPORT_LIMITS[sportCode] || 'No limit';
+            
+            // Create sport object with additional properties for badminton
+            const sportObj = {
+                name: sport,
+                currentCount: count[0].count,
+                limit: limit,
+                full: limit !== 'No limit' && count[0].count >= limit
+            };
+            
+            // Add badminton category information
+            if (sport.includes('Badminton')) {
+                sportObj.isBadminton = true;
+                sportObj.categoryOptions = ['Singles', 'Doubles'];
+            }
+            
+            return sportObj;
+        }));
+
+        res.render('user/playerRegister', {
+            team_id: team_id,
+            sports: sportData.filter(s => !s.full), // Only show sports that aren't full
+            teamName: teamData.teamName,
+            organizationType: teamData.organization,
+            errorMessage: req.flash('error')
+        });
+    } catch (error) {
+        console.error('Error in getPlayerRegister:', error);
+        req.flash('error', 'Error loading registration form');
+        res.redirect('/all-teams');
+    }
+};
+
+
 //REGISTER PLAYER FUNCTION 
 exports.registerPlayer = async (req, res) => {
     const { 
@@ -1375,7 +1379,11 @@ exports.registerPlayer = async (req, res) => {
             COE,
             authorization_letter,
             school_id,
-            certification_lack_units
+            certification_lack_units,
+            "pending", // Add status value here
+            0, // Add notification_viewed value here
+            new Date(), // Add created_at
+            new Date()  // Add updated_at
         ];
 
         // Insert player - Updated SQL query to include badminton_category
@@ -1386,7 +1394,7 @@ exports.registerPlayer = async (req, res) => {
             student_type, COR, TOR_previous_school, COG, entry_form, COE, authorization_letter, school_id,
             certification_lack_units,
             status, notification_viewed, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "pending", 0, NOW(), NOW())
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, insertValues);
 
         req.flash('success', 'Player registered successfully!');
@@ -1485,6 +1493,7 @@ exports.uploadProfilePicture = async (req, res) => {
         res.sendStatus(500);
     }
 };
+
 
 
 
