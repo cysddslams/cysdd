@@ -1864,7 +1864,7 @@ exports.getEventResults = async (req, res) => {
     }
 };
 
-// Export event results
+// Export event results - IMPROVED VERSION
 exports.exportEventResults = async (req, res) => {
     if (!req.session.admin) {
         return res.redirect("/admin");
@@ -1885,32 +1885,261 @@ exports.exportEventResults = async (req, res) => {
 
         const event = events[0];
 
-        // Get all completed brackets with champions
+        // Get all brackets for this event with detailed information
         const [brackets] = await db.execute(
-            `SELECT tb.sport_type, tb.bracket_type, t.teamName as champion_name,
-                    c.fullname as coach_name, t.organization
+            `SELECT 
+                tb.id as bracket_id,
+                tb.sport_type,
+                tb.bracket_type,
+                tb.status as bracket_status,
+                tp.champion_team_id,
+                t.teamName as champion_name,
+                c.fullname as coach_name,
+                t.organization,
+                tp.is_completed,
+                tp.current_round,
+                tp.total_rounds,
+                DATE_FORMAT(tp.completed_at, '%Y-%m-%d %H:%i:%s') as completion_date
              FROM tournament_brackets tb
              LEFT JOIN tournament_progress tp ON tb.id = tp.bracket_id
              LEFT JOIN team t ON tp.champion_team_id = t.id
              LEFT JOIN coach c ON t.coach_id = c.id
-             WHERE tb.event_id = ? AND tp.is_completed = TRUE
-             ORDER BY tb.sport_type`,
+             WHERE tb.event_id = ?
+             ORDER BY tb.sport_type, tb.bracket_type`,
             [eventId]
         );
 
-        // Create CSV content
-        let csvContent = `Event: ${event.title}\n`;
-        csvContent += `Date: ${event.date_schedule}\n`;
-        csvContent += `Location: ${event.location}\n\n`;
-        csvContent += 'Sport,Bracket Type,Champion Team,Coach,Organization\n';
+        // Get match statistics for each bracket
+        const bracketsWithDetails = await Promise.all(
+            brackets.map(async (bracket) => {
+                // Get match count and statistics
+                const [matchStats] = await db.execute(
+                    `SELECT 
+                        COUNT(*) as total_matches,
+                        SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_matches,
+                        SUM(CASE WHEN status = 'scheduled' THEN 1 ELSE 0 END) as scheduled_matches,
+                        SUM(CASE WHEN status = 'ongoing' THEN 1 ELSE 0 END) as ongoing_matches
+                     FROM matches 
+                     WHERE bracket_id = ?`,
+                    [bracket.bracket_id]
+                );
+
+                // Get all matches with team details
+                const [matches] = await db.execute(
+                    `SELECT 
+                        m.*,
+                        t1.teamName as team1_name,
+                        t2.teamName as team2_name,
+                        t1.organization as team1_org,
+                        t2.organization as team2_org,
+                        winner.teamName as winner_name,
+                        DATE_FORMAT(m.match_date, '%Y-%m-%d %H:%i:%s') as match_date_formatted,
+                        DATE_FORMAT(m.completed_at, '%Y-%m-%d %H:%i:%s') as completed_date
+                     FROM matches m
+                     LEFT JOIN team t1 ON m.team1_id = t1.id
+                     LEFT JOIN team t2 ON m.team2_id = t2.id
+                     LEFT JOIN team winner ON m.winner_team_id = winner.id
+                     WHERE m.bracket_id = ?
+                     ORDER BY m.round_number, m.match_number`,
+                    [bracket.bracket_id]
+                );
+
+                // Get all participating teams in this bracket
+                const [participatingTeams] = await db.execute(
+                    `SELECT DISTINCT 
+                        t.id,
+                        t.teamName,
+                        t.organization,
+                        c.fullname as coach_name
+                     FROM matches m
+                     JOIN team t ON (m.team1_id = t.id OR m.team2_id = t.id)
+                     LEFT JOIN coach c ON t.coach_id = c.id
+                     WHERE m.bracket_id = ?
+                     ORDER BY t.teamName`,
+                    [bracket.bracket_id]
+                );
+
+                return {
+                    ...bracket,
+                    match_stats: matchStats[0] || {
+                        total_matches: 0,
+                        completed_matches: 0,
+                        scheduled_matches: 0,
+                        ongoing_matches: 0
+                    },
+                    matches: matches,
+                    participating_teams: participatingTeams,
+                    completion_rate: matchStats[0] && matchStats[0].total_matches > 0 ? 
+                        Math.round((matchStats[0].completed_matches / matchStats[0].total_matches) * 100) : 0
+                };
+            })
+        );
+
+        // Get event leaderboard data
+        const leaderboardData = await getEventLeaderboardData(eventId);
+
+        // Create comprehensive CSV content
+        let csvContent = 'EVENT RESULTS REPORT\n';
+        csvContent += '='.repeat(50) + '\n\n';
         
-        brackets.forEach(bracket => {
-            csvContent += `"${bracket.sport_type}","${bracket.bracket_type.replace('_', ' ')}","${bracket.champion_name || 'N/A'}","${bracket.coach_name || 'N/A'}","${bracket.organization || 'N/A'}"\n`;
+        // Event Information Section
+        csvContent += 'EVENT INFORMATION\n';
+        csvContent += '-' .repeat(30) + '\n';
+        csvContent += `Event Title: ${event.title}\n`;
+        csvContent += `Event Date: ${new Date(event.date_schedule).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        })}\n`;
+        csvContent += `Location: ${event.location}\n`;
+        csvContent += `Status: ${event.status}\n`;
+        csvContent += `Description: ${event.description || 'N/A'}\n\n`;
+        
+        // Tournament Brackets Summary
+        csvContent += 'TOURNAMENT BRACKETS SUMMARY\n';
+        csvContent += '-' .repeat(30) + '\n';
+        csvContent += 'Sport Type,Bracket Type,Status,Champion Team,Coach,Organization,Total Matches,Completed Matches,Completion Rate\n';
+        
+        bracketsWithDetails.forEach(bracket => {
+            csvContent += `"${bracket.sport_type}","${bracket.bracket_type.replace(/_/g, ' ')}","${bracket.bracket_status}","${bracket.champion_name || 'N/A'}","${bracket.coach_name || 'N/A'}","${bracket.organization || 'N/A'}","${bracket.match_stats.total_matches}","${bracket.match_stats.completed_matches}","${bracket.completion_rate}%"\n`;
         });
+        
+        csvContent += '\n';
+        
+        // Detailed Match Results by Bracket
+        csvContent += 'DETAILED MATCH RESULTS\n';
+        csvContent += '='.repeat(50) + '\n';
+        
+        bracketsWithDetails.forEach((bracket, index) => {
+            csvContent += `\n${index + 1}. ${bracket.sport_type.toUpperCase()} - ${bracket.bracket_type.replace(/_/g, ' ').toUpperCase()}\n`;
+            csvContent += '-' .repeat(40) + '\n';
+            
+            if (bracket.matches.length === 0) {
+                csvContent += 'No matches recorded for this bracket.\n';
+            } else {
+                csvContent += 'Round,Match,Team 1,Organization 1,Team 2,Organization 2,Winner,Score,Status,Match Date,Completed Date\n';
+                
+                bracket.matches.forEach(match => {
+                    csvContent += `"${match.round_number}","${match.match_number}","${match.team1_name || 'N/A'}","${match.team1_org || 'N/A'}","${match.team2_name || 'N/A'}","${match.team2_org || 'N/A'}","${match.winner_name || 'N/A'}","${match.team1_score || 0}-${match.team2_score || 0}","${match.status}","${match.match_date_formatted || 'N/A'}","${match.completed_date || 'N/A'}"\n`;
+                });
+            }
+            
+            // Participating Teams for this bracket
+            csvContent += `\nParticipating Teams (${bracket.participating_teams.length} teams):\n`;
+            csvContent += 'Team Name,Organization,Coach\n';
+            
+            bracket.participating_teams.forEach(team => {
+                csvContent += `"${team.teamName}","${team.organization || 'N/A'}","${team.coach_name || 'N/A'}"\n`;
+            });
+            
+            csvContent += '\n';
+        });
+        
+        // Event Leaderboard Section
+        if (leaderboardData.length > 0) {
+            csvContent += '\nEVENT LEADERBOARD\n';
+            csvContent += '='.repeat(50) + '\n';
+            
+            // Aggregate leaderboard across all sports
+            const teamStats = {};
+            leaderboardData.forEach(lb => {
+                if (!teamStats[lb.team_id]) {
+                    teamStats[lb.team_id] = {
+                        team_id: lb.team_id,
+                        team_name: lb.team_name,
+                        organization: lb.organization,
+                        gold: 0,
+                        silver: 0,
+                        bronze: 0,
+                        total_matches: 0,
+                        wins: 0
+                    };
+                }
+                
+                teamStats[lb.team_id].gold += lb.gold || 0;
+                teamStats[lb.team_id].silver += lb.silver || 0;
+                teamStats[lb.team_id].bronze += lb.bronze || 0;
+                teamStats[lb.team_id].total_matches += lb.total_matches || 0;
+                teamStats[lb.team_id].wins += lb.wins || 0;
+            });
+
+            // Convert to array and calculate points and win rate
+            const aggregatedLeaderboard = Object.values(teamStats).map(team => {
+                team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
+                team.win_rate = team.total_matches > 0 ? 
+                    Math.min(Math.round((team.wins / team.total_matches) * 100), 100) : 0;
+                return team;
+            });
+
+            // Sort by total points (descending)
+            aggregatedLeaderboard.sort((a, b) => b.total_points - a.total_points);
+            
+            csvContent += '\nOVERALL LEADERBOARD (ALL SPORTS)\n';
+            csvContent += '-' .repeat(30) + '\n';
+            csvContent += 'Rank,Team Name,Organization,Gold Medals,Silver Medals,Bronze Medals,Total Points,Matches Played,Wins,Win Rate\n';
+            
+            aggregatedLeaderboard.forEach((team, index) => {
+                const rank = index + 1;
+                csvContent += `"${rank}","${team.team_name}","${team.organization || 'N/A'}","${team.gold}","${team.silver}","${team.bronze}","${team.total_points}","${team.total_matches}","${team.wins}","${team.win_rate}%"\n`;
+            });
+            
+            // Leaderboard by Sport Type
+            const sportsLeaderboards = {};
+            leaderboardData.forEach(lb => {
+                if (!sportsLeaderboards[lb.sport_type]) {
+                    sportsLeaderboards[lb.sport_type] = [];
+                }
+                sportsLeaderboards[lb.sport_type].push(lb);
+            });
+
+            Object.keys(sportsLeaderboards).forEach(sport => {
+                csvContent += `\n${sport.toUpperCase()} LEADERBOARD\n`;
+                csvContent += '-' .repeat(30) + '\n';
+                csvContent += 'Rank,Team Name,Organization,Gold Medals,Silver Medals,Bronze Medals,Total Points,Matches Played,Wins,Win Rate\n';
+                
+                const sportLeaderboard = sportsLeaderboards[sport]
+                    .map(team => {
+                        team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
+                        team.win_rate = team.total_matches > 0 ? 
+                            Math.min(Math.round((team.wins / team.total_matches) * 100), 100) : 0;
+                        return team;
+                    })
+                    .sort((a, b) => b.total_points - a.total_points);
+                
+                sportLeaderboard.forEach((team, index) => {
+                    const rank = index + 1;
+                    csvContent += `"${rank}","${team.team_name}","${team.organization || 'N/A'}","${team.gold || 0}","${team.silver || 0}","${team.bronze || 0}","${team.total_points}","${team.total_matches || 0}","${team.wins || 0}","${team.win_rate}%"\n`;
+                });
+            });
+        }
+        
+        // Final Summary
+        csvContent += '\n\nEVENT SUMMARY\n';
+        csvContent += '='.repeat(50) + '\n';
+        csvContent += `Total Brackets: ${brackets.length}\n`;
+        
+        const completedBrackets = brackets.filter(b => b.is_completed).length;
+        csvContent += `Completed Brackets: ${completedBrackets}\n`;
+        
+        const totalMatches = bracketsWithDetails.reduce((sum, b) => sum + b.match_stats.total_matches, 0);
+        const completedMatches = bracketsWithDetails.reduce((sum, b) => sum + b.match_stats.completed_matches, 0);
+        csvContent += `Total Matches: ${totalMatches}\n`;
+        csvContent += `Completed Matches: ${completedMatches}\n`;
+        csvContent += `Overall Completion Rate: ${totalMatches > 0 ? Math.round((completedMatches / totalMatches) * 100) : 0}%\n\n`;
+        
+        csvContent += `Report Generated: ${new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })}\n`;
+        csvContent += 'Generated by: SLAMS Tournament Management System\n';
 
         // Set response headers for file download
+        const fileName = `${event.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_detailed_results_${new Date().toISOString().split('T')[0]}.csv`;
         res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', `attachment; filename="${event.title.replace(/\s+/g, '_')}_results.csv"`);
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
         res.send(csvContent);
 
     } catch (error) {
@@ -2164,6 +2393,7 @@ exports.getAllUsers = async (req, res) => {
         res.redirect('/admin/home');
     }
 };
+
 
 
 
