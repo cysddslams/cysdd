@@ -1064,13 +1064,22 @@ exports.getPlayerRegister = async (req, res) => {
             `, [team_id, sportCode]);
 
             const limit = SPORT_LIMITS[sportCode] || 'No limit';
-
-            return {
+            
+            // Create sport object with additional properties for badminton
+            const sportObj = {
                 name: sport,
                 currentCount: count[0].count,
                 limit: limit,
                 full: limit !== 'No limit' && count[0].count >= limit
             };
+            
+            // Add badminton category information
+            if (sport.includes('Badminton')) {
+                sportObj.isBadminton = true;
+                sportObj.categoryOptions = ['Singles', 'Doubles'];
+            }
+            
+            return sportObj;
         }));
 
         res.render('user/playerRegister', {
@@ -1250,6 +1259,7 @@ exports.registerPlayer = async (req, res) => {
         age, 
         sex, 
         sports,
+        badminton_category, // Added badminton category
         school,
         year_level,
         barangay,
@@ -1295,6 +1305,12 @@ exports.registerPlayer = async (req, res) => {
 
         // Map display names back to codes
         const sportsValue = convertDisplayNameToSportCode(sports);
+        
+        // Validate badminton category if sport is badminton
+        if ((sportsValue === 'badminton_men' || sportsValue === 'badminton_women') && !badminton_category) {
+            req.flash('error', 'Please select a badminton category (Singles or Doubles).');
+            return res.redirect(`/player-register?team_id=${team_id}`);
+        }
 
         // Check if sport has player limit
         if (SPORT_LIMITS[sportsValue]) {
@@ -1333,7 +1349,7 @@ exports.registerPlayer = async (req, res) => {
         const school_id = getFileUrl('school_id');
         const certification_lack_units = getFileUrl('certification_lack_units');
 
-        // Prepare values for database
+        // Prepare values for database - Updated to include badminton_category
         const insertValues = [
             team_id,
             userId,
@@ -1345,6 +1361,8 @@ exports.registerPlayer = async (req, res) => {
             parseInt(age),
             sex,
             sportsValue,
+            // Add badminton category only for badminton sports, otherwise null
+            (sportsValue === 'badminton_men' || sportsValue === 'badminton_women') ? badminton_category : null,
             organizationType === 'school' ? school : null,
             organizationType === 'school' ? year_level : null,
             organizationType === 'barangay' ? barangay : null,
@@ -1360,11 +1378,11 @@ exports.registerPlayer = async (req, res) => {
             certification_lack_units
         ];
 
-        // Insert player
+        // Insert player - Updated SQL query to include badminton_category
         await db.execute(`
             INSERT INTO team_players 
             (team_id, user_id, player_name, PSA, waiver, med_cert, 
-            birthdate, age, sex, sports, school, year_level, barangay, contact_number,
+            birthdate, age, sex, sports, badminton_category, school, year_level, barangay, contact_number,
             student_type, COR, TOR_previous_school, COG, entry_form, COE, authorization_letter, school_id,
             certification_lack_units,
             status, notification_viewed, created_at, updated_at)
