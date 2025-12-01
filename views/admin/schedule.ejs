@@ -819,16 +819,20 @@
         </div>
     
     <script>
-        let selectedEvent = null;
-        let selectedSport = null;
-        let selectedTeams = [];
-        let selectedBracketType = null;
-        let currentBracketId = null;
-        let existingBrackets = [];
+    let selectedEvent = null;
+    let selectedSport = null;
+    let selectedTeams = [];
+    let selectedBracketType = null;
+    let currentBracketId = null;
+    let existingBrackets = [];
 
+    // Event selection - FIXED: Add event listeners properly
+    document.addEventListener('DOMContentLoaded', function() {
         // Event selection
         document.querySelectorAll('.event-card').forEach(card => {
             card.addEventListener('click', function() {
+                console.log('Event card clicked:', this.dataset.eventId);
+                
                 selectedEvent = {
                     id: this.dataset.eventId,
                     title: this.dataset.eventTitle
@@ -838,389 +842,516 @@
                 loadSports(this.dataset.eventId);
             });
         });
+    });
 
-        // Load sports for selected event - UPDATED FOR BADMINTON CATEGORIES
-        async function loadSports(eventId) {
-            try {
-                console.log('Loading sports for event ID:', eventId);
-                const response = await fetch(`/admin/schedule/event/${eventId}/sports`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                console.log('Sports data received:', data);
-                
-                const sportsGrid = document.getElementById('sportsGrid');
-                sportsGrid.innerHTML = '';
-                
-                if (!data.sports || data.sports.length === 0) {
-                    sportsGrid.innerHTML = '<p>No sports available for this event.</p>';
-                    return;
-                }
-                
-                // Group badminton sports by category for better display
-                const badmintonSports = {};
-                const otherSports = [];
-                
-                data.sports.forEach(sport => {
-                    if (sport.name.includes('badminton') && sport.category) {
-                        const baseSport = sport.baseSport || sport.name.split(' - ')[0];
-                        if (!badmintonSports[baseSport]) {
-                            badmintonSports[baseSport] = [];
-                        }
-                        badmintonSports[baseSport].push(sport);
-                    } else {
-                        otherSports.push(sport);
+    // Load sports for selected event - FIXED VERSION
+    async function loadSports(eventId) {
+        try {
+            console.log('Loading sports for event ID:', eventId);
+            const response = await fetch(`/admin/schedule/event/${eventId}/sports`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            console.log('Sports data received:', data);
+            
+            const sportsGrid = document.getElementById('sportsGrid');
+            sportsGrid.innerHTML = '';
+            
+            if (!data.sports || data.sports.length === 0) {
+                sportsGrid.innerHTML = '<p>No sports available for this event.</p>';
+                return;
+            }
+            
+            // Group badminton sports by category for better display
+            const badmintonSports = {};
+            const otherSports = [];
+            
+            data.sports.forEach(sport => {
+                if (sport.name && sport.name.includes('badminton') && sport.category) {
+                    const baseSport = sport.baseSport || sport.name.split(' - ')[0];
+                    if (!badmintonSports[baseSport]) {
+                        badmintonSports[baseSport] = [];
                     }
-                });
-                
-                // Display badminton sports with categories
-                Object.keys(badmintonSports).forEach(baseSport => {
-                    const categoryDiv = document.createElement('div');
-                    categoryDiv.className = 'sport-category-group';
-                    categoryDiv.style.marginBottom = '20px';
-                    categoryDiv.style.padding = '15px';
-                    categoryDiv.style.border = '1px solid #ddd';
-                    categoryDiv.style.borderRadius = '10px';
-                    categoryDiv.style.backgroundColor = '#f8f9fa';
-                    
-                    const categoryTitle = document.createElement('h5');
-                    categoryTitle.textContent = baseSport.replace('_', ' ').toUpperCase();
-                    categoryTitle.style.color = '#333';
-                    categoryTitle.style.marginBottom = '10px';
-                    categoryTitle.style.textAlign = 'center';
-                    categoryDiv.appendChild(categoryTitle);
-                    
-                    const categoryGrid = document.createElement('div');
-                    categoryGrid.style.display = 'grid';
-                    categoryGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(180px, 1fr))';
-                    categoryGrid.style.gap = '10px';
-                    
-                    badmintonSports[baseSport].forEach(sport => {
-                        const sportCard = createSportCard(sport);
-                        categoryGrid.appendChild(sportCard);
-                    });
-                    
-                    categoryDiv.appendChild(categoryGrid);
-                    sportsGrid.appendChild(categoryDiv);
-                });
-                
-                // Display other sports
-                otherSports.forEach(sport => {
-                    const sportCard = createSportCard(sport);
-                    sportsGrid.appendChild(sportCard);
-                });
-                
-                document.getElementById('sportsSection').style.display = 'block';
-                document.getElementById('eventsSection').style.display = 'none';
-                
-            } catch (error) {
-                console.error('Error loading sports:', error);
-                alert('Error loading sports: ' + error.message);
-            }
-        }
-        
-        // Helper function to create sport card
-        function createSportCard(sport) {
-            const sportCard = document.createElement('div');
-            sportCard.className = 'sport-card';
-            
-            // Determine display name
-            let displayName = sport.name;
-            if (sport.category) {
-                displayName = `${sport.category} (${sport.gender})`;
-            }
-            
-            sportCard.innerHTML = `
-                <h5>${displayName}</h5>
-                <small>${sport.type ? sport.type.charAt(0).toUpperCase() + sport.type.slice(1).replace('_', ' ') : 'Sport'}</small>
-            `;
-            sportCard.dataset.sportType = sport.type;
-            sportCard.dataset.sportName = sport.name;
-            sportCard.dataset.baseSport = sport.baseSport || sport.name;
-            sportCard.dataset.category = sport.category || '';
-            sportCard.dataset.gender = sport.gender || '';
-            
-            sportCard.addEventListener('click', function() {
-                console.log('Sport card clicked:', this.dataset);
-                
-                // Remove selection from all cards
-                document.querySelectorAll('.sport-card').forEach(c => c.classList.remove('selected'));
-                
-                // Add selection to clicked card
-                this.classList.add('selected');
-                
-                selectedSport = {
-                    type: this.dataset.sportType,
-                    name: this.dataset.sportName,
-                    baseSport: this.dataset.baseSport,
-                    category: this.dataset.category,
-                    gender: this.dataset.gender
-                };
-                
-                console.log('Selected sport:', selectedSport);
-                
-                // Proceed to next step
-                checkExistingBrackets(selectedEvent.id, selectedSport.type, selectedSport.name);
+                    badmintonSports[baseSport].push(sport);
+                } else {
+                    otherSports.push(sport);
+                }
             });
             
-            return sportCard;
-        }
-        
-        document.getElementById('sportsSection').style.display = 'block';
-        document.getElementById('eventsSection').style.display = 'none';
-        
-    } catch (error) {
-        console.error('Error loading sports:', error);
-        alert('Error loading sports: ' + error.message);
-    }
-}
-
-        // Check if brackets already exist for this sport - UPDATED FOR BADMINTON CATEGORIES
-        async function checkExistingBrackets(eventId, sportType, sportName) {
-            try {
-                console.log(`Checking existing brackets for event ${eventId}, sport: ${sportName}`);
-                const response = await fetch(`/admin/schedule/event/${eventId}/brackets`);
-                const data = await response.json();
+            // Display badminton sports with categories
+            Object.keys(badmintonSports).forEach(baseSport => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'sport-category-group';
+                categoryDiv.style.marginBottom = '20px';
+                categoryDiv.style.padding = '15px';
+                categoryDiv.style.border = '1px solid #ddd';
+                categoryDiv.style.borderRadius = '10px';
+                categoryDiv.style.backgroundColor = '#f8f9fa';
                 
-                console.log('All brackets data:', data.brackets);
+                const categoryTitle = document.createElement('h5');
+                categoryTitle.textContent = baseSport.replace('_', ' ').toUpperCase();
+                categoryTitle.style.color = '#333';
+                categoryTitle.style.marginBottom = '10px';
+                categoryTitle.style.textAlign = 'center';
+                categoryDiv.appendChild(categoryTitle);
                 
-                // Filter brackets by exact sport name match
-                existingBrackets = data.brackets.filter(bracket => {
-                    const matches = bracket.sport_type && bracket.sport_type === sportName;
-                    console.log(`Comparing: "${bracket.sport_type}" with "${sportName}" -> ${matches}`);
-                    return matches;
+                const categoryGrid = document.createElement('div');
+                categoryGrid.style.display = 'grid';
+                categoryGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(180px, 1fr))';
+                categoryGrid.style.gap = '10px';
+                
+                badmintonSports[baseSport].forEach(sport => {
+                    const sportCard = createSportCard(sport);
+                    categoryGrid.appendChild(sportCard);
                 });
                 
-                console.log('Filtered existing brackets:', existingBrackets);
-                
-                if (existingBrackets.length > 0) {
-                    showExistingBrackets(eventId, sportType, sportName);
-                } else {
-                    console.log('No existing brackets found, loading teams...');
-                    loadTeams(eventId, sportType, sportName);
-                }
-            } catch (error) {
-                console.error('Error checking existing brackets:', error);
-                console.log('Error occurred, loading teams as fallback...');
+                categoryDiv.appendChild(categoryGrid);
+                sportsGrid.appendChild(categoryDiv);
+            });
+            
+            // Display other sports
+            otherSports.forEach(sport => {
+                const sportCard = createSportCard(sport);
+                sportsGrid.appendChild(sportCard);
+            });
+            
+            document.getElementById('sportsSection').style.display = 'block';
+            document.getElementById('eventsSection').style.display = 'none';
+            
+        } catch (error) {
+            console.error('Error loading sports:', error);
+            alert('Error loading sports: ' + error.message);
+        }
+    }
+    
+    // Helper function to create sport card
+    function createSportCard(sport) {
+        const sportCard = document.createElement('div');
+        sportCard.className = 'sport-card';
+        
+        // Add badminton class if it's badminton
+        if (sport.name && sport.name.includes('badminton')) {
+            sportCard.classList.add('badminton');
+        }
+        
+        // Determine display name
+        let displayName = sport.name || 'Unknown Sport';
+        if (sport.category) {
+            displayName = `${sport.category} (${sport.gender || ''})`;
+        }
+        
+        sportCard.innerHTML = `
+            <h5>${displayName}</h5>
+            <small>${sport.type ? sport.type.charAt(0).toUpperCase() + sport.type.slice(1).replace('_', ' ') : 'Sport'}</small>
+        `;
+        sportCard.dataset.sportType = sport.type;
+        sportCard.dataset.sportName = sport.name;
+        sportCard.dataset.baseSport = sport.baseSport || sport.name;
+        sportCard.dataset.category = sport.category || '';
+        sportCard.dataset.gender = sport.gender || '';
+        
+        sportCard.addEventListener('click', function() {
+            console.log('Sport card clicked:', this.dataset);
+            
+            // Remove selection from all cards
+            document.querySelectorAll('.sport-card').forEach(c => c.classList.remove('selected'));
+            
+            // Add selection to clicked card
+            this.classList.add('selected');
+            
+            selectedSport = {
+                type: this.dataset.sportType,
+                name: this.dataset.sportName,
+                baseSport: this.dataset.baseSport,
+                category: this.dataset.category,
+                gender: this.dataset.gender
+            };
+            
+            console.log('Selected sport:', selectedSport);
+            
+            // Proceed to next step
+            checkExistingBrackets(selectedEvent.id, selectedSport.type, selectedSport.name);
+        });
+        
+        return sportCard;
+    }
+
+    // Check if brackets already exist for this sport
+    async function checkExistingBrackets(eventId, sportType, sportName) {
+        try {
+            console.log(`Checking existing brackets for event ${eventId}, sport: ${sportName}`);
+            const response = await fetch(`/admin/schedule/event/${eventId}/brackets`);
+            const data = await response.json();
+            
+            console.log('All brackets data:', data.brackets);
+            
+            // Filter brackets by exact sport name match
+            existingBrackets = data.brackets.filter(bracket => {
+                const matches = bracket.sport_type && bracket.sport_type === sportName;
+                console.log(`Comparing: "${bracket.sport_type}" with "${sportName}" -> ${matches}`);
+                return matches;
+            });
+            
+            console.log('Filtered existing brackets:', existingBrackets);
+            
+            if (existingBrackets.length > 0) {
+                showExistingBrackets(eventId, sportType, sportName);
+            } else {
+                console.log('No existing brackets found, loading teams...');
                 loadTeams(eventId, sportType, sportName);
             }
+        } catch (error) {
+            console.error('Error checking existing brackets:', error);
+            console.log('Error occurred, loading teams as fallback...');
+            loadTeams(eventId, sportType, sportName);
         }
+    }
 
-        // Show existing brackets
-        function showExistingBrackets(eventId, sportType, sportName) {
-            const bracketList = document.getElementById('bracketList');
-            bracketList.innerHTML = '';
+    // Show existing brackets
+    function showExistingBrackets(eventId, sportType, sportName) {
+        const bracketList = document.getElementById('bracketList');
+        bracketList.innerHTML = '';
+        
+        existingBrackets.forEach(bracket => {
+            const bracketItem = document.createElement('div');
+            bracketItem.className = 'bracket-item';
+            bracketItem.innerHTML = `
+                <h5>${bracket.bracket_type.replace('_', ' ').toUpperCase()} Bracket</h5>
+                <p><strong>Status:</strong> ${bracket.is_completed ? 'Completed' : 'In Progress'}</p>
+                <p><strong>Current Round:</strong> ${bracket.current_round || 1}</p>
+                ${bracket.champion_name ? `<p><strong>Champion:</strong> ${bracket.champion_name}</p>` : ''}
+                <p><strong>Created:</strong> ${new Date(bracket.created_at).toLocaleDateString()}</p>
+            `;
             
-            existingBrackets.forEach(bracket => {
-                const bracketItem = document.createElement('div');
-                bracketItem.className = 'bracket-item';
-                bracketItem.innerHTML = `
-                    <h5>${bracket.bracket_type.replace('_', ' ').toUpperCase()} Bracket</h5>
-                    <p><strong>Status:</strong> ${bracket.is_completed ? 'Completed' : 'In Progress'}</p>
-                    <p><strong>Current Round:</strong> ${bracket.current_round || 1}</p>
-                    ${bracket.champion_name ? `<p><strong>Champion:</strong> ${bracket.champion_name}</p>` : ''}
-                    <p><strong>Created:</strong> ${new Date(bracket.created_at).toLocaleDateString()}</p>
-                `;
-                
-                bracketItem.addEventListener('click', function() {
-                    loadExistingBracket(bracket.id);
-                });
-                
-                bracketList.appendChild(bracketItem);
+            bracketItem.addEventListener('click', function() {
+                loadExistingBracket(bracket.id);
             });
             
-            document.getElementById('existingBracketsSection').style.display = 'block';
-            document.getElementById('teamsSelectionSection').style.display = 'none';
+            bracketList.appendChild(bracketItem);
+        });
+        
+        document.getElementById('existingBracketsSection').style.display = 'block';
+        document.getElementById('teamsSelectionSection').style.display = 'none';
+        document.getElementById('selectedSportTitle').textContent = sportName;
+        document.getElementById('teamsSection').style.display = 'block';
+        document.getElementById('sportsSection').style.display = 'none';
+    }
+
+    // Load existing bracket matches
+    async function loadExistingBracket(bracketId) {
+        currentBracketId = bracketId;
+        await loadBracketMatches(bracketId);
+        document.getElementById('backToBrackets').style.display = 'block';
+    }
+
+    // Load teams for selected event and sport
+    async function loadTeams(eventId, sportType, sportName) {
+        try {
+            console.log(`Loading teams for event ${eventId}, sport type: ${sportType}`);
+            const response = await fetch(`/admin/schedule/event/${eventId}/sport/${sportType}/teams`);
+            const data = await response.json();
+            
+            console.log('Teams data received:', data);
+            
+            const teamsGrid = document.getElementById('teamsGrid');
+            teamsGrid.innerHTML = '';
+            
+            if (!data.teams || data.teams.length === 0) {
+                teamsGrid.innerHTML = '<p>No teams registered for this sport.</p>';
+                return;
+            }
+            
+            data.teams.forEach(team => {
+                const teamCard = document.createElement('div');
+                teamCard.className = 'team-card';
+                teamCard.innerHTML = `
+                    <h5>${team.teamName}</h5>
+                    <p>Coach: ${team.coach_name || 'N/A'}</p>
+                    <p>Organization: ${team.organization || 'N/A'}</p>
+                `;
+                teamCard.dataset.teamId = team.id;
+                teamCard.dataset.teamName = team.teamName;
+                
+                teamCard.addEventListener('click', function() {
+                    this.classList.toggle('selected');
+                    const teamId = this.dataset.teamId;
+                    
+                    if (this.classList.contains('selected')) {
+                        selectedTeams.push({
+                            id: teamId,
+                            name: this.dataset.teamName
+                        });
+                    } else {
+                        selectedTeams = selectedTeams.filter(team => team.id !== teamId);
+                    }
+                    
+                    // Update button text with count
+                    const proceedBtn = document.getElementById('proceedToBracket');
+                    proceedBtn.textContent = `Proceed to Bracket Creation (${selectedTeams.length} teams selected)`;
+                });
+                
+                teamsGrid.appendChild(teamCard);
+            });
+            
+            document.getElementById('existingBracketsSection').style.display = 'none';
+            document.getElementById('teamsSelectionSection').style.display = 'block';
             document.getElementById('selectedSportTitle').textContent = sportName;
             document.getElementById('teamsSection').style.display = 'block';
             document.getElementById('sportsSection').style.display = 'none';
+        } catch (error) {
+            console.error('Error loading teams:', error);
+            alert('Error loading teams: ' + error.message);
         }
+    }
 
-        // Load existing bracket matches
-        async function loadExistingBracket(bracketId) {
-            currentBracketId = bracketId;
-            await loadBracketMatches(bracketId);
-            document.getElementById('backToBrackets').style.display = 'block';
+    // Create new bracket button
+    document.getElementById('createNewBracket')?.addEventListener('click', function() {
+        document.getElementById('existingBracketsSection').style.display = 'none';
+        document.getElementById('teamsSelectionSection').style.display = 'block';
+    });
+
+    // Proceed to bracket creation
+    document.getElementById('proceedToBracket').addEventListener('click', function() {
+        if (selectedTeams.length < 2) {
+            alert('Please select at least 2 teams');
+            return;
         }
+        
+        document.getElementById('bracketSection').style.display = 'block';
+        document.getElementById('teamsSection').style.display = 'none';
+        
+        // Reset bracket selection
+        document.querySelectorAll('.bracket-option').forEach(o => o.classList.remove('selected'));
+        selectedBracketType = null;
+    });
 
-        // Load teams for selected event and sport - FIXED VERSION
-        async function loadTeams(eventId, sportType, sportName) {
-            try {
-                console.log(`Loading teams for event ${eventId}, sport type: ${sportType}`);
-                const response = await fetch(`/admin/schedule/event/${eventId}/sport/${sportType}/teams`);
-                const data = await response.json();
-                
-                console.log('Teams data received:', data);
-                
-                const teamsGrid = document.getElementById('teamsGrid');
-                teamsGrid.innerHTML = '';
-                
-                if (!data.teams || data.teams.length === 0) {
-                    teamsGrid.innerHTML = '<p>No teams registered for this sport.</p>';
-                    return;
-                }
-                
-                data.teams.forEach(team => {
-                    const teamCard = document.createElement('div');
-                    teamCard.className = 'team-card';
-                    teamCard.innerHTML = `
-                        <h5>${team.teamName}</h5>
-                        <p>Coach: ${team.coach_name || 'N/A'}</p>
-                        <p>Organization: ${team.organization || 'N/A'}</p>
-                    `;
-                    teamCard.dataset.teamId = team.id;
-                    teamCard.dataset.teamName = team.teamName;
-                    
-                    teamCard.addEventListener('click', function() {
-                        this.classList.toggle('selected');
-                        const teamId = this.dataset.teamId;
-                        
-                        if (this.classList.contains('selected')) {
-                            selectedTeams.push({
-                                id: teamId,
-                                name: this.dataset.teamName
-                            });
-                        } else {
-                            selectedTeams = selectedTeams.filter(team => team.id !== teamId);
-                        }
-                        
-                        // Update button text with count
-                        const proceedBtn = document.getElementById('proceedToBracket');
-                        proceedBtn.textContent = `Proceed to Bracket Creation (${selectedTeams.length} teams selected)`;
-                    });
-                    
-                    teamsGrid.appendChild(teamCard);
-                });
-                
-                document.getElementById('existingBracketsSection').style.display = 'none';
-                document.getElementById('teamsSelectionSection').style.display = 'block';
-                document.getElementById('selectedSportTitle').textContent = sportName;
-                document.getElementById('teamsSection').style.display = 'block';
-                document.getElementById('sportsSection').style.display = 'none';
-            } catch (error) {
-                console.error('Error loading teams:', error);
-                alert('Error loading teams: ' + error.message);
-            }
-        }
-
-        // Create new bracket button
-        document.getElementById('createNewBracket')?.addEventListener('click', function() {
-            document.getElementById('existingBracketsSection').style.display = 'none';
-            document.getElementById('teamsSelectionSection').style.display = 'block';
-        });
-
-        // Proceed to bracket creation
-        document.getElementById('proceedToBracket').addEventListener('click', function() {
-            if (selectedTeams.length < 2) {
-                alert('Please select at least 2 teams');
-                return;
-            }
-            
-            document.getElementById('bracketSection').style.display = 'block';
-            document.getElementById('teamsSection').style.display = 'none';
-            
-            // Reset bracket selection
+    // Bracket type selection
+    document.querySelectorAll('.bracket-option').forEach(option => {
+        option.addEventListener('click', function() {
             document.querySelectorAll('.bracket-option').forEach(o => o.classList.remove('selected'));
-            selectedBracketType = null;
+            this.classList.add('selected');
+            selectedBracketType = this.dataset.bracketType;
+            console.log('Selected bracket type:', selectedBracketType);
         });
+    });
 
-        // Bracket type selection
-        document.querySelectorAll('.bracket-option').forEach(option => {
-            option.addEventListener('click', function() {
-                document.querySelectorAll('.bracket-option').forEach(o => o.classList.remove('selected'));
-                this.classList.add('selected');
-                selectedBracketType = this.dataset.bracketType;
-                console.log('Selected bracket type:', selectedBracketType);
+    // Create bracket
+    document.getElementById('createBracket').addEventListener('click', async function() {
+        if (!selectedBracketType) {
+            alert('Please select a bracket type');
+            return;
+        }
+
+        if (selectedTeams.length < 2) {
+            alert('Please select at least 2 teams');
+            return;
+        }
+
+        try {
+            const teamIds = selectedTeams.map(team => team.id);
+            
+            console.log('Creating bracket with data:', {
+                eventId: selectedEvent.id,
+                sportType: selectedSport.type,
+                sportName: selectedSport.name,
+                bracketType: selectedBracketType,
+                teams: teamIds
             });
-        });
-
-        // Create bracket
-        document.getElementById('createBracket').addEventListener('click', async function() {
-            if (!selectedBracketType) {
-                alert('Please select a bracket type');
-                return;
-            }
-
-            if (selectedTeams.length < 2) {
-                alert('Please select at least 2 teams');
-                return;
-            }
-
-            try {
-                const teamIds = selectedTeams.map(team => team.id);
-                
-                console.log('Creating bracket with data:', {
+            
+            const response = await fetch('/admin/schedule/create-bracket', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
                     eventId: selectedEvent.id,
                     sportType: selectedSport.type,
                     sportName: selectedSport.name,
                     bracketType: selectedBracketType,
                     teams: teamIds
-                });
-                
-                const response = await fetch('/admin/schedule/create-bracket', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        eventId: selectedEvent.id,
-                        sportType: selectedSport.type,
-                        sportName: selectedSport.name,
-                        bracketType: selectedBracketType,
-                        teams: teamIds
-                    })
-                });
+                })
+            });
 
-                const data = await response.json();
-                
-                if (data.success) {
-                    currentBracketId = data.bracketId;
-                    alert('Bracket created successfully!');
-                    loadBracketMatches(data.bracketId);
-                } else {
-                    alert('Error creating bracket: ' + data.error);
-                }
-            } catch (error) {
-                console.error('Error creating bracket:', error);
-                alert('Error creating bracket: ' + error.message);
+            const data = await response.json();
+            
+            if (data.success) {
+                currentBracketId = data.bracketId;
+                alert('Bracket created successfully!');
+                loadBracketMatches(data.bracketId);
+            } else {
+                alert('Error creating bracket: ' + data.error);
             }
+        } catch (error) {
+            console.error('Error creating bracket:', error);
+            alert('Error creating bracket: ' + error.message);
+        }
+    });
+
+    // Load bracket matches
+    async function loadBracketMatches(bracketId) {
+        try {
+            console.log(`Loading matches for bracket ${bracketId}`);
+            const response = await fetch(`/admin/schedule/bracket/${bracketId}/matches`);
+            const data = await response.json();
+            
+            console.log('Matches data:', data.matches);
+            console.log('Bracket data:', data.bracket);
+            
+            displayMatches(data.matches, data.bracket);
+            document.getElementById('matchesSection').style.display = 'block';
+            document.getElementById('bracketSection').style.display = 'none';
+            document.getElementById('teamsSection').style.display = 'none';
+        } catch (error) {
+            console.error('Error loading matches:', error);
+            alert('Error loading matches');
+        }
+    }
+
+    // Display matches
+    function displayMatches(matches, bracket) {
+        const container = document.getElementById('matchesContainer');
+        container.innerHTML = `
+            <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                <h4 style="color: #333; margin: 0; font-size: 1.4rem;">${bracket.event_name} - ${bracket.sport_type}</h4>
+                <p style="color: #666; margin: 5px 0 0 0; font-size: 1rem;">Bracket Type: ${bracket.bracket_type.replace('_', ' ').toUpperCase()}</p>
+                <p style="color: #666; margin: 5px 0 0 0; font-size: 1rem;">Status: ${bracket.is_completed ? 'Completed' : 'In Progress'} | Current Round: ${bracket.current_round || 1}</p>
+                ${bracket.champion_name ? `<p style="color: #28a745; margin: 5px 0 0 0; font-size: 1rem; font-weight: 600;"><i class="fas fa-trophy"></i> Champion: ${bracket.champion_name}</p>` : ''}
+            </div>
+        `;
+        
+        // Group matches by round
+        const rounds = {};
+        matches.forEach(match => {
+            if (!rounds[match.round_number]) {
+                rounds[match.round_number] = [];
+            }
+            rounds[match.round_number].push(match);
         });
+        
+        // Display each round
+        Object.keys(rounds).forEach(roundNumber => {
+            const roundDiv = document.createElement('div');
+            roundDiv.className = 'round';
+            roundDiv.innerHTML = `<div class="round-header"><i class="fas fa-flag"></i> Round ${roundNumber}</div>`;
+            
+            rounds[roundNumber].forEach(match => {
+                const matchCard = document.createElement('div');
+                matchCard.className = 'match-card';
+                
+                // Format date if available
+                let dateInfo = '';
+                if (match.match_date) {
+                    const matchDate = new Date(match.match_date);
+                    dateInfo = `
+                        <div style="background: #e8f4ff; padding: 10px; border-radius: 6px; margin: 10px 0;">
+                            <p style="margin: 0; color: #0066cc; font-weight: 600;">
+                                <i class="fas fa-calendar"></i> ${matchDate.toLocaleDateString()} 
+                                <i class="fas fa-clock" style="margin-left: 15px;"></i> ${matchDate.toLocaleTimeString()}
+                            </p>
+                            ${match.venue ? `<p style="margin: 5px 0 0 0; color: #004d99;"><i class="fas fa-map-marker-alt"></i> ${match.venue}</p>` : ''}
+                        </div>
+                    `;
+                }
+                
+                // Winner info if available
+                let winnerInfo = '';
+                if (match.winner_name) {
+                    winnerInfo = `
+                        <div style="background: #d4edda; padding: 10px; border-radius: 6px; margin: 10px 0;">
+                            <p style="margin: 0; color: #155724; font-weight: 600;">
+                                <i class="fas fa-trophy"></i> Winner: ${match.winner_name}
+                                ${match.team1_score !== null ? ` (${match.team1_score}-${match.team2_score})` : ''}
+                            </p>
+                        </div>
+                    `;
+                }
+                
+                matchCard.innerHTML = `
+                    <div class="teams-display">
+                        <div class="team">${match.team1_name || 'TBD'}</div>
+                        <div class="vs">VS</div>
+                        <div class="team">${match.team2_name || 'TBD'}</div>
+                    </div>
+                    ${dateInfo}
+                    ${winnerInfo}
+                    <div class="match-actions">
+                        <button class="btn btn-primary" onclick="openScheduleModal(${match.id}, '${match.team1_name || 'TBD'}', '${match.team2_name || 'TBD'}')">
+                            <i class="fas fa-calendar-plus"></i> Schedule
+                        </button>
+                        <button class="btn btn-success" onclick="openResultModal(${match.id}, ${match.team1_id}, '${match.team1_name || 'TBD'}', ${match.team2_id}, '${match.team2_name || 'TBD'}')">
+                            <i class="fas fa-flag-checkered"></i> Set Result
+                        </button>
+                    </div>
+                `;
+                roundDiv.appendChild(matchCard);
+            });
+            
+            container.appendChild(roundDiv);
+        });
+    }
 
-        // Load bracket matches
-        async function loadBracketMatches(bracketId) {
-            try {
-                console.log(`Loading matches for bracket ${bracketId}`);
-                const response = await fetch(`/admin/schedule/bracket/${bracketId}/matches`);
-                const data = await response.json();
-                
-                console.log('Matches data:', data.matches);
-                console.log('Bracket data:', data.bracket);
-                
-                displayMatches(data.matches, data.bracket);
-                document.getElementById('matchesSection').style.display = 'block';
-                document.getElementById('bracketSection').style.display = 'none';
-                document.getElementById('teamsSection').style.display = 'none';
-            } catch (error) {
-                console.error('Error loading matches:', error);
-                alert('Error loading matches');
-            }
+    // Manual next round generation
+    document.getElementById('manualNextRound')?.addEventListener('click', async function() {
+        if (!currentBracketId) {
+            alert('No bracket selected');
+            return;
         }
 
-        // Display matches
-        function displayMatches(matches, bracket) {
-            const container = document.getElementById('matchesContainer');
-            container.innerHTML = `
-                <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-                    <h4 style="color: #333; margin: 0; font-size: 1.4rem;">${bracket.event_name} - ${bracket.sport_type}</h4>
-                    <p style="color: #666; margin: 5px 0 0 0; font-size: 1rem;">Bracket Type: ${bracket.bracket_type.replace('_', ' ').toUpperCase()}</p>
-                    <p style="color: #666; margin: 5px 0 0 0; font-size: 1rem;">Status: ${bracket.is_completed ? 'Completed' : 'In Progress'} | Current Round: ${bracket.current_round || 1}</p>
-                    ${bracket.champion_name ? `<p style="color: #28a745; margin: 5px 0 0 0; font-size: 1rem; font-weight: 600;"><i class="fas fa-trophy"></i> Champion: ${bracket.champion_name}</p>` : ''}
-                </div>
-            `;
+        try {
+            // Get current bracket info to determine current round
+            const response = await fetch(`/admin/schedule/bracket/${currentBracketId}/matches`);
+            const data = await response.json();
+            
+            const currentRound = data.bracket.current_round;
+            const matches = data.matches;
+            
+            // Find the highest round number in matches
+            const maxRound = Math.max(...matches.map(m => m.round_number));
+            
+            const roundToUse = currentRound || maxRound;
+            
+            const nextRoundResponse = await fetch('/admin/schedule/generate-next-round', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    bracketId: currentBracketId,
+                    currentRound: roundToUse
+                })
+            });
+
+            const result = await nextRoundResponse.json();
+            
+            if (result.success) {
+                alert('Next round generated successfully!');
+                loadBracketMatches(currentBracketId);
+            } else {
+                alert('Error generating next round: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Error generating next round:', error);
+            alert('Error generating next round');
+        }
+    });
+
+    // Check round completion
+    document.getElementById('checkRoundCompletion')?.addEventListener('click', async function() {
+        if (!currentBracketId) {
+            alert('No bracket selected');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/admin/schedule/bracket/${currentBracketId}/matches`);
+            const data = await response.json();
+            
+            const matches = data.matches;
+            const bracket = data.bracket;
             
             // Group matches by round
             const rounds = {};
@@ -1231,358 +1362,229 @@
                 rounds[match.round_number].push(match);
             });
             
-            // Display each round
+            let message = `Tournament Status for ${bracket.event_name} - ${bracket.sport_type}\n\n`;
+            
             Object.keys(rounds).forEach(roundNumber => {
-                const roundDiv = document.createElement('div');
-                roundDiv.className = 'round';
-                roundDiv.innerHTML = `<div class="round-header"><i class="fas fa-flag"></i> Round ${roundNumber}</div>`;
+                const roundMatches = rounds[roundNumber];
+                const completed = roundMatches.filter(m => m.status === 'completed').length;
+                const total = roundMatches.length;
                 
-                rounds[roundNumber].forEach(match => {
-                    const matchCard = document.createElement('div');
-                    matchCard.className = 'match-card';
-                    
-                    // Format date if available
-                    let dateInfo = '';
-                    if (match.match_date) {
-                        const matchDate = new Date(match.match_date);
-                        dateInfo = `
-                            <div style="background: #e8f4ff; padding: 10px; border-radius: 6px; margin: 10px 0;">
-                                <p style="margin: 0; color: #0066cc; font-weight: 600;">
-                                    <i class="fas fa-calendar"></i> ${matchDate.toLocaleDateString()} 
-                                    <i class="fas fa-clock" style="margin-left: 15px;"></i> ${matchDate.toLocaleTimeString()}
-                                </p>
-                                ${match.venue ? `<p style="margin: 5px 0 0 0; color: #004d99;"><i class="fas fa-map-marker-alt"></i> ${match.venue}</p>` : ''}
-                            </div>
-                        `;
-                    }
-                    
-                    // Winner info if available
-                    let winnerInfo = '';
-                    if (match.winner_name) {
-                        winnerInfo = `
-                            <div style="background: #d4edda; padding: 10px; border-radius: 6px; margin: 10px 0;">
-                                <p style="margin: 0; color: #155724; font-weight: 600;">
-                                    <i class="fas fa-trophy"></i> Winner: ${match.winner_name}
-                                    ${match.team1_score !== null ? ` (${match.team1_score}-${match.team2_score})` : ''}
-                                </p>
-                            </div>
-                        `;
-                    }
-                    
-                    matchCard.innerHTML = `
-                        <div class="teams-display">
-                            <div class="team">${match.team1_name || 'TBD'}</div>
-                            <div class="vs">VS</div>
-                            <div class="team">${match.team2_name || 'TBD'}</div>
-                        </div>
-                        ${dateInfo}
-                        ${winnerInfo}
-                        <div class="match-actions">
-                            <button class="btn btn-primary" onclick="openScheduleModal(${match.id}, '${match.team1_name || 'TBD'}', '${match.team2_name || 'TBD'}')">
-                                <i class="fas fa-calendar-plus"></i> Schedule
-                            </button>
-                            <button class="btn btn-success" onclick="openResultModal(${match.id}, ${match.team1_id}, '${match.team1_name || 'TBD'}', ${match.team2_id}, '${match.team2_name || 'TBD'}')">
-                                <i class="fas fa-flag-checkered"></i> Set Result
-                            </button>
-                        </div>
-                    `;
-                    roundDiv.appendChild(matchCard);
-                });
+                message += `Round ${roundNumber}: ${completed}/${total} matches completed\n`;
                 
-                container.appendChild(roundDiv);
-            });
-        }
-
-        // Manual next round generation
-        document.getElementById('manualNextRound')?.addEventListener('click', async function() {
-            if (!currentBracketId) {
-                alert('No bracket selected');
-                return;
-            }
-
-            try {
-                // Get current bracket info to determine current round
-                const response = await fetch(`/admin/schedule/bracket/${currentBracketId}/matches`);
-                const data = await response.json();
-                
-                const currentRound = data.bracket.current_round;
-                const matches = data.matches;
-                
-                // Find the highest round number in matches
-                const maxRound = Math.max(...matches.map(m => m.round_number));
-                
-                const roundToUse = currentRound || maxRound;
-                
-                const nextRoundResponse = await fetch('/admin/schedule/generate-next-round', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        bracketId: currentBracketId,
-                        currentRound: roundToUse
-                    })
-                });
-
-                const result = await nextRoundResponse.json();
-                
-                if (result.success) {
-                    alert('Next round generated successfully!');
-                    loadBracketMatches(currentBracketId);
+                if (completed === total && completed > 0) {
+                    message += `✅ Round ${roundNumber} is COMPLETED and ready for next round!\n`;
+                } else if (completed > 0) {
+                    message += `⏳ Round ${roundNumber} is IN PROGRESS (${total - completed} matches remaining)\n`;
                 } else {
-                    alert('Error generating next round: ' + result.error);
+                    message += `❌ Round ${roundNumber} has NO RESULTS yet\n`;
                 }
-            } catch (error) {
-                console.error('Error generating next round:', error);
-                alert('Error generating next round');
-            }
-        });
-
-        // Check round completion
-        document.getElementById('checkRoundCompletion')?.addEventListener('click', async function() {
-            if (!currentBracketId) {
-                alert('No bracket selected');
-                return;
-            }
-
-            try {
-                const response = await fetch(`/admin/schedule/bracket/${currentBracketId}/matches`);
-                const data = await response.json();
-                
-                const matches = data.matches;
-                const bracket = data.bracket;
-                
-                // Group matches by round
-                const rounds = {};
-                matches.forEach(match => {
-                    if (!rounds[match.round_number]) {
-                        rounds[match.round_number] = [];
-                    }
-                    rounds[match.round_number].push(match);
-                });
-                
-                let message = `Tournament Status for ${bracket.event_name} - ${bracket.sport_type}\n\n`;
-                
-                Object.keys(rounds).forEach(roundNumber => {
-                    const roundMatches = rounds[roundNumber];
-                    const completed = roundMatches.filter(m => m.status === 'completed').length;
-                    const total = roundMatches.length;
-                    
-                    message += `Round ${roundNumber}: ${completed}/${total} matches completed\n`;
-                    
-                    if (completed === total && completed > 0) {
-                        message += `✅ Round ${roundNumber} is COMPLETED and ready for next round!\n`;
-                    } else if (completed > 0) {
-                        message += `⏳ Round ${roundNumber} is IN PROGRESS (${total - completed} matches remaining)\n`;
-                    } else {
-                        message += `❌ Round ${roundNumber} has NO RESULTS yet\n`;
-                    }
-                    message += '\n';
-                });
-                
-                alert(message);
-            } catch (error) {
-                console.error('Error checking round completion:', error);
-                alert('Error checking round completion');
-            }
-        });
-
-        // Navigation buttons
-        document.getElementById('backToSports')?.addEventListener('click', function() {
-            document.getElementById('matchesSection').style.display = 'none';
-            document.getElementById('sportsSection').style.display = 'block';
-            resetSelection();
-        });
-
-        document.getElementById('backToBrackets')?.addEventListener('click', function() {
-            document.getElementById('matchesSection').style.display = 'none';
-            document.getElementById('teamsSection').style.display = 'block';
-            this.style.display = 'none';
-        });
-
-        document.getElementById('createAnotherBracket')?.addEventListener('click', function() {
-            document.getElementById('matchesSection').style.display = 'none';
-            document.getElementById('teamsSection').style.display = 'block';
-            document.getElementById('existingBracketsSection').style.display = 'none';
-            document.getElementById('teamsSelectionSection').style.display = 'block';
-            resetTeamSelection();
-        });
-
-        // Reset selection
-        function resetSelection() {
-            selectedEvent = null;
-            selectedSport = null;
-            selectedTeams = [];
-            selectedBracketType = null;
-            currentBracketId = null;
-            existingBrackets = [];
-        }
-
-        function resetTeamSelection() {
-            selectedTeams = [];
-            selectedBracketType = null;
-            currentBracketId = null;
-            document.querySelectorAll('.team-card.selected').forEach(card => {
-                card.classList.remove('selected');
+                message += '\n';
             });
-            document.getElementById('proceedToBracket').textContent = 'Proceed to Bracket Creation';
-        }
-
-        // Modal functions
-        function openScheduleModal(matchId, team1Name, team2Name) {
-            document.getElementById('scheduleMatchId').value = matchId;
-            document.getElementById('scheduleModal').style.display = 'block';
-        }
-
-        function openResultModal(matchId, team1Id, team1Name, team2Id, team2Name) {
-            document.getElementById('resultMatchId').value = matchId;
-            document.getElementById('team1Name').textContent = team1Name + ' Score:';
-            document.getElementById('team2Name').textContent = team2Name + ' Score:';
             
-            const winnerSelect = document.getElementById('winnerTeam');
-            winnerSelect.innerHTML = `
-                <option value="">Select Winner</option>
-                <option value="${team1Id}">${team1Name}</option>
-                <option value="${team2Id}">${team2Name}</option>
-            `;
-            
-            document.getElementById('resultModal').style.display = 'block';
+            alert(message);
+        } catch (error) {
+            console.error('Error checking round completion:', error);
+            alert('Error checking round completion');
         }
+    });
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
+    // Navigation buttons
+    document.getElementById('backToSports')?.addEventListener('click', function() {
+        document.getElementById('matchesSection').style.display = 'none';
+        document.getElementById('sportsSection').style.display = 'block';
+        resetSelection();
+    });
 
-        // Form submissions
-        document.getElementById('scheduleForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+    document.getElementById('backToBrackets')?.addEventListener('click', function() {
+        document.getElementById('matchesSection').style.display = 'none';
+        document.getElementById('teamsSection').style.display = 'block';
+        this.style.display = 'none';
+    });
+
+    document.getElementById('createAnotherBracket')?.addEventListener('click', function() {
+        document.getElementById('matchesSection').style.display = 'none';
+        document.getElementById('teamsSection').style.display = 'block';
+        document.getElementById('existingBracketsSection').style.display = 'none';
+        document.getElementById('teamsSelectionSection').style.display = 'block';
+        resetTeamSelection();
+    });
+
+    // Reset selection
+    function resetSelection() {
+        selectedEvent = null;
+        selectedSport = null;
+        selectedTeams = [];
+        selectedBracketType = null;
+        currentBracketId = null;
+        existingBrackets = [];
+    }
+
+    function resetTeamSelection() {
+        selectedTeams = [];
+        selectedBracketType = null;
+        currentBracketId = null;
+        document.querySelectorAll('.team-card.selected').forEach(card => {
+            card.classList.remove('selected');
+        });
+        document.getElementById('proceedToBracket').textContent = 'Proceed to Bracket Creation';
+    }
+
+    // Modal functions
+    function openScheduleModal(matchId, team1Name, team2Name) {
+        document.getElementById('scheduleMatchId').value = matchId;
+        document.getElementById('scheduleModal').style.display = 'block';
+    }
+
+    function openResultModal(matchId, team1Id, team1Name, team2Id, team2Name) {
+        document.getElementById('resultMatchId').value = matchId;
+        document.getElementById('team1Name').textContent = team1Name + ' Score:';
+        document.getElementById('team2Name').textContent = team2Name + ' Score:';
+        
+        const winnerSelect = document.getElementById('winnerTeam');
+        winnerSelect.innerHTML = `
+            <option value="">Select Winner</option>
+            <option value="${team1Id}">${team1Name}</option>
+            <option value="${team2Id}">${team2Name}</option>
+        `;
+        
+        document.getElementById('resultModal').style.display = 'block';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Form submissions
+    document.getElementById('scheduleForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const matchId = document.getElementById('scheduleMatchId').value;
+        const matchDate = document.getElementById('matchDate').value;
+        const venue = document.getElementById('venue').value;
+        
+        try {
+            const response = await fetch(`/admin/schedule/match/${matchId}/schedule`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    matchDate: matchDate,
+                    venue: venue
+                })
+            });
             
-            const matchId = document.getElementById('scheduleMatchId').value;
-            const matchDate = document.getElementById('matchDate').value;
-            const venue = document.getElementById('venue').value;
+            const data = await response.json();
             
-            try {
-                const response = await fetch(`/admin/schedule/match/${matchId}/schedule`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        matchDate: matchDate,
-                        venue: venue
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    alert('Schedule updated successfully!');
-                    closeModal('scheduleModal');
-                    loadBracketMatches(currentBracketId);
-                } else {
-                    alert('Error updating schedule');
-                }
-            } catch (error) {
-                console.error('Error updating schedule:', error);
+            if (data.success) {
+                alert('Schedule updated successfully!');
+                closeModal('scheduleModal');
+                loadBracketMatches(currentBracketId);
+            } else {
                 alert('Error updating schedule');
             }
-        });
+        } catch (error) {
+            console.error('Error updating schedule:', error);
+            alert('Error updating schedule');
+        }
+    });
 
-        document.getElementById('resultForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+    document.getElementById('resultForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const matchId = document.getElementById('resultMatchId').value;
+        const team1Score = document.getElementById('team1Score').value;
+        const team2Score = document.getElementById('team2Score').value;
+        const winnerTeam = document.getElementById('winnerTeam').value;
+        
+        try {
+            const response = await fetch(`/admin/schedule/match/${matchId}/result`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    team1Score: team1Score,
+                    team2Score: team2Score,
+                    winnerTeamId: winnerTeam
+                })
+            });
             
-            const matchId = document.getElementById('resultMatchId').value;
-            const team1Score = document.getElementById('team1Score').value;
-            const team2Score = document.getElementById('team2Score').value;
-            const winnerTeam = document.getElementById('winnerTeam').value;
+            const data = await response.json();
             
-            try {
-                const response = await fetch(`/admin/schedule/match/${matchId}/result`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        team1Score: team1Score,
-                        team2Score: team2Score,
-                        winnerTeamId: winnerTeam
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    alert('Result updated successfully!');
-                    closeModal('resultModal');
-                    loadBracketMatches(currentBracketId);
-                } else {
-                    alert('Error updating result');
-                }
-            } catch (error) {
-                console.error('Error updating result:', error);
+            if (data.success) {
+                alert('Result updated successfully!');
+                closeModal('resultModal');
+                loadBracketMatches(currentBracketId);
+            } else {
                 alert('Error updating result');
             }
-        });
-
-        // Set champion manually
-        document.getElementById('setChampion')?.addEventListener('click', async function() {
-            if (!currentBracketId) {
-                alert('No bracket selected');
-                return;
-            }
-
-            if (!confirm('Are you sure you want to manually set the champion? This should only be used if the automatic champion detection failed.')) {
-                return;
-            }
-
-            try {
-                const response = await fetch('/admin/schedule/set-champion', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        bracketId: currentBracketId
-                    })
-                });
-
-                const result = await response.json();
-                
-                if (result.success) {
-                    alert(result.message || 'Champion set successfully!');
-                    loadBracketMatches(currentBracketId);
-                } else {
-                    alert('Error setting champion: ' + result.error);
-                }
-            } catch (error) {
-                console.error('Error setting champion:', error);
-                alert('Error setting champion');
-            }
-        });
-
-        // Your existing sidebar and other functions...
-        let isSidebarOpen = false;
-
-        function toggleNav() {
-            const sidebar = document.getElementById("mySidebar");
-            const content = document.querySelector(".dashboard-container");
-            const sidebarBtn = document.querySelector(".sidebar-btn");
-
-            if (isSidebarOpen) {
-                sidebar.style.left = "-240px";  
-                content.style.marginLeft = "0"; 
-                sidebarBtn.innerHTML = "&#9776;"; 
-            } else {
-                sidebar.style.left = "0";  
-                content.style.marginLeft = "0";  
-                sidebarBtn.innerHTML = "&#9776;"; 
-            }
-            isSidebarOpen = !isSidebarOpen;  
+        } catch (error) {
+            console.error('Error updating result:', error);
+            alert('Error updating result');
         }
-        
-        // Toggle the team dropdown
-        const teamDropdownBtn = document.querySelector('.team-dropdown-btn');
-        const teamDropdownContent = document.querySelector('.team-dropdown-content');
+    });
+
+    // Set champion manually
+    document.getElementById('setChampion')?.addEventListener('click', async function() {
+        if (!currentBracketId) {
+            alert('No bracket selected');
+            return;
+        }
+
+        if (!confirm('Are you sure you want to manually set the champion? This should only be used if the automatic champion detection failed.')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/admin/schedule/set-champion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    bracketId: currentBracketId
+                })
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                alert(result.message || 'Champion set successfully!');
+                loadBracketMatches(currentBracketId);
+            } else {
+                alert('Error setting champion: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Error setting champion:', error);
+            alert('Error setting champion');
+        }
+    });
+
+    // Your existing sidebar and other functions...
+    let isSidebarOpen = false;
+
+    function toggleNav() {
+        const sidebar = document.getElementById("mySidebar");
+        const content = document.querySelector(".schedule-container");
+        const sidebarBtn = document.querySelector(".sidebar-btn");
+
+        if (isSidebarOpen) {
+            sidebar.style.left = "-240px";  
+            content.style.marginLeft = "0"; 
+            sidebarBtn.innerHTML = "&#9776;"; 
+        } else {
+            sidebar.style.left = "0";  
+            content.style.marginLeft = "240px";  
+            sidebarBtn.innerHTML = "&#9776;"; 
+        }
+        isSidebarOpen = !isSidebarOpen;  
+    }
+    
+    // Toggle the team dropdown
+    const teamDropdownBtn = document.querySelector('.team-dropdown-btn');
+    const teamDropdownContent = document.querySelector('.team-dropdown-content');
+    if (teamDropdownBtn && teamDropdownContent) {
         teamDropdownBtn.addEventListener('click', function() {
             teamDropdownBtn.classList.toggle('active');
             if (teamDropdownContent.style.display === "block") {
@@ -1591,51 +1593,55 @@
                 teamDropdownContent.style.display = "block";
             }
         });
-        
-        // Show the logout confirmation modal
-        function showLogoutModal() {
-            document.getElementById('logoutModal').style.display = 'block';
+    }
+    
+    // Show the logout confirmation modal
+    function showLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'block';
+    }
+    
+    function hideLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'none';
+    }
+    
+    document.getElementById('confirmLogout')?.addEventListener('click', function() {
+        window.location.href = '/admin/logout';  
+    });
+    
+    document.getElementById('cancelLogout')?.addEventListener('click', function() {
+        hideLogoutModal(); 
+    });
+    
+    // Success message 
+    window.addEventListener("DOMContentLoaded", () => {
+        const successAlert = document.querySelector(".alert-success");
+        if (successAlert) {
+            setTimeout(() => {
+                successAlert.style.transition = "opacity 0.5s ease";
+                successAlert.style.opacity = "0";
+                setTimeout(() => successAlert.remove(), 500);
+            }, 1000);
         }
-        
-        function hideLogoutModal() {
-            document.getElementById('logoutModal').style.display = 'none';
-        }
-        
-        document.getElementById('confirmLogout').addEventListener('click', function() {
-            window.location.href = '/admin/logout';  
-        });
-        
-        document.getElementById('cancelLogout').addEventListener('click', function() {
-            hideLogoutModal(); 
-        });
-        
-        //Success message 
-        window.addEventListener("DOMContentLoaded", () => {
-            const successAlert = document.querySelector(".alert-success");
-            if (successAlert) {
-                setTimeout(() => {
-                    successAlert.style.transition = "opacity 0.5s ease";
-                    successAlert.style.opacity = "0";
-                    setTimeout(() => successAlert.remove(), 500);
-                }, 1000);
-            }
-        });
-        
-        //admin profile dropdown
-        document.addEventListener('DOMContentLoaded', () => {
-            const profileContainer = document.getElementById('adminProfileContainer');
-            const dropdownMenu = document.getElementById('adminDropdownMenu');
-            let hideTimeout;
+    });
+    
+    // Admin profile dropdown
+    document.addEventListener('DOMContentLoaded', () => {
+        const profileContainer = document.getElementById('adminProfileContainer');
+        const dropdownMenu = document.getElementById('adminDropdownMenu');
+        let hideTimeout;
 
+        if (profileContainer && dropdownMenu) {
             profileContainer.addEventListener('click', function(e) {
-            e.stopPropagation();
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-        });
-        });
-    </script>
+                e.stopPropagation();
+                dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+            });
+        }
+    });
+</script>
 </body>
 
 </html>
+
 
 
 
