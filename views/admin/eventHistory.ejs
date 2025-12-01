@@ -56,7 +56,7 @@
 
         .event-header {
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 15px;
@@ -193,6 +193,16 @@
             transform: translateY(-2px);
         }
 
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -210,6 +220,176 @@
             margin-bottom: 10px;
         }
 
+        /* Leaderboard Styles */
+        .leaderboard-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .leaderboard-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .leaderboard-tab {
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-tab.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .leaderboard-tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .leaderboard-table th {
+            background: #007bff;
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .leaderboard-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .leaderboard-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .rank-1 {
+            background: linear-gradient(135deg, #ffd700, #ffed4e) !important;
+            font-weight: bold;
+        }
+
+        .rank-2 {
+            background: linear-gradient(135deg, #c0c0c0, #e0e0e0) !important;
+            font-weight: bold;
+        }
+
+        .rank-3 {
+            background: linear-gradient(135deg, #cd7f32, #e9b384) !important;
+            font-weight: bold;
+        }
+
+        .medal {
+            font-size: 1.2rem;
+            margin-right: 8px;
+        }
+
+        .gold-medal {
+            color: #ffd700;
+        }
+
+        .silver-medal {
+            color: #c0c0c0;
+        }
+
+        .bronze-medal {
+            color: #cd7f32;
+        }
+
+        .team-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .team-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #007bff;
+        }
+
+        .team-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .organization-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .school-badge {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .barangay-badge {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .stats-number {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .win-rate {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .high-win-rate {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .medium-win-rate {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .low-win-rate {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .no-leaderboard {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .no-leaderboard i {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+
         @media (max-width: 768px) {
             .event-header {
                 flex-direction: column;
@@ -223,6 +403,21 @@
 
             .event-actions {
                 flex-direction: column;
+            }
+
+            .leaderboard-table {
+                font-size: 0.85rem;
+            }
+
+            .leaderboard-table th,
+            .leaderboard-table td {
+                padding: 8px 10px;
+            }
+
+            .team-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
             }
         }
     </style>
@@ -279,7 +474,7 @@
    <main class="event-history-container">
         <div class="page-header">
             <h1><i class="fas fa-history"></i> Event History</h1>
-            <p>View past events and tournament results</p>
+            <p>View past events, tournament results, and team rankings</p>
         </div>
 
         <% if (events.length === 0) { %>
@@ -366,6 +561,210 @@
                             <% } %>
                         </div>
 
+                        <!-- Leaderboard Section -->
+                        <div class="leaderboard-section">
+                            <h4 class="section-title"><i class="fas fa-trophy"></i> Team Leaderboard</h4>
+                            
+                            <% if (event.leaderboards && event.leaderboards.length > 0) { %>
+                                <div class="leaderboard-tabs" id="leaderboardTabs-<%= event.id %>">
+                                    <button class="leaderboard-tab active" data-sport="all">All Sports</button>
+                                    <% 
+                                        const sports = [...new Set(event.leaderboards.map(lb => lb.sport_type))];
+                                        sports.forEach(sport => { 
+                                    %>
+                                        <button class="leaderboard-tab" data-sport="<%= sport %>"><%= sport %></button>
+                                    <% }); %>
+                                </div>
+
+                                <div class="leaderboard-content" id="leaderboardContent-<%= event.id %>">
+                                    <!-- All Sports Leaderboard (default) -->
+                                    <div class="leaderboard-table-container" data-sport="all">
+                                        <table class="leaderboard-table">
+                                            <thead>
+                                                <tr>
+                                                    <th width="60">Rank</th>
+                                                    <th>Team</th>
+                                                    <th width="100">Organization</th>
+                                                    <th width="80">Gold</th>
+                                                    <th width="80">Silver</th>
+                                                    <th width="80">Bronze</th>
+                                                    <th width="100">Total Points</th>
+                                                    <th width="100">Win Rate</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% 
+                                                    // Calculate aggregated leaderboard across all sports
+                                                    const teamStats = {};
+                                                    event.leaderboards.forEach(lb => {
+                                                        if (!teamStats[lb.team_id]) {
+                                                            teamStats[lb.team_id] = {
+                                                                team_id: lb.team_id,
+                                                                team_name: lb.team_name,
+                                                                team_profile: lb.team_profile,
+                                                                organization: lb.organization,
+                                                                gold: 0,
+                                                                silver: 0,
+                                                                bronze: 0,
+                                                                total_matches: 0,
+                                                                wins: 0
+                                                            };
+                                                        }
+                                                        
+                                                        teamStats[lb.team_id].gold += lb.gold || 0;
+                                                        teamStats[lb.team_id].silver += lb.silver || 0;
+                                                        teamStats[lb.team_id].bronze += lb.bronze || 0;
+                                                        teamStats[lb.team_id].total_matches += lb.total_matches || 0;
+                                                        teamStats[lb.team_id].wins += lb.wins || 0;
+                                                    });
+
+                                                    // Convert to array and calculate points and win rate
+                                                    const aggregatedLeaderboard = Object.values(teamStats).map(team => {
+                                                        team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
+                                                        team.win_rate = team.total_matches > 0 ? Math.round((team.wins / team.total_matches) * 100) : 0;
+                                                        return team;
+                                                    });
+
+                                                    // Sort by total points (descending)
+                                                    aggregatedLeaderboard.sort((a, b) => b.total_points - a.total_points);
+
+                                                    // Display the leaderboard
+                                                    aggregatedLeaderboard.forEach((team, index) => { 
+                                                        const rank = index + 1;
+                                                        const medalClass = rank === 1 ? 'gold-medal' : rank === 2 ? 'silver-medal' : rank === 3 ? 'bronze-medal' : '';
+                                                        const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                                                        const winRateClass = team.win_rate >= 70 ? 'high-win-rate' : 
+                                                                           team.win_rate >= 40 ? 'medium-win-rate' : 'low-win-rate';
+                                                %>
+                                                    <tr class="<%= rankClass %>">
+                                                        <td>
+                                                            <% if (rank <= 3) { %>
+                                                                <i class="fas fa-medal medal <%= medalClass %>"></i>
+                                                            <% } %>
+                                                            <%= rank %>
+                                                        </td>
+                                                        <td>
+                                                            <div class="team-info">
+                                                                <% if (team.team_profile) { %>
+                                                                    <img src="<%= team.team_profile %>" alt="<%= team.team_name %>" class="team-avatar">
+                                                                <% } else { %>
+                                                                    <div style="width: 35px; height: 35px; border-radius: 50%; background: #007bff; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                                                        <%= team.team_name.charAt(0).toUpperCase() %>
+                                                                    </div>
+                                                                <% } %>
+                                                                <span class="team-name"><%= team.team_name %></span>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <span class="organization-badge <%= team.organization === 'school' ? 'school-badge' : 'barangay-badge' %>">
+                                                                <%= team.organization %>
+                                                            </span>
+                                                        </td>
+                                                        <td class="stats-number"><%= team.gold %></td>
+                                                        <td class="stats-number"><%= team.silver %></td>
+                                                        <td class="stats-number"><%= team.bronze %></td>
+                                                        <td class="stats-number"><%= team.total_points %></td>
+                                                        <td>
+                                                            <span class="win-rate <%= winRateClass %>">
+                                                                <%= team.win_rate %>%
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                <% }); %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Individual Sport Leaderboards -->
+                                    <% 
+                                        const sportsLeaderboards = {};
+                                        event.leaderboards.forEach(lb => {
+                                            if (!sportsLeaderboards[lb.sport_type]) {
+                                                sportsLeaderboards[lb.sport_type] = [];
+                                            }
+                                            sportsLeaderboards[lb.sport_type].push(lb);
+                                        });
+
+                                        Object.keys(sportsLeaderboards).forEach(sport => {
+                                            const sportLeaderboard = sportsLeaderboards[sport]
+                                                .map(team => {
+                                                    team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
+                                                    team.win_rate = team.total_matches > 0 ? Math.round((team.wins / team.total_matches) * 100) : 0;
+                                                    return team;
+                                                })
+                                                .sort((a, b) => b.total_points - a.total_points);
+                                    %>
+                                        <div class="leaderboard-table-container" data-sport="<%= sport %>" style="display: none;">
+                                            <table class="leaderboard-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="60">Rank</th>
+                                                        <th>Team</th>
+                                                        <th width="100">Organization</th>
+                                                        <th width="80">Gold</th>
+                                                        <th width="80">Silver</th>
+                                                        <th width="80">Bronze</th>
+                                                        <th width="100">Total Points</th>
+                                                        <th width="100">Win Rate</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% sportLeaderboard.forEach((team, index) => { 
+                                                        const rank = index + 1;
+                                                        const medalClass = rank === 1 ? 'gold-medal' : rank === 2 ? 'silver-medal' : rank === 3 ? 'bronze-medal' : '';
+                                                        const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                                                        const winRateClass = team.win_rate >= 70 ? 'high-win-rate' : 
+                                                                           team.win_rate >= 40 ? 'medium-win-rate' : 'low-win-rate';
+                                                    %>
+                                                        <tr class="<%= rankClass %>">
+                                                            <td>
+                                                                <% if (rank <= 3) { %>
+                                                                    <i class="fas fa-medal medal <%= medalClass %>"></i>
+                                                                <% } %>
+                                                                <%= rank %>
+                                                            </td>
+                                                            <td>
+                                                                <div class="team-info">
+                                                                    <% if (team.team_profile) { %>
+                                                                        <img src="<%= team.team_profile %>" alt="<%= team.team_name %>" class="team-avatar">
+                                                                    <% } else { %>
+                                                                        <div style="width: 35px; height: 35px; border-radius: 50%; background: #007bff; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                                                            <%= team.team_name.charAt(0).toUpperCase() %>
+                                                                        </div>
+                                                                    <% } %>
+                                                                    <span class="team-name"><%= team.team_name %></span>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <span class="organization-badge <%= team.organization === 'school' ? 'school-badge' : 'barangay-badge' %>">
+                                                                    <%= team.organization %>
+                                                                </span>
+                                                            </td>
+                                                            <td class="stats-number"><%= team.gold %></td>
+                                                            <td class="stats-number"><%= team.silver %></td>
+                                                            <td class="stats-number"><%= team.bronze %></td>
+                                                            <td class="stats-number"><%= team.total_points %></td>
+                                                            <td>
+                                                                <span class="win-rate <%= winRateClass %>">
+                                                                    <%= team.win_rate %>%
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    <% }); %>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    <% }); %>
+                                </div>
+                            <% } else { %>
+                                <div class="no-leaderboard">
+                                    <i class="fas fa-chart-line"></i>
+                                    <h4>No Leaderboard Data Available</h4>
+                                    <p>There is no team performance data for this event.</p>
+                                </div>
+                            <% } %>
+                        </div>
+
                         <div class="event-actions">
                             <button class="btn btn-info view-results-btn" data-event-id="<%= event.id %>">
                                 <i class="fas fa-chart-bar"></i> View Detailed Results
@@ -373,6 +772,9 @@
                             <a href="/admin/event-history/export/<%= event.id %>" class="btn btn-success">
                                 <i class="fas fa-download"></i> Export Results
                             </a>
+                            <button class="btn btn-warning view-leaderboard-btn" data-event-id="<%= event.id %>">
+                                <i class="fas fa-trophy"></i> View Full Leaderboard
+                            </button>
                         </div>
                     </div>
                 <% }); %>
@@ -392,6 +794,19 @@
             </div>
         </div>
     </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboardModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <h3 id="leaderboardModalTitle">Event Leaderboard</h3>
+            <div id="leaderboardModalContent">
+                <!-- Dynamic leaderboard content will be loaded here -->
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeModal('leaderboardModal')">Close</button>
+            </div>
+        </div>
+    </div>
                 
     
 
@@ -405,14 +820,53 @@
                 <button id="cancelLogout" class="cancel-btn">Cancel</button>
             </div>
         </div>
+    </div>
     
     <script>
+        // Leaderboard Tab Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize leaderboard tabs for each event
+            document.querySelectorAll('[id^="leaderboardTabs-"]').forEach(tabsContainer => {
+                const eventId = tabsContainer.id.split('-')[1];
+                const tabs = tabsContainer.querySelectorAll('.leaderboard-tab');
+                const contentContainer = document.getElementById(`leaderboardContent-${eventId}`);
+                
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', function() {
+                        // Remove active class from all tabs
+                        tabs.forEach(t => t.classList.remove('active'));
+                        // Add active class to clicked tab
+                        this.classList.add('active');
+                        
+                        // Hide all leaderboard tables
+                        contentContainer.querySelectorAll('.leaderboard-table-container').forEach(table => {
+                            table.style.display = 'none';
+                        });
+                        
+                        // Show the selected leaderboard table
+                        const sport = this.dataset.sport;
+                        const targetTable = contentContainer.querySelector(`[data-sport="${sport}"]`);
+                        if (targetTable) {
+                            targetTable.style.display = 'block';
+                        }
+                    });
+                });
+            });
+        });
 
         // View detailed results
         document.querySelectorAll('.view-results-btn').forEach(btn => {
             btn.addEventListener('click', async function() {
                 const eventId = this.dataset.eventId;
                 await loadEventResults(eventId);
+            });
+        });
+
+        // View full leaderboard
+        document.querySelectorAll('.view-leaderboard-btn').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const eventId = this.dataset.eventId;
+                await loadEventLeaderboard(eventId);
             });
         });
 
@@ -430,6 +884,23 @@
             } catch (error) {
                 console.error('Error loading event results:', error);
                 alert('Error loading event results');
+            }
+        }
+
+        async function loadEventLeaderboard(eventId) {
+            try {
+                const response = await fetch(`/admin/event-history/leaderboard/${eventId}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                displayLeaderboardModal(data);
+            } catch (error) {
+                console.error('Error loading event leaderboard:', error);
+                alert('Error loading event leaderboard');
             }
         }
 
@@ -469,6 +940,174 @@
 
             modalContent.innerHTML = html;
             document.getElementById('resultsModal').style.display = 'block';
+        }
+
+        function displayLeaderboardModal(data) {
+            const modalTitle = document.getElementById('leaderboardModalTitle');
+            const modalContent = document.getElementById('leaderboardModalContent');
+            
+            modalTitle.textContent = `Leaderboard - ${data.event.title}`;
+            
+            let html = `
+                <div style="margin-bottom: 20px;">
+                    <p><strong>Date:</strong> ${new Date(data.event.date_schedule).toLocaleDateString()}</p>
+                    <p><strong>Location:</strong> ${data.event.location}</p>
+                </div>
+                
+                <div class="leaderboard-tabs" style="margin-bottom: 20px;">
+                    <button class="leaderboard-tab active" data-sport="all">All Sports</button>
+            `;
+            
+            // Add sport tabs
+            const sports = [...new Set(data.leaderboards.map(lb => lb.sport_type))];
+            sports.forEach(sport => {
+                html += `<button class="leaderboard-tab" data-sport="${sport}">${sport}</button>`;
+            });
+            
+            html += `</div><div id="modalLeaderboardContent">`;
+            
+            // All Sports Leaderboard
+            html += `<div class="leaderboard-table-container" data-sport="all">`;
+            html += generateLeaderboardTable(data.leaderboards, true);
+            html += `</div>`;
+            
+            // Individual Sport Leaderboards
+            const sportsLeaderboards = {};
+            data.leaderboards.forEach(lb => {
+                if (!sportsLeaderboards[lb.sport_type]) {
+                    sportsLeaderboards[lb.sport_type] = [];
+                }
+                sportsLeaderboards[lb.sport_type].push(lb);
+            });
+            
+            Object.keys(sportsLeaderboards).forEach(sport => {
+                html += `<div class="leaderboard-table-container" data-sport="${sport}" style="display: none;">`;
+                html += generateLeaderboardTable(sportsLeaderboards[sport], false);
+                html += `</div>`;
+            });
+            
+            html += `</div>`;
+            
+            modalContent.innerHTML = html;
+            
+            // Add tab functionality to modal
+            const modalTabs = modalContent.querySelectorAll('.leaderboard-tab');
+            modalTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    modalTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const sport = this.dataset.sport;
+                    modalContent.querySelectorAll('.leaderboard-table-container').forEach(table => {
+                        table.style.display = 'none';
+                    });
+                    
+                    const targetTable = modalContent.querySelector(`[data-sport="${sport}"]`);
+                    if (targetTable) {
+                        targetTable.style.display = 'block';
+                    }
+                });
+            });
+            
+            document.getElementById('leaderboardModal').style.display = 'block';
+        }
+
+        function generateLeaderboardTable(leaderboardData, isAggregated) {
+            let tableHtml = `<table class="leaderboard-table"><thead><tr>
+                <th width="60">Rank</th>
+                <th>Team</th>
+                <th width="100">Organization</th>
+                <th width="80">Gold</th>
+                <th width="80">Silver</th>
+                <th width="80">Bronze</th>
+                <th width="100">Total Points</th>
+                <th width="100">Win Rate</th>
+            </tr></thead><tbody>`;
+            
+            // Process data based on whether it's aggregated or not
+            let processedData;
+            if (isAggregated) {
+                const teamStats = {};
+                leaderboardData.forEach(lb => {
+                    if (!teamStats[lb.team_id]) {
+                        teamStats[lb.team_id] = {
+                            team_id: lb.team_id,
+                            team_name: lb.team_name,
+                            team_profile: lb.team_profile,
+                            organization: lb.organization,
+                            gold: 0,
+                            silver: 0,
+                            bronze: 0,
+                            total_matches: 0,
+                            wins: 0
+                        };
+                    }
+                    
+                    teamStats[lb.team_id].gold += lb.gold || 0;
+                    teamStats[lb.team_id].silver += lb.silver || 0;
+                    teamStats[lb.team_id].bronze += lb.bronze || 0;
+                    teamStats[lb.team_id].total_matches += lb.total_matches || 0;
+                    teamStats[lb.team_id].wins += lb.wins || 0;
+                });
+                
+                processedData = Object.values(teamStats).map(team => {
+                    team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
+                    team.win_rate = team.total_matches > 0 ? Math.round((team.wins / team.total_matches) * 100) : 0;
+                    return team;
+                }).sort((a, b) => b.total_points - a.total_points);
+            } else {
+                processedData = leaderboardData
+                    .map(team => {
+                        team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
+                        team.win_rate = team.total_matches > 0 ? Math.round((team.wins / team.total_matches) * 100) : 0;
+                        return team;
+                    })
+                    .sort((a, b) => b.total_points - a.total_points);
+            }
+            
+            // Generate table rows
+            processedData.forEach((team, index) => {
+                const rank = index + 1;
+                const medalClass = rank === 1 ? 'gold-medal' : rank === 2 ? 'silver-medal' : rank === 3 ? 'bronze-medal' : '';
+                const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                const winRateClass = team.win_rate >= 70 ? 'high-win-rate' : 
+                                   team.win_rate >= 40 ? 'medium-win-rate' : 'low-win-rate';
+                
+                tableHtml += `<tr class="${rankClass}">
+                    <td>
+                        ${rank <= 3 ? `<i class="fas fa-medal medal ${medalClass}"></i>` : ''}
+                        ${rank}
+                    </td>
+                    <td>
+                        <div class="team-info">
+                            ${team.team_profile ? 
+                                `<img src="${team.team_profile}" alt="${team.team_name}" class="team-avatar">` : 
+                                `<div style="width: 35px; height: 35px; border-radius: 50%; background: #007bff; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                    ${team.team_name.charAt(0).toUpperCase()}
+                                </div>`
+                            }
+                            <span class="team-name">${team.team_name}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="organization-badge ${team.organization === 'school' ? 'school-badge' : 'barangay-badge'}">
+                            ${team.organization}
+                        </span>
+                    </td>
+                    <td class="stats-number">${team.gold}</td>
+                    <td class="stats-number">${team.silver}</td>
+                    <td class="stats-number">${team.bronze}</td>
+                    <td class="stats-number">${team.total_points}</td>
+                    <td>
+                        <span class="win-rate ${winRateClass}">
+                            ${team.win_rate}%
+                        </span>
+                    </td>
+                </tr>`;
+            });
+            
+            tableHtml += `</tbody></table>`;
+            return tableHtml;
         }
 
         function closeModal(modalId) {
@@ -550,5 +1189,4 @@
         });
     </script>
 </body>
-
 </html>
