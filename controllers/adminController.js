@@ -87,6 +87,10 @@ exports.getAdminHome = async (req, res) => {
         const [expiredEvents] = await db.execute("SELECT * FROM events WHERE status = ?", ['expired']);
 
         // Get dashboard statistics
+        // Total users count (from users table)
+        const [totalUsersResult] = await db.execute("SELECT COUNT(*) as total FROM users");
+        const totalUsers = totalUsersResult[0].total;
+
         // Total players count
         const [totalPlayersResult] = await db.execute("SELECT COUNT(*) as total FROM team_players");
         const totalPlayers = totalPlayersResult[0].total;
@@ -234,6 +238,7 @@ exports.getAdminHome = async (req, res) => {
             newCoachRequests,
             newTeamRequests,
             dashboardStats: {
+                totalUsers, // Added this line
                 totalPlayers,
                 totalCoordinators,
                 pendingPlayers,
@@ -262,6 +267,7 @@ exports.getAdminHome = async (req, res) => {
             newCoachRequests: [],
             newTeamRequests: [],
             dashboardStats: {
+                totalUsers: 0, // Added this line
                 totalPlayers: 0,
                 totalCoordinators: 0,
                 pendingPlayers: 0,
@@ -2106,6 +2112,7 @@ exports.getEventHistory = async (req, res) => {
         res.redirect('/admin/home');
     }
 };
+
 
 
 
