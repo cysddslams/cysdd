@@ -186,6 +186,7 @@ router.post(
 );
 
 router.get("/admin/events", adminAuthMiddleware, adminController.getAdminEvents);
+router.get('/all-users', adminAuthMiddleware, adminController.getAllUsers);
 router.get("/admin/events/create", adminAuthMiddleware, adminController.getCreateEvent);
 router.get("/admin/events/:id", adminAuthMiddleware, adminController.getEventDetails);
 router.get("/admin/events/edit/:id", adminAuthMiddleware, adminController.getEditEvent);
@@ -224,6 +225,7 @@ router.post("/admin/schedule/set-champion", adminAuthMiddleware, scheduleControl
 
 
 module.exports = router;
+
 
 
 
