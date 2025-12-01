@@ -2117,6 +2117,56 @@ exports.getEventHistory = async (req, res) => {
 
 
 
+// Get All Users Page
+exports.getAllUsers = async (req, res) => {
+    if (!req.session.admin) {
+        return res.redirect("/admin");
+    }
+
+    try {
+        const adminId = req.session.admin.id;
+        const [adminData] = await db.execute("SELECT * FROM admins WHERE id = ?", [adminId]);
+        const admin = adminData[0];
+
+        // Get all users from users table
+        const [users] = await db.execute(`
+            SELECT id, email, profile, google_id, created_at, updated_at, 
+                   terms_accepted, terms_accepted_at 
+            FROM users 
+            ORDER BY created_at DESC
+        `);
+
+        // Calculate statistics
+        const totalUsers = users.length;
+        const termsAcceptedUsers = users.filter(user => user.terms_accepted).length;
+        const termsPendingUsers = totalUsers - termsAcceptedUsers;
+        const googleUsers = users.filter(user => user.google_id).length;
+
+        // Get notification data
+        const newCoachRequests = await getPendingCoachNotifications();
+        const newTeamRequests = await getPendingTeamNotifications();
+
+        res.render('admin/adminAllUsers', {
+            admin: admin,
+            users: users,
+            totalUsers: totalUsers,
+            termsAcceptedUsers: termsAcceptedUsers,
+            termsPendingUsers: termsPendingUsers,
+            googleUsers: googleUsers,
+            success: req.flash('success'),
+            error: req.flash('error'),
+            newCoachRequests: newCoachRequests,
+            newTeamRequests: newTeamRequests
+        });
+    } catch (error) {
+        console.error('Error loading all users:', error);
+        req.flash('error', 'Error loading users data');
+        res.redirect('/admin/home');
+    }
+};
+
+
+
 
 
 
