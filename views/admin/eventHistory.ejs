@@ -619,10 +619,12 @@
                                                         teamStats[lb.team_id].wins += lb.wins || 0;
                                                     });
 
-                                                    // Convert to array and calculate points and win rate
+                                                    // Convert to array and calculate points and win rate (CAP AT 100%)
                                                     const aggregatedLeaderboard = Object.values(teamStats).map(team => {
                                                         team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
-                                                        team.win_rate = team.total_matches > 0 ? Math.round((team.wins / team.total_matches) * 100) : 0;
+                                                        // Ensure win rate never exceeds 100%
+                                                        team.win_rate = team.total_matches > 0 ? 
+                                                            Math.min(Math.round((team.wins / team.total_matches) * 100), 100) : 0;
                                                         return team;
                                                     });
 
@@ -690,7 +692,9 @@
                                             const sportLeaderboard = sportsLeaderboards[sport]
                                                 .map(team => {
                                                     team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
-                                                    team.win_rate = team.total_matches > 0 ? Math.round((team.wins / team.total_matches) * 100) : 0;
+                                                    // Ensure win rate never exceeds 100%
+                                                    team.win_rate = team.total_matches > 0 ? 
+                                                        Math.min(Math.round((team.wins / team.total_matches) * 100), 100) : 0;
                                                     return team;
                                                 })
                                                 .sort((a, b) => b.total_points - a.total_points);
@@ -1053,14 +1057,18 @@
                 
                 processedData = Object.values(teamStats).map(team => {
                     team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
-                    team.win_rate = team.total_matches > 0 ? Math.round((team.wins / team.total_matches) * 100) : 0;
+                    // Ensure win rate never exceeds 100%
+                    team.win_rate = team.total_matches > 0 ? 
+                        Math.min(Math.round((team.wins / team.total_matches) * 100), 100) : 0;
                     return team;
                 }).sort((a, b) => b.total_points - a.total_points);
             } else {
                 processedData = leaderboardData
                     .map(team => {
                         team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
-                        team.win_rate = team.total_matches > 0 ? Math.round((team.wins / team.total_matches) * 100) : 0;
+                        // Ensure win rate never exceeds 100%
+                        team.win_rate = team.total_matches > 0 ? 
+                            Math.min(Math.round((team.wins / team.total_matches) * 100), 100) : 0;
                         return team;
                     })
                     .sort((a, b) => b.total_points - a.total_points);
@@ -1191,5 +1199,3 @@
     </script>
 </body>
 </html>
-
-
