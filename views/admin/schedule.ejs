@@ -782,40 +782,111 @@
             });
         });
 
-        // Load sports for selected event - FIXED VERSION
-async function loadSports(eventId) {
-    try {
-        console.log('Loading sports for event ID:', eventId);
-        const response = await fetch(`/admin/schedule/event/${eventId}/sports`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        // Load sports for selected event - UPDATED FOR BADMINTON CATEGORIES
+        async function loadSports(eventId) {
+            try {
+                console.log('Loading sports for event ID:', eventId);
+                const response = await fetch(`/admin/schedule/event/${eventId}/sports`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                console.log('Sports data received:', data);
+                
+                const sportsGrid = document.getElementById('sportsGrid');
+                sportsGrid.innerHTML = '';
+                
+                if (!data.sports || data.sports.length === 0) {
+                    sportsGrid.innerHTML = '<p>No sports available for this event.</p>';
+                    return;
+                }
+                
+                // Group badminton sports by category for better display
+                const badmintonSports = {};
+                const otherSports = [];
+                
+                data.sports.forEach(sport => {
+                    if (sport.name.includes('badminton') && sport.category) {
+                        const baseSport = sport.baseSport || sport.name.split(' - ')[0];
+                        if (!badmintonSports[baseSport]) {
+                            badmintonSports[baseSport] = [];
+                        }
+                        badmintonSports[baseSport].push(sport);
+                    } else {
+                        otherSports.push(sport);
+                    }
+                });
+                
+                // Display badminton sports with categories
+                Object.keys(badmintonSports).forEach(baseSport => {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'sport-category-group';
+                    categoryDiv.style.marginBottom = '20px';
+                    categoryDiv.style.padding = '15px';
+                    categoryDiv.style.border = '1px solid #ddd';
+                    categoryDiv.style.borderRadius = '10px';
+                    categoryDiv.style.backgroundColor = '#f8f9fa';
+                    
+                    const categoryTitle = document.createElement('h5');
+                    categoryTitle.textContent = baseSport.replace('_', ' ').toUpperCase();
+                    categoryTitle.style.color = '#333';
+                    categoryTitle.style.marginBottom = '10px';
+                    categoryTitle.style.textAlign = 'center';
+                    categoryDiv.appendChild(categoryTitle);
+                    
+                    const categoryGrid = document.createElement('div');
+                    categoryGrid.style.display = 'grid';
+                    categoryGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(180px, 1fr))';
+                    categoryGrid.style.gap = '10px';
+                    
+                    badmintonSports[baseSport].forEach(sport => {
+                        const sportCard = createSportCard(sport);
+                        categoryGrid.appendChild(sportCard);
+                    });
+                    
+                    categoryDiv.appendChild(categoryGrid);
+                    sportsGrid.appendChild(categoryDiv);
+                });
+                
+                // Display other sports
+                otherSports.forEach(sport => {
+                    const sportCard = createSportCard(sport);
+                    sportsGrid.appendChild(sportCard);
+                });
+                
+                document.getElementById('sportsSection').style.display = 'block';
+                document.getElementById('eventsSection').style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error loading sports:', error);
+                alert('Error loading sports: ' + error.message);
+            }
         }
         
-        const data = await response.json();
-        
-        console.log('Sports data received:', data);
-        
-        const sportsGrid = document.getElementById('sportsGrid');
-        sportsGrid.innerHTML = '';
-        
-        if (!data.sports || data.sports.length === 0) {
-            sportsGrid.innerHTML = '<p>No sports available for this event.</p>';
-            return;
-        }
-        
-        data.sports.forEach(sport => {
-            console.log('Processing sport:', sport);
+        // Helper function to create sport card
+        function createSportCard(sport) {
             const sportCard = document.createElement('div');
             sportCard.className = 'sport-card';
+            
+            // Determine display name
+            let displayName = sport.name;
+            if (sport.category) {
+                displayName = `${sport.category} (${sport.gender})`;
+            }
+            
             sportCard.innerHTML = `
-                <h5>${sport.name}</h5>
-                <small>${sport.type.charAt(0).toUpperCase() + sport.type.slice(1).replace('_', ' ')}</small>
+                <h5>${displayName}</h5>
+                <small>${sport.type ? sport.type.charAt(0).toUpperCase() + sport.type.slice(1).replace('_', ' ') : 'Sport'}</small>
             `;
             sportCard.dataset.sportType = sport.type;
             sportCard.dataset.sportName = sport.name;
+            sportCard.dataset.baseSport = sport.baseSport || sport.name;
+            sportCard.dataset.category = sport.category || '';
+            sportCard.dataset.gender = sport.gender || '';
             
-            // ADDED direct event listener to each sport card
             sportCard.addEventListener('click', function() {
                 console.log('Sport card clicked:', this.dataset);
                 
@@ -827,18 +898,20 @@ async function loadSports(eventId) {
                 
                 selectedSport = {
                     type: this.dataset.sportType,
-                    name: this.dataset.sportName
+                    name: this.dataset.sportName,
+                    baseSport: this.dataset.baseSport,
+                    category: this.dataset.category,
+                    gender: this.dataset.gender
                 };
                 
                 console.log('Selected sport:', selectedSport);
-                console.log('Current event:', selectedEvent);
                 
                 // Proceed to next step
                 checkExistingBrackets(selectedEvent.id, selectedSport.type, selectedSport.name);
             });
             
-            sportsGrid.appendChild(sportCard);
-        });
+            return sportCard;
+        }
         
         document.getElementById('sportsSection').style.display = 'block';
         document.getElementById('eventsSection').style.display = 'none';
@@ -849,7 +922,7 @@ async function loadSports(eventId) {
     }
 }
 
-        // Check if brackets already exist for this sport - FIXED VERSION
+        // Check if brackets already exist for this sport - UPDATED FOR BADMINTON CATEGORIES
         async function checkExistingBrackets(eventId, sportType, sportName) {
             try {
                 console.log(`Checking existing brackets for event ${eventId}, sport: ${sportName}`);
@@ -858,9 +931,9 @@ async function loadSports(eventId) {
                 
                 console.log('All brackets data:', data.brackets);
                 
-                // Filter brackets by sport name - FIXED COMPARISON
+                // Filter brackets by exact sport name match
                 existingBrackets = data.brackets.filter(bracket => {
-                    const matches = bracket.sport_type && bracket.sport_type.toLowerCase() === sportName.toLowerCase();
+                    const matches = bracket.sport_type && bracket.sport_type === sportName;
                     console.log(`Comparing: "${bracket.sport_type}" with "${sportName}" -> ${matches}`);
                     return matches;
                 });
@@ -875,7 +948,6 @@ async function loadSports(eventId) {
                 }
             } catch (error) {
                 console.error('Error checking existing brackets:', error);
-                // If there's an error, proceed to load teams
                 console.log('Error occurred, loading teams as fallback...');
                 loadTeams(eventId, sportType, sportName);
             }
@@ -1507,6 +1579,7 @@ async function loadSports(eventId) {
 </body>
 
 </html>
+
 
 
 
