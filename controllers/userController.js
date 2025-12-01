@@ -1387,14 +1387,14 @@ exports.registerPlayer = async (req, res) => {
         ];
 
         // Insert player - Updated SQL query to include badminton_category
+        // Make sure we have ALL 28 columns listed
         await db.execute(`
             INSERT INTO team_players 
             (team_id, user_id, player_name, PSA, waiver, med_cert, 
             birthdate, age, sex, sports, badminton_category, school, year_level, barangay, contact_number,
             student_type, COR, TOR_previous_school, COG, entry_form, COE, authorization_letter, school_id,
-            certification_lack_units,
-            status, notification_viewed, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            certification_lack_units, status, notification_viewed, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, insertValues);
 
         req.flash('success', 'Player registered successfully!');
@@ -1493,6 +1493,7 @@ exports.uploadProfilePicture = async (req, res) => {
         res.sendStatus(500);
     }
 };
+
 
 
 
