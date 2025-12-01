@@ -34,7 +34,7 @@ exports.getSchedulePage = async (req, res) => {
     }
 };
 
-// Get sports for a specific event - FIXED VERSION
+// Get sports for a specific event - UPDATED FOR BADMINTON CATEGORIES
 exports.getEventSports = async (req, res) => {
     try {
         const eventId = req.params.eventId;
@@ -58,10 +58,33 @@ exports.getEventSports = async (req, res) => {
             
             sportsList.forEach(sport => {
                 if (sport && sport !== 'none' && sport !== '') {
-                    sports.push({
-                        type: 'sports',
-                        name: sport
-                    });
+                    // Check if it's badminton
+                    if (sport.includes('badminton')) {
+                        // For badminton, add separate categories
+                        const gender = sport.includes('women') ? 'Women' : 'Men';
+                        
+                        sports.push({
+                            type: 'sports',
+                            name: `${sport} - Singles`,
+                            baseSport: sport,
+                            category: 'Singles',
+                            gender: gender
+                        });
+                        
+                        sports.push({
+                            type: 'sports',
+                            name: `${sport} - Doubles`,
+                            baseSport: sport,
+                            category: 'Doubles',
+                            gender: gender
+                        });
+                    } else {
+                        // For other sports, add as normal
+                        sports.push({
+                            type: 'sports',
+                            name: sport
+                        });
+                    }
                 }
             });
         }
@@ -102,34 +125,77 @@ exports.getEventSports = async (req, res) => {
     }
 };
 
-// Get teams for a specific event and sport
+// Get teams for a specific event and sport - UPDATED FOR BADMINTON CATEGORIES
 exports.getEventTeams = async (req, res) => {
     try {
         const { eventId, sportType } = req.params;
         
-        const [teams] = await db.execute(
-            `SELECT t.*, c.fullname as coach_name 
-             FROM team t 
-             LEFT JOIN coach c ON t.coach_id = c.id 
-             WHERE t.event_id = ? AND t.status = 'confirmed' 
-             ORDER BY t.teamName`,
-            [eventId]
-        );
-
-        res.json({ teams });
+        console.log('Getting teams for event:', eventId, 'sport:', sportType);
+        
+        // Parse sport name to check if it's badminton with category
+        const isBadmintonWithCategory = sportType.includes('badminton') && 
+                                       (sportType.includes('Singles') || sportType.includes('Doubles'));
+        
+        if (isBadmintonWithCategory) {
+            // Extract base sport name and category from the sportType
+            // Example: "badminton_men - Singles" -> base: "badminton_men", category: "Singles"
+            const parts = sportType.split(' - ');
+            const baseSport = parts[0].trim();
+            const category = parts[1].trim();
+            const gender = baseSport.includes('women') ? 'female' : 'male';
+            
+            console.log('Badminton category detected:', { baseSport, category, gender });
+            
+            // Get teams that have players in this specific badminton category
+            const [teams] = await db.execute(
+                `SELECT DISTINCT t.*, c.fullname as coach_name 
+                 FROM team t 
+                 LEFT JOIN coach c ON t.coach_id = c.id 
+                 WHERE t.event_id = ? 
+                 AND t.status = 'confirmed'
+                 AND EXISTS (
+                     SELECT 1 FROM team_players tp 
+                     WHERE tp.team_id = t.id 
+                     AND tp.sports = ?
+                     AND (tp.badminton_category = ? OR ? = 'No Category')
+                     AND tp.sex = ?
+                 )
+                 ORDER BY t.teamName`,
+                [eventId, baseSport, category, category, gender]
+            );
+            
+            console.log('Found teams for badminton category:', teams.length);
+            res.json({ teams });
+        } else {
+            // For non-badminton sports or badminton without category specification
+            const [teams] = await db.execute(
+                `SELECT t.*, c.fullname as coach_name 
+                 FROM team t 
+                 LEFT JOIN coach c ON t.coach_id = c.id 
+                 WHERE t.event_id = ? 
+                 AND t.status = 'confirmed' 
+                 ORDER BY t.teamName`,
+                [eventId]
+            );
+            
+            console.log('Found teams for regular sport:', teams.length);
+            res.json({ teams });
+        }
     } catch (error) {
         console.error('Error getting event teams:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
 
-// Create tournament bracket
+// Create tournament bracket - UPDATED FOR BADMINTON CATEGORIES
 exports.createTournamentBracket = async (req, res) => {
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
 
         const { eventId, sportType, sportName, bracketType, teams } = req.body;
+
+        console.log('Creating bracket with data:', { eventId, sportType, sportName, bracketType, teams });
 
         // Validate bracket type
         const validBracketTypes = ['single_elimination', 'round_robin'];
@@ -142,7 +208,29 @@ exports.createTournamentBracket = async (req, res) => {
             return res.status(400).json({ error: 'At least 2 teams are required' });
         }
 
-        // Create tournament bracket with sport name
+        // For badminton categories, ensure teams have players in that category
+        if (sportName.includes('badminton') && (sportName.includes('Singles') || sportName.includes('Doubles'))) {
+            console.log('Validating badminton category teams...');
+            
+            // Check each team has players in this specific category
+            for (const teamId of teams) {
+                const [players] = await connection.execute(
+                    `SELECT COUNT(*) as count FROM team_players 
+                     WHERE team_id = ? 
+                     AND sports LIKE '%badminton%'
+                     AND badminton_category = ?`,
+                    [teamId, sportName.includes('Singles') ? 'Singles' : 'Doubles']
+                );
+                
+                if (players[0].count === 0) {
+                    return res.status(400).json({ 
+                        error: `Team ${teamId} has no players registered for ${sportName}` 
+                    });
+                }
+            }
+        }
+
+        // Create tournament bracket with full sport name (including category if applicable)
         const [bracketResult] = await connection.execute(
             "INSERT INTO tournament_brackets (event_id, sport_type, bracket_type) VALUES (?, ?, ?)",
             [eventId, sportName, bracketType]
@@ -647,4 +735,5 @@ exports.setChampionManually = async (req, res) => {
     }
 
 };
+
 
