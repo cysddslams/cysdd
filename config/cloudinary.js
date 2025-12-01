@@ -177,6 +177,37 @@ const userProfileUpload = multer({
 });
 
 
+const coachProfileStorage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
+    return {
+      folder: 'coach_profiles',
+      resource_type: 'image',
+      public_id: `coach_profile_${Date.now()}`,
+      transformation: [
+        { width: 400, height: 400, crop: 'fill', gravity: 'face' },
+        { quality: 'auto:good' }
+      ],
+      format: 'webp', // Optimize for web
+    };
+  },
+});
+
+// 🔹 Coach profile upload middleware
+const coachProfileUpload = multer({
+  storage: coachProfileStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+  fileFilter: (req, file, cb) => {
+    // Only allow image files
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed for profile pictures'), false);
+    }
+  }
+});
+
+
 
 module.exports = {
   cloudinary,
@@ -185,6 +216,8 @@ module.exports = {
   coachRegisterUpload,
    playerDocsUpload,
   userProfileUpload,
+  coachProfileUpload,
 };
+
 
 
