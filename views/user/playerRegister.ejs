@@ -76,6 +76,18 @@
         .required-star {
             color: #e74c3c;
         }
+        
+        /* Badminton category specific styles */
+        #badminton_category_group {
+            display: none;
+            margin-top: 15px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -98,19 +110,33 @@
 
                         <!-- Sport selection -->
                         <div class="form-group">
-                            <label for="player_sport">Sport</label>
+                            <label for="player_sport">Sport <span class="required-star">*</span></label>
                             <div class="select-wrapper">
                                 <select id="player_sport" name="sports" required class="select-placeholder">
                                     <option value="" disabled selected hidden>Select a sport</option>
                                     <% sports.forEach(function(sport) { %>
                                         <option value="<%= sport.name %>" 
                                             data-limit="<%= sport.limit %>" 
-                                            data-current="<%= sport.currentCount %>">
+                                            data-current="<%= sport.currentCount %>"
+                                            <% if (sport.isBadminton) { %>data-badminton="true"<% } %>>
                                             <%= sport.name %> (<%= sport.currentCount %>/<%= sport.limit %>)
                                         </option>
                                     <% }); %>
                                 </select>
                             </div>
+                        </div>
+
+                        <!-- Badminton Category (hidden by default) -->
+                        <div class="form-group" id="badminton_category_group">
+                            <label for="badminton_category">Badminton Category <span class="required-star">*</span></label>
+                            <div class="select-wrapper">
+                                <select id="badminton_category" name="badminton_category">
+                                    <option value="" disabled selected hidden>Select category</option>
+                                    <option value="Singles">Singles</option>
+                                    <option value="Doubles">Doubles</option>
+                                </select>
+                            </div>
+                            <div class="info-text">Please select whether you will play Singles or Doubles</div>
                         </div>
 
                         <!-- Personal information -->
@@ -257,13 +283,41 @@
             document.getElementById('age').value = age;
         });
 
-        // Handle select placeholder appearance
-        const sportSelect = document.getElementById('player_sport');
-        sportSelect.addEventListener('change', function() {
+        // Handle sport selection change to show/hide badminton category
+        document.getElementById('player_sport').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const isBadminton = selectedOption.dataset.badminton === 'true';
+            const badmintonCategoryGroup = document.getElementById('badminton_category_group');
+            const badmintonCategorySelect = document.getElementById('badminton_category');
+            
+            if (isBadminton) {
+                badmintonCategoryGroup.style.display = 'block';
+                badmintonCategorySelect.required = true;
+                // Reset value when showing
+                badmintonCategorySelect.value = '';
+            } else {
+                badmintonCategoryGroup.style.display = 'none';
+                badmintonCategorySelect.required = false;
+                // Clear value when hiding
+                badmintonCategorySelect.value = '';
+            }
+            
+            // Handle select placeholder appearance
             if (this.value !== "") {
                 this.classList.remove('select-placeholder');
             } else {
                 this.classList.add('select-placeholder');
+            }
+            
+            // Show sport capacity warnings
+            const current = parseInt(selectedOption.dataset.current);
+            const limit = selectedOption.dataset.limit;
+            
+            if (limit !== 'No limit') {
+                const remaining = parseInt(limit) - current;
+                if (remaining <= 3) {
+                    alert(`Warning: Only ${remaining} spot(s) remaining for ${selectedOption.text.split('(')[0].trim()}`);
+                }
             }
         });
 
@@ -338,19 +392,12 @@
             <% } else { %>
                 documentsSection.innerHTML = '<div class="info-text">Please select your student type to see recommended documents</div>';
             <% } %>
-        });
-
-        // Show sport capacity warnings
-        document.getElementById('player_sport').addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const current = parseInt(selectedOption.dataset.current);
-            const limit = selectedOption.dataset.limit;
             
-            if (limit !== 'No limit') {
-                const remaining = parseInt(limit) - current;
-                if (remaining <= 3) {
-                    alert(`Warning: Only ${remaining} spot(s) remaining for ${selectedOption.text.split('(')[0].trim()}`);
-                }
+            // Initialize badminton category field
+            const sportSelect = document.getElementById('player_sport');
+            if (sportSelect.value.includes('Badminton')) {
+                document.getElementById('badminton_category_group').style.display = 'block';
+                document.getElementById('badminton_category').required = true;
             }
         });
 
@@ -398,6 +445,16 @@
                     return false;
                 }
             <% } %>
+            
+            // Check if badminton category is required but not selected
+            const sportSelect = document.getElementById('player_sport');
+            const badmintonCategory = document.getElementById('badminton_category');
+            
+            if (sportSelect.value.includes('Badminton') && !badmintonCategory.value) {
+                e.preventDefault();
+                alert('Please select a Badminton category (Singles or Doubles)');
+                return false;
+            }
             
             // Show loading state
             const submitBtn = document.querySelector('button[type="submit"]');
