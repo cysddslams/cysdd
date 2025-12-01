@@ -16,7 +16,7 @@ const {
     getLatestCoachPostNotification
 } = require('../utils/notificationHelper');
 const { coachCertificateUpload } = require('../config/cloudinary');
-const { coachRegisterUpload } = require('../config/cloudinary');
+const { coachRegisterUpload, coachProfileUpload} = require('../config/cloudinary');
 
 
 
@@ -202,21 +202,7 @@ exports.getCoachHomepage = async (req, res) => {
     }
 };
 
-// Get coach profile
-exports.getCoachProfile = async (req, res) => {
-    try {
-        const coach = await coachModel.findCoachById(req.session.coachOnly.id);
-        res.render('coach/coachProfile', {
-            coach: coach,
-            success: req.flash('success'),
-            error: req.flash('error')
-        });
-    } catch (error) {
-        console.error('Error fetching coach profile:', error);
-        req.flash('error', 'Failed to load profile');
-        res.redirect('/coach/homepage');
-    }
-};
+
 
 // Mark notification as viewed
 exports.markNotificationViewed = async (req, res) => {
@@ -244,31 +230,92 @@ exports.markNotificationViewed = async (req, res) => {
     }
 };
 
+// Get coach profile
+exports.getCoachProfile = async (req, res) => {
+    try {
+        const coach = await coachModel.findCoachById(req.session.coachOnly.id);
+        res.render('coach/coachProfile', {
+            coach: coach,
+            success: req.flash('success'),
+            error: req.flash('error')
+        });
+    } catch (error) {
+        console.error('Error fetching coach profile:', error);
+        req.flash('error', 'Failed to load profile');
+        res.redirect('/coach/homepage');
+    }
+};
+
+// Helper function to delete old Cloudinary image
+async function deleteCloudinaryImage(imageUrl) {
+    try {
+        if (!imageUrl || !imageUrl.includes('cloudinary.com')) {
+            return;
+        }
+        
+        // Extract public_id from Cloudinary URL
+        const urlParts = imageUrl.split('/');
+        const publicIdWithExtension = urlParts.slice(-2).join('/');
+        const publicId = publicIdWithExtension.split('.')[0];
+        
+        // Delete the image from Cloudinary
+        const result = await cloudinary.uploader.destroy(publicId);
+        console.log('Old Cloudinary image deleted:', publicId);
+        return result;
+    } catch (error) {
+        console.error('Error deleting Cloudinary image:', error);
+        // Don't throw error, just log it - don't want to block profile update
+    }
+}
+
 // Update coach profile picture
 exports.updateCoachProfile = [
-    upload.single('profilePic'),
+    coachProfileUpload.single('profilePic'),
     async (req, res) => {
         try {
             if (!req.file) {
-                req.flash('error', 'No file uploaded');
+                req.flash('error', 'No file uploaded. Please select an image.');
                 return res.redirect('/coach/profile');
             }
 
-            const profilePath = '/uploads/coach_profile/' + req.file.filename;
+            // Get current coach to check for existing profile picture
+            const currentCoach = await coachModel.findCoachById(req.session.coachOnly.id);
+            
+            // Delete old Cloudinary image if exists
+            if (currentCoach && currentCoach.profilePic && currentCoach.profilePic.includes('cloudinary.com')) {
+                await deleteCloudinaryImage(currentCoach.profilePic);
+            }
+            
+            // The Cloudinary URL is automatically saved in req.file.path
+            const cloudinaryUrl = req.file.path;
             
             // Update coach profile in database
-            await coachModel.updateCoachProfile(req.session.coachOnly.id, profilePath);
+            await coachModel.updateCoachProfile(req.session.coachOnly.id, cloudinaryUrl);
             
-            req.flash('success', 'Profile picture updated successfully');
+            // Also update session data if profile picture is stored there
+            if (req.session.coachOnly) {
+                req.session.coachOnly.profilePic = cloudinaryUrl;
+            }
+            
+            req.flash('success', 'Profile picture updated successfully!');
             res.redirect('/coach/profile');
+            
         } catch (error) {
             console.error('Error updating coach profile:', error);
-            req.flash('error', error.message || 'Failed to update profile');
+            
+            // Handle specific error cases
+            if (error.message === 'File too large') {
+                req.flash('error', 'Image size too large. Maximum size is 10MB.');
+            } else if (error.message.includes('Only image files are allowed')) {
+                req.flash('error', 'Only image files (JPG, PNG, GIF, etc.) are allowed for profile pictures.');
+            } else {
+                req.flash('error', error.message || 'Failed to update profile picture. Please try again.');
+            }
+            
             res.redirect('/coach/profile');
         }
     }
 ];
-
 // Helper function to format date like Facebook
 function formatTimeAgo(dateString) {
     const now = new Date();
@@ -1363,6 +1410,7 @@ exports.updatePlayerStatus = async (req, res) => {
         res.redirect(`/coach/team/${teamId}`);
     }
 };
+
 
 
 
