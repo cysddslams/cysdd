@@ -1919,6 +1919,193 @@ exports.exportEventResults = async (req, res) => {
 
 
 
+// Get Event Leaderboard
+exports.getEventLeaderboard = async (req, res) => {
+    if (!req.session.admin) {
+        return res.redirect("/admin");
+    }
+
+    try {
+        const { eventId } = req.params;
+
+        // Get event details
+        const [events] = await db.execute(
+            "SELECT * FROM events WHERE id = ?",
+            [eventId]
+        );
+
+        if (events.length === 0) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+
+        const event = events[0];
+
+        // Get leaderboard data for this event
+        const leaderboardData = await getEventLeaderboardData(eventId);
+
+        res.json({
+            event: event,
+            leaderboards: leaderboardData
+        });
+    } catch (error) {
+        console.error('Error getting event leaderboard:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// Helper function to get leaderboard data
+async function getEventLeaderboardData(eventId) {
+    // Get all brackets for the event
+    const [brackets] = await db.execute(
+        "SELECT * FROM tournament_brackets WHERE event_id = ?",
+        [eventId]
+    );
+
+    const leaderboardData = [];
+
+    for (const bracket of brackets) {
+        // Get all teams that participated in this bracket
+        const [participatingTeams] = await db.execute(
+            `SELECT DISTINCT t.id, t.teamName, t.teamProfile, t.organization
+             FROM matches m
+             JOIN team t ON (m.team1_id = t.id OR m.team2_id = t.id)
+             WHERE m.bracket_id = ?`,
+            [bracket.id]
+        );
+
+        for (const team of participatingTeams) {
+            // Get match statistics for this team in this bracket
+            const [matchStats] = await db.execute(
+                `SELECT 
+                    COUNT(*) as total_matches,
+                    SUM(CASE WHEN m.winner_team_id = ? THEN 1 ELSE 0 END) as wins,
+                    SUM(CASE WHEN m.status = 'completed' AND m.winner_team_id = ? THEN 1 ELSE 0 END) as completed_wins
+                 FROM matches m
+                 WHERE m.bracket_id = ? AND (m.team1_id = ? OR m.team2_id = ?)`,
+                [team.id, team.id, bracket.id, team.id, team.id]
+            );
+
+            // Get medal counts (championships)
+            const [medalStats] = await db.execute(
+                `SELECT 
+                    SUM(CASE WHEN tp.champion_team_id = ? THEN 1 ELSE 0 END) as gold,
+                    SUM(CASE WHEN m.winner_team_id != ? AND (m.team1_id = ? OR m.team2_id = ?) 
+                           AND m.round_number = (SELECT MAX(round_number) FROM matches WHERE bracket_id = ?) THEN 1 ELSE 0 END) as silver,
+                    SUM(CASE WHEN m.winner_team_id != ? AND (m.team1_id = ? OR m.team2_id = ?) 
+                           AND m.round_number = (SELECT MAX(round_number)-1 FROM matches WHERE bracket_id = ?) THEN 1 ELSE 0 END) as bronze
+                 FROM tournament_progress tp
+                 LEFT JOIN matches m ON tp.bracket_id = m.bracket_id
+                 WHERE tp.bracket_id = ? AND (m.team1_id = ? OR m.team2_id = ?)`,
+                [team.id, team.id, team.id, team.id, bracket.id, 
+                 team.id, team.id, team.id, bracket.id, bracket.id, team.id, team.id]
+            );
+
+            const stats = matchStats[0] || { total_matches: 0, wins: 0, completed_wins: 0 };
+            const medals = medalStats[0] || { gold: 0, silver: 0, bronze: 0 };
+
+            leaderboardData.push({
+                team_id: team.id,
+                team_name: team.teamName,
+                team_profile: team.teamProfile,
+                organization: team.organization,
+                sport_type: bracket.sport_type,
+                total_matches: stats.total_matches,
+                wins: stats.wins,
+                gold: medals.gold,
+                silver: medals.silver,
+                bronze: medals.bronze
+            });
+        }
+    }
+
+    return leaderboardData;
+}
+
+// Update getEventHistory to include leaderboard data
+exports.getEventHistory = async (req, res) => {
+    if (!req.session.admin) {
+        return res.redirect("/admin");
+    }
+
+    try {
+        const adminId = req.session.admin.id;
+        const [adminData] = await db.execute("SELECT * FROM admins WHERE id = ?", [adminId]);
+        const admin = adminData[0];
+
+        // Get all expired events
+        const [expiredEvents] = await db.execute(
+            "SELECT * FROM events WHERE status = 'expired' ORDER BY date_schedule DESC"
+        );
+
+        // Get tournament results and leaderboards for each event
+        const eventsWithResults = await Promise.all(
+            expiredEvents.map(async (event) => {
+                // Get all completed brackets for this event
+                const [brackets] = await db.execute(
+                    `SELECT tb.*, tp.champion_team_id, t.teamName as champion_name
+                     FROM tournament_brackets tb
+                     LEFT JOIN tournament_progress tp ON tb.id = tp.bracket_id
+                     LEFT JOIN team t ON tp.champion_team_id = t.id
+                     WHERE tb.event_id = ? AND tp.is_completed = TRUE
+                     ORDER BY tb.sport_type`,
+                    [event.id]
+                );
+
+                // Group champions by sport type
+                const sportsChampions = [];
+                const esportsChampions = [];
+                const otherActivitiesChampions = [];
+
+                brackets.forEach(bracket => {
+                    const championInfo = {
+                        sport: bracket.sport_type,
+                        champion: bracket.champion_name,
+                        teamId: bracket.champion_team_id,
+                        bracketType: bracket.bracket_type
+                    };
+
+                    // Check if this sport belongs to sports, esports, or other_activities
+                    if (event.sports && event.sports.includes(bracket.sport_type)) {
+                        sportsChampions.push(championInfo);
+                    } else if (event.esports && event.esports.includes(bracket.sport_type)) {
+                        esportsChampions.push(championInfo);
+                    } else if (event.other_activities && event.other_activities.includes(bracket.sport_type)) {
+                        otherActivitiesChampions.push(championInfo);
+                    }
+                });
+
+                // Get leaderboard data for this event
+                const leaderboards = await getEventLeaderboardData(event.id);
+
+                return {
+                    ...event,
+                    sportsChampions,
+                    esportsChampions,
+                    otherActivitiesChampions,
+                    totalChampions: brackets.length,
+                    leaderboards: leaderboards
+                };
+            })
+        );
+
+        // Get notification data
+        const newCoachRequests = await getPendingCoachNotifications();
+        const newTeamRequests = await getPendingTeamNotifications();
+
+        res.render('admin/eventHistory', {
+            admin: admin,
+            events: eventsWithResults,
+            success: req.flash('success'),
+            error: req.flash('error'),
+            newCoachRequests: newCoachRequests,
+            newTeamRequests: newTeamRequests
+        });
+    } catch (error) {
+        console.error('Error loading event history:', error);
+        req.flash('error', 'Error loading event history');
+        res.redirect('/admin/home');
+    }
+};
 
 
 
