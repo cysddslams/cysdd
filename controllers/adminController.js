@@ -1864,7 +1864,7 @@ exports.getEventResults = async (req, res) => {
     }
 };
 
-// Export event results - IMPROVED VERSION (FIXED)
+// Export event results - IMPROVED VERSION (FIXED with correct schema)
 exports.exportEventResults = async (req, res) => {
     if (!req.session.admin) {
         return res.redirect("/admin");
@@ -1886,7 +1886,7 @@ exports.exportEventResults = async (req, res) => {
         const event = events[0];
 
         // Get all brackets for this event with detailed information
-        // REMOVED 'tb.status as bracket_status' since it doesn't exist
+        // Using correct columns from tournament_progress based on your schema
         const [brackets] = await db.execute(
             `SELECT 
                 tb.id as bracket_id,
@@ -1898,8 +1898,7 @@ exports.exportEventResults = async (req, res) => {
                 t.organization,
                 tp.is_completed,
                 tp.current_round,
-                tp.total_rounds,
-                DATE_FORMAT(tp.completed_at, '%Y-%m-%d %H:%i:%s') as completion_date
+                DATE_FORMAT(tp.updated_at, '%Y-%m-%d %H:%i:%s') as last_updated
              FROM tournament_brackets tb
              LEFT JOIN tournament_progress tp ON tb.id = tp.bracket_id
              LEFT JOIN team t ON tp.champion_team_id = t.id
@@ -1918,7 +1917,8 @@ exports.exportEventResults = async (req, res) => {
                         COUNT(*) as total_matches,
                         SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_matches,
                         SUM(CASE WHEN status = 'scheduled' THEN 1 ELSE 0 END) as scheduled_matches,
-                        SUM(CASE WHEN status = 'ongoing' THEN 1 ELSE 0 END) as ongoing_matches
+                        SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as ongoing_matches,
+                        SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled_matches
                      FROM matches 
                      WHERE bracket_id = ?`,
                     [bracket.bracket_id]
@@ -1932,12 +1932,16 @@ exports.exportEventResults = async (req, res) => {
                         t2.teamName as team2_name,
                         t1.organization as team1_org,
                         t2.organization as team2_org,
+                        c1.fullname as team1_coach,
+                        c2.fullname as team2_coach,
                         winner.teamName as winner_name,
                         DATE_FORMAT(m.match_date, '%Y-%m-%d %H:%i:%s') as match_date_formatted,
-                        DATE_FORMAT(m.completed_at, '%Y-%m-%d %H:%i:%s') as completed_date
+                        DATE_FORMAT(m.updated_at, '%Y-%m-%d %H:%i:%s') as last_updated
                      FROM matches m
                      LEFT JOIN team t1 ON m.team1_id = t1.id
                      LEFT JOIN team t2 ON m.team2_id = t2.id
+                     LEFT JOIN coach c1 ON t1.coach_id = c1.id
+                     LEFT JOIN coach c2 ON t2.coach_id = c2.id
                      LEFT JOIN team winner ON m.winner_team_id = winner.id
                      WHERE m.bracket_id = ?
                      ORDER BY m.round_number, m.match_number`,
@@ -1959,16 +1963,22 @@ exports.exportEventResults = async (req, res) => {
                     [bracket.bracket_id]
                 );
 
+                // Calculate total rounds for this bracket
+                const totalRounds = matches.length > 0 ? 
+                    Math.max(...matches.map(m => m.round_number)) : 0;
+
                 return {
                     ...bracket,
                     match_stats: matchStats[0] || {
                         total_matches: 0,
                         completed_matches: 0,
                         scheduled_matches: 0,
-                        ongoing_matches: 0
+                        ongoing_matches: 0,
+                        cancelled_matches: 0
                     },
                     matches: matches,
                     participating_teams: participatingTeams,
+                    total_rounds: totalRounds,
                     completion_rate: matchStats[0] && matchStats[0].total_matches > 0 ? 
                         Math.round((matchStats[0].completed_matches / matchStats[0].total_matches) * 100) : 0,
                     // Add bracket status based on completion
@@ -2000,10 +2010,10 @@ exports.exportEventResults = async (req, res) => {
         // Tournament Brackets Summary
         csvContent += 'TOURNAMENT BRACKETS SUMMARY\n';
         csvContent += '-' .repeat(30) + '\n';
-        csvContent += 'Sport Type,Bracket Type,Status,Champion Team,Coach,Organization,Total Matches,Completed Matches,Completion Rate\n';
+        csvContent += 'Sport Type,Bracket Type,Status,Current Round,Total Rounds,Champion Team,Coach,Organization,Total Matches,Completed Matches,Completion Rate\n';
         
         bracketsWithDetails.forEach(bracket => {
-            csvContent += `"${bracket.sport_type}","${bracket.bracket_type.replace(/_/g, ' ')}","${bracket.bracket_status}","${bracket.champion_name || 'N/A'}","${bracket.coach_name || 'N/A'}","${bracket.organization || 'N/A'}","${bracket.match_stats.total_matches}","${bracket.match_stats.completed_matches}","${bracket.completion_rate}%"\n`;
+            csvContent += `"${bracket.sport_type}","${bracket.bracket_type.replace(/_/g, ' ')}","${bracket.bracket_status}","${bracket.current_round || 1}","${bracket.total_rounds}","${bracket.champion_name || 'N/A'}","${bracket.coach_name || 'N/A'}","${bracket.organization || 'N/A'}","${bracket.match_stats.total_matches}","${bracket.match_stats.completed_matches}","${bracket.completion_rate}%"\n`;
         });
         
         csvContent += '\n';
@@ -2019,10 +2029,12 @@ exports.exportEventResults = async (req, res) => {
             if (bracket.matches.length === 0) {
                 csvContent += 'No matches recorded for this bracket.\n';
             } else {
-                csvContent += 'Round,Match,Team 1,Organization 1,Team 2,Organization 2,Winner,Score,Status,Match Date,Completed Date\n';
+                csvContent += 'Round,Match,Team 1,Org 1,Coach 1,Team 2,Org 2,Coach 2,Winner,Score (Team1-Team2),Status,Match Date,Last Updated\n';
                 
                 bracket.matches.forEach(match => {
-                    csvContent += `"${match.round_number}","${match.match_number}","${match.team1_name || 'N/A'}","${match.team1_org || 'N/A'}","${match.team2_name || 'N/A'}","${match.team2_org || 'N/A'}","${match.winner_name || 'N/A'}","${match.team1_score || 0}-${match.team2_score || 0}","${match.status}","${match.match_date_formatted || 'N/A'}","${match.completed_date || 'N/A'}"\n`;
+                    const score = match.team1_score !== null && match.team2_score !== null ? 
+                        `${match.team1_score}-${match.team2_score}` : 'N/A';
+                    csvContent += `"${match.round_number}","${match.match_number}","${match.team1_name || 'N/A'}","${match.team1_org || 'N/A'}","${match.team1_coach || 'N/A'}","${match.team2_name || 'N/A'}","${match.team2_org || 'N/A'}","${match.team2_coach || 'N/A'}","${match.winner_name || 'N/A'}","${score}","${match.status}","${match.match_date_formatted || 'N/A'}","${match.last_updated || 'N/A'}"\n`;
                 });
             }
             
@@ -2125,8 +2137,15 @@ exports.exportEventResults = async (req, res) => {
         
         const totalMatches = bracketsWithDetails.reduce((sum, b) => sum + b.match_stats.total_matches, 0);
         const completedMatches = bracketsWithDetails.reduce((sum, b) => sum + b.match_stats.completed_matches, 0);
+        const scheduledMatches = bracketsWithDetails.reduce((sum, b) => sum + b.match_stats.scheduled_matches, 0);
+        const ongoingMatches = bracketsWithDetails.reduce((sum, b) => sum + b.match_stats.ongoing_matches, 0);
+        const cancelledMatches = bracketsWithDetails.reduce((sum, b) => sum + b.match_stats.cancelled_matches, 0);
+        
         csvContent += `Total Matches: ${totalMatches}\n`;
         csvContent += `Completed Matches: ${completedMatches}\n`;
+        csvContent += `Scheduled Matches: ${scheduledMatches}\n`;
+        csvContent += `Ongoing Matches: ${ongoingMatches}\n`;
+        csvContent += `Cancelled Matches: ${cancelledMatches}\n`;
         csvContent += `Overall Completion Rate: ${totalMatches > 0 ? Math.round((completedMatches / totalMatches) * 100) : 0}%\n\n`;
         
         csvContent += `Report Generated: ${new Date().toLocaleDateString('en-US', { 
@@ -2395,6 +2414,7 @@ exports.getAllUsers = async (req, res) => {
         res.redirect('/admin/home');
     }
 };
+
 
 
 
