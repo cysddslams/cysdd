@@ -1864,7 +1864,7 @@ exports.getEventResults = async (req, res) => {
     }
 };
 
-// Export event results - IMPROVED VERSION
+// Export event results - IMPROVED VERSION (FIXED)
 exports.exportEventResults = async (req, res) => {
     if (!req.session.admin) {
         return res.redirect("/admin");
@@ -1886,12 +1886,12 @@ exports.exportEventResults = async (req, res) => {
         const event = events[0];
 
         // Get all brackets for this event with detailed information
+        // REMOVED 'tb.status as bracket_status' since it doesn't exist
         const [brackets] = await db.execute(
             `SELECT 
                 tb.id as bracket_id,
                 tb.sport_type,
                 tb.bracket_type,
-                tb.status as bracket_status,
                 tp.champion_team_id,
                 t.teamName as champion_name,
                 c.fullname as coach_name,
@@ -1970,7 +1970,9 @@ exports.exportEventResults = async (req, res) => {
                     matches: matches,
                     participating_teams: participatingTeams,
                     completion_rate: matchStats[0] && matchStats[0].total_matches > 0 ? 
-                        Math.round((matchStats[0].completed_matches / matchStats[0].total_matches) * 100) : 0
+                        Math.round((matchStats[0].completed_matches / matchStats[0].total_matches) * 100) : 0,
+                    // Add bracket status based on completion
+                    bracket_status: bracket.is_completed ? 'Completed' : 'In Progress'
                 };
             })
         );
@@ -2393,6 +2395,7 @@ exports.getAllUsers = async (req, res) => {
         res.redirect('/admin/home');
     }
 };
+
 
 
 
