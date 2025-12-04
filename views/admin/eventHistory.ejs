@@ -635,19 +635,27 @@
             background: #f8f9fa;
         }
 
-        .rank-1 {
+        .rank-champion {
             background: linear-gradient(135deg, #ffd700, #ffed4e) !important;
             font-weight: bold;
+            border-left: 4px solid #ffd700;
+        }
+
+        .rank-1 {
+            background: linear-gradient(135deg, #c0c0c0, #e0e0e0) !important;
+            font-weight: bold;
+            border-left: 4px solid #c0c0c0;
         }
 
         .rank-2 {
-            background: linear-gradient(135deg, #c0c0c0, #e0e0e0) !important;
-            font-weight: bold;
-        }
-
-        .rank-3 {
             background: linear-gradient(135deg, #cd7f32, #e9b384) !important;
             font-weight: bold;
+            border-left: 4px solid #cd7f32;
+        }
+
+        .rank-number {
+            background: #f8f9fa !important;
+            border-left: 4px solid #007bff;
         }
 
         .medal {
@@ -655,7 +663,12 @@
             margin-right: 5px;
         }
 
-        .gold-medal {
+        .trophy-icon {
+            font-size: 1.2rem;
+            margin-right: 5px;
+        }
+
+        .gold-trophy {
             color: #ffd700;
         }
 
@@ -984,6 +997,10 @@
             .medal {
                 font-size: 0.9rem;
             }
+
+            .trophy-icon {
+                font-size: 1rem;
+            }
         }
 
         .results-modal,
@@ -1190,7 +1207,8 @@
                                                                 silver: 0,
                                                                 bronze: 0,
                                                                 total_matches: 0,
-                                                                wins: 0
+                                                                wins: 0,
+                                                                losses: 0
                                                             };
                                                         }
                                                         
@@ -1199,30 +1217,57 @@
                                                         teamStats[lb.team_id].bronze += lb.bronze || 0;
                                                         teamStats[lb.team_id].total_matches += lb.total_matches || 0;
                                                         teamStats[lb.team_id].wins += lb.wins || 0;
+                                                        teamStats[lb.team_id].losses += lb.losses || 0;
                                                     });
 
                                                     const aggregatedLeaderboard = Object.values(teamStats).map(team => {
                                                         team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
-                                                        team.win_rate = team.total_matches > 0 ? 
-                                                            Math.min(Math.round((team.wins / team.total_matches) * 100), 100) : 0;
+                                                        
+                                                        if (team.total_matches > 0) {
+                                                            team.win_rate = Math.round((team.wins / team.total_matches) * 100);
+                                                        } else {
+                                                            team.win_rate = 0;
+                                                        }
+                                                        
                                                         return team;
                                                     });
 
-                                                    aggregatedLeaderboard.sort((a, b) => b.total_points - a.total_points);
+                                                    aggregatedLeaderboard.sort((a, b) => {
+                                                        if (b.total_points !== a.total_points) {
+                                                            return b.total_points - a.total_points;
+                                                        }
+                                                        return b.win_rate - a.win_rate;
+                                                    });
 
                                                     aggregatedLeaderboard.forEach((team, index) => { 
-                                                        const rank = index + 1;
-                                                        const medalClass = rank === 1 ? 'gold-medal' : rank === 2 ? 'silver-medal' : rank === 3 ? 'bronze-medal' : '';
-                                                        const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                                                        let rankClass = '';
+                                                        let rankIcon = '';
+                                                        let rankDisplay = '';
+                                                        
+                                                        if (index === 0) {
+                                                            rankClass = 'rank-champion';
+                                                            rankIcon = '<i class="fas fa-trophy trophy-icon gold-trophy"></i> Champion';
+                                                            rankDisplay = 'Champion';
+                                                        } else if (index === 1) {
+                                                            rankClass = 'rank-1';
+                                                            rankIcon = '<i class="fas fa-medal medal silver-medal"></i> 1st';
+                                                            rankDisplay = '1st';
+                                                        } else if (index === 2) {
+                                                            rankClass = 'rank-2';
+                                                            rankIcon = '<i class="fas fa-medal medal bronze-medal"></i> 2nd';
+                                                            rankDisplay = '2nd';
+                                                        } else {
+                                                            rankClass = 'rank-number';
+                                                            rankIcon = (index + 1).toString();
+                                                            rankDisplay = (index + 1).toString();
+                                                        }
+                                                        
                                                         const winRateClass = team.win_rate >= 70 ? 'high-win-rate' : 
                                                                            team.win_rate >= 40 ? 'medium-win-rate' : 'low-win-rate';
                                                 %>
                                                     <tr class="<%= rankClass %>">
                                                         <td>
-                                                            <% if (rank <= 3) { %>
-                                                                <i class="fas fa-medal medal <%= medalClass %>"></i>
-                                                            <% } %>
-                                                            <%= rank %>
+                                                            <%= rankIcon %>
                                                         </td>
                                                         <td>
                                                             <div class="team-info">
@@ -1269,11 +1314,21 @@
                                             const sportLeaderboard = sportsLeaderboards[sport]
                                                 .map(team => {
                                                     team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
-                                                    team.win_rate = team.total_matches > 0 ? 
-                                                        Math.min(Math.round((team.wins / team.total_matches) * 100), 100) : 0;
+                                                    
+                                                    if (team.total_matches > 0) {
+                                                        team.win_rate = Math.round((team.wins / team.total_matches) * 100);
+                                                    } else {
+                                                        team.win_rate = 0;
+                                                    }
+                                                    
                                                     return team;
                                                 })
-                                                .sort((a, b) => b.total_points - a.total_points);
+                                                .sort((a, b) => {
+                                                    if (b.total_points !== a.total_points) {
+                                                        return b.total_points - a.total_points;
+                                                    }
+                                                    return b.win_rate - a.win_rate;
+                                                });
                                     %>
                                         <div class="leaderboard-table-container" data-sport="<%= sport %>" style="display: none;">
                                             <table class="leaderboard-table">
@@ -1291,18 +1346,34 @@
                                                 </thead>
                                                 <tbody>
                                                     <% sportLeaderboard.forEach((team, index) => { 
-                                                        const rank = index + 1;
-                                                        const medalClass = rank === 1 ? 'gold-medal' : rank === 2 ? 'silver-medal' : rank === 3 ? 'bronze-medal' : '';
-                                                        const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                                                        let rankClass = '';
+                                                        let rankIcon = '';
+                                                        let rankDisplay = '';
+                                                        
+                                                        if (index === 0) {
+                                                            rankClass = 'rank-champion';
+                                                            rankIcon = '<i class="fas fa-trophy trophy-icon gold-trophy"></i> Champion';
+                                                            rankDisplay = 'Champion';
+                                                        } else if (index === 1) {
+                                                            rankClass = 'rank-1';
+                                                            rankIcon = '<i class="fas fa-medal medal silver-medal"></i> 1st';
+                                                            rankDisplay = '1st';
+                                                        } else if (index === 2) {
+                                                            rankClass = 'rank-2';
+                                                            rankIcon = '<i class="fas fa-medal medal bronze-medal"></i> 2nd';
+                                                            rankDisplay = '2nd';
+                                                        } else {
+                                                            rankClass = 'rank-number';
+                                                            rankIcon = (index + 1).toString();
+                                                            rankDisplay = (index + 1).toString();
+                                                        }
+                                                        
                                                         const winRateClass = team.win_rate >= 70 ? 'high-win-rate' : 
                                                                            team.win_rate >= 40 ? 'medium-win-rate' : 'low-win-rate';
                                                     %>
                                                         <tr class="<%= rankClass %>">
                                                             <td>
-                                                                <% if (rank <= 3) { %>
-                                                                    <i class="fas fa-medal medal <%= medalClass %>"></i>
-                                                                <% } %>
-                                                                <%= rank %>
+                                                                <%= rankIcon %>
                                                             </td>
                                                             <td>
                                                                 <div class="team-info">
@@ -1660,7 +1731,8 @@
                             silver: 0,
                             bronze: 0,
                             total_matches: 0,
-                            wins: 0
+                            wins: 0,
+                            losses: 0
                         };
                     }
                     
@@ -1669,36 +1741,70 @@
                     teamStats[lb.team_id].bronze += lb.bronze || 0;
                     teamStats[lb.team_id].total_matches += lb.total_matches || 0;
                     teamStats[lb.team_id].wins += lb.wins || 0;
+                    teamStats[lb.team_id].losses += lb.losses || 0;
                 });
                 
                 processedData = Object.values(teamStats).map(team => {
                     team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
-                    team.win_rate = team.total_matches > 0 ? 
-                        Math.min(Math.round((team.wins / team.total_matches) * 100), 100) : 0;
+                    
+                    if (team.total_matches > 0) {
+                        team.win_rate = Math.round((team.wins / team.total_matches) * 100);
+                    } else {
+                        team.win_rate = 0;
+                    }
+                    
                     return team;
-                }).sort((a, b) => b.total_points - a.total_points);
+                }).sort((a, b) => {
+                    if (b.total_points !== a.total_points) {
+                        return b.total_points - a.total_points;
+                    }
+                    return b.win_rate - a.win_rate;
+                });
             } else {
                 processedData = leaderboardData
                     .map(team => {
                         team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
-                        team.win_rate = team.total_matches > 0 ? 
-                            Math.min(Math.round((team.wins / team.total_matches) * 100), 100) : 0;
+                        
+                        if (team.total_matches > 0) {
+                            team.win_rate = Math.round((team.wins / team.total_matches) * 100);
+                        } else {
+                            team.win_rate = 0;
+                        }
+                        
                         return team;
                     })
-                    .sort((a, b) => b.total_points - a.total_points);
+                    .sort((a, b) => {
+                        if (b.total_points !== a.total_points) {
+                            return b.total_points - a.total_points;
+                        }
+                        return b.win_rate - a.win_rate;
+                    });
             }
             
             processedData.forEach((team, index) => {
-                const rank = index + 1;
-                const medalClass = rank === 1 ? 'gold-medal' : rank === 2 ? 'silver-medal' : rank === 3 ? 'bronze-medal' : '';
-                const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                let rankClass = '';
+                let rankIcon = '';
+                
+                if (index === 0) {
+                    rankClass = 'rank-champion';
+                    rankIcon = '<i class="fas fa-trophy trophy-icon gold-trophy"></i> Champion';
+                } else if (index === 1) {
+                    rankClass = 'rank-1';
+                    rankIcon = '<i class="fas fa-medal medal silver-medal"></i> 1st';
+                } else if (index === 2) {
+                    rankClass = 'rank-2';
+                    rankIcon = '<i class="fas fa-medal medal bronze-medal"></i> 2nd';
+                } else {
+                    rankClass = 'rank-number';
+                    rankIcon = (index + 1).toString();
+                }
+                
                 const winRateClass = team.win_rate >= 70 ? 'high-win-rate' : 
                                    team.win_rate >= 40 ? 'medium-win-rate' : 'low-win-rate';
                 
                 tableHtml += `<tr class="${rankClass}">
                     <td>
-                        ${rank <= 3 ? `<i class="fas fa-medal medal ${medalClass}"></i>` : ''}
-                        ${rank}
+                        ${rankIcon}
                     </td>
                     <td>
                         <div class="team-info">
@@ -1744,4 +1850,3 @@
     </script>
 </body>
 </html>
-
