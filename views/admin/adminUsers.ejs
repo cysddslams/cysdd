@@ -967,8 +967,8 @@
                         </div>
                         <div class="player-name"><%= user.player_name || 'N/A' %></div>
                         <div class="player-actions">
-                            <button class="btn btn-danger" onclick="event.stopPropagation(); confirmRemovePlayer('<%= user.team_player_id %>')" title="Remove Player">
-                                <i class="fas fa-trash-alt"></i> Remove
+                            <button class="btn btn-info" onclick="event.stopPropagation(); showPlayerModal('<%= user.team_player_id %>')" title="View Details">
+                                <i class="fas fa-eye"></i> View Details
                             </button>
                         </div>
                     </div>
@@ -1304,5 +1304,6 @@
     </script>
 </body>
 </html>
+
 
 
