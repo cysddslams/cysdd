@@ -167,6 +167,22 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
+    
+    // Log specifically for AI recommendation calls
+    if (req.url.includes('format-recommendations')) {
+        console.log('📡 AI Recommendation API called:', {
+            method: req.method,
+            url: req.url,
+            body: req.body,
+            params: req.params,
+            session: req.session?.admin ? 'Admin logged in' : 'No admin session'
+        });
+    }
+    next();
+});
+
 // Flash messages
 app.use(flash());
 app.use((req, res, next) => {
@@ -191,5 +207,6 @@ app.listen(3000, () => {
     console.log('Server is running on http://localhost:3000');
 
 });
+
 
 
