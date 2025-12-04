@@ -888,6 +888,27 @@
                 width: 100%;
             }
         }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 25px;
+            padding: 20px 0;
+            border-top: 1px solid #e0e0e0;
+            grid-column: span 2;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            color: white;
+            box-shadow: 0 3px 8px rgba(108, 117, 125, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(108, 117, 125, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -1089,9 +1110,16 @@
 
         // Player removal functions
         function confirmRemovePlayer(playerId) {
-            event.stopPropagation();
-            playerToRemove = playerId;
+            const idToRemove = playerId || currentPlayerId;
+            
+            if (!idToRemove) {
+                alert('No player selected');
+                return;
+            }
+            
+            playerToRemove = idToRemove;
             showRemovePlayerModal();
+            hidePlayerModal(); 
         }
 
         async function removePlayer() {
@@ -1147,7 +1175,11 @@
         };
 
         // Player modal functions
+        let currentPlayerId = null;
+
         function showPlayerModal(playerId) {
+            currentPlayerId = playerId; // Store for later use
+            
             const player = usersData.find(p => p.team_player_id == playerId);
             if (!player) return;
             
@@ -1313,6 +1345,7 @@
     </script>
 </body>
 </html>
+
 
 
 
