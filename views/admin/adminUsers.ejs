@@ -1187,90 +1187,99 @@
             const documentStatus = `${uploadedCount}/${requiredDocuments.length} documents uploaded`;
             
             modalBody.innerHTML = `
-                <div class="player-modal-profile">
-                    ${player.profile ? 
-                        `<img src="${player.profile}" class="player-modal-avatar" alt="Profile">` : 
-                        `<div class="player-modal-avatar" style="background: linear-gradient(135deg, #e4e6eb, #d1d3d8); display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-user" style="color: #8B0039; font-size: 32px;"></i>
-                        </div>`
-                    }
-                    <h3 style="margin-top: 10px; color: #8B0039;">${player.player_name || 'N/A'}</h3>
-                    <div>
-                        <span class="student-type-badge">${studentType.replace('_', ' ').toUpperCase()}</span>
-                        <span class="organization-badge">${organizationType.toUpperCase()}</span>
-                    </div>
+            <div class="player-modal-profile">
+                ${player.profile ? 
+                    `<img src="${player.profile}" class="player-modal-avatar" alt="Profile">` : 
+                    `<div class="player-modal-avatar" style="background: linear-gradient(135deg, #e4e6eb, #d1d3d8); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-user" style="color: #8B0039; font-size: 32px;"></i>
+                    </div>`
+                }
+                <h3 style="margin-top: 10px; color: #8B0039;">${player.player_name || 'N/A'}</h3>
+                <div>
+                    <span class="student-type-badge">${studentType.replace('_', ' ').toUpperCase()}</span>
+                    <span class="organization-badge">${organizationType.toUpperCase()}</span>
                 </div>
-                <div class="player-info-group">
-                    <div class="player-info-label">Email</div>
-                    <div class="player-info-value">${player.email || 'N/A'}</div>
+            </div>
+            <div class="player-info-group">
+                <div class="player-info-label">Email</div>
+                <div class="player-info-value">${player.email || 'N/A'}</div>
+            </div>
+            <div class="player-info-group">
+                <div class="player-info-label">Sports</div>
+                <div class="player-info-value">${player.sports || 'N/A'}</div>
+            </div>
+            <div class="player-info-group">
+                <div class="player-info-label">Age</div>
+                <div class="player-info-value">${player.age || 'N/A'}</div>
+            </div>
+            <div class="player-info-group">
+                <div class="player-info-label">Gender</div>
+                <div class="player-info-value">${player.sex || 'N/A'}</div>
+            </div>
+            <div class="player-info-group">
+                <div class="player-info-label">Birthdate</div>
+                <div class="player-info-value">${player.birthdate || 'N/A'}</div>
+            </div>
+            <div class="player-info-group">
+                <div class="player-info-label">Contact Number</div>
+                <div class="player-info-value">${player.contact_number || 'N/A'}</div>
+            </div>
+            <div class="player-info-group">
+                <div class="player-info-label">School/Barangay</div>
+                <div class="player-info-value">${player.school || player.barangay || 'N/A'}</div>
+            </div>
+            ${player.year_level ? `
+            <div class="player-info-group">
+                <div class="player-info-label">Year Level</div>
+                <div class="player-info-value">${player.year_level}</div>
+            </div>
+            ` : ''}
+            <div class="player-info-group">
+                <div class="player-info-label">Team</div>
+                <div class="player-info-value">${player.teamName || 'N/A'}</div>
+            </div>
+            <div class="player-info-group">
+                <div class="player-info-label">Event</div>
+                <div class="player-info-value">${player.event_title || 'N/A'}</div>
+            </div>
+            <div class="player-info-group">
+                <div class="player-info-label">Date Registered</div>
+                <div class="player-info-value">${player.created_at || 'N/A'}</div>
+            </div>
+            <div class="documents-section">
+                <h3><i class="fas fa-file-alt"></i> Required Documents</h3>
+                <div class="document-status">
+                    <span class="${uploadedCount === requiredDocuments.length ? 'status-complete' : 'status-missing'}">
+                        ${documentStatus}
+                    </span>
                 </div>
-                <div class="player-info-group">
-                    <div class="player-info-label">Sports</div>
-                    <div class="player-info-value">${player.sports || 'N/A'}</div>
+                <div class="document-links">
+                    ${documentItems.map(doc => `
+                        ${doc.uploaded ? 
+                            `<a href="${doc.url}" target="_blank" class="document-link">
+                                <i class="${doc.icon}"></i>
+                                <span>${doc.name}</span>
+                                <i class="fas fa-check-circle" style="margin-left: auto; color: #4CAF50;"></i>
+                            </a>` :
+                            `<div class="document-link missing">
+                                <i class="${doc.icon}"></i>
+                                <span>${doc.name}</span>
+                                <i class="fas fa-times-circle" style="margin-left: auto; color: #f44336;"></i>
+                            </div>`
+                        }
+                    `).join('')}
                 </div>
-                <div class="player-info-group">
-                    <div class="player-info-label">Age</div>
-                    <div class="player-info-value">${player.age || 'N/A'}</div>
-                </div>
-                <div class="player-info-group">
-                    <div class="player-info-label">Gender</div>
-                    <div class="player-info-value">${player.sex || 'N/A'}</div>
-                </div>
-                <div class="player-info-group">
-                    <div class="player-info-label">Birthdate</div>
-                    <div class="player-info-value">${player.birthdate || 'N/A'}</div>
-                </div>
-                <div class="player-info-group">
-                    <div class="player-info-label">Contact Number</div>
-                    <div class="player-info-value">${player.contact_number || 'N/A'}</div>
-                </div>
-                <div class="player-info-group">
-                    <div class="player-info-label">School/Barangay</div>
-                    <div class="player-info-value">${player.school || player.barangay || 'N/A'}</div>
-                </div>
-                ${player.year_level ? `
-                <div class="player-info-group">
-                    <div class="player-info-label">Year Level</div>
-                    <div class="player-info-value">${player.year_level}</div>
-                </div>
-                ` : ''}
-                <div class="player-info-group">
-                    <div class="player-info-label">Team</div>
-                    <div class="player-info-value">${player.teamName || 'N/A'}</div>
-                </div>
-                <div class="player-info-group">
-                    <div class="player-info-label">Event</div>
-                    <div class="player-info-value">${player.event_title || 'N/A'}</div>
-                </div>
-                <div class="player-info-group">
-                    <div class="player-info-label">Date Registered</div>
-                    <div class="player-info-value">${player.created_at || 'N/A'}</div>
-                </div>
-                <div class="documents-section">
-                    <h3><i class="fas fa-file-alt"></i> Required Documents</h3>
-                    <div class="document-status">
-                        <span class="${uploadedCount === requiredDocuments.length ? 'status-complete' : 'status-missing'}">
-                            ${documentStatus}
-                        </span>
-                    </div>
-                    <div class="document-links">
-                        ${documentItems.map(doc => `
-                            ${doc.uploaded ? 
-                                `<a href="${doc.url}" target="_blank" class="document-link">
-                                    <i class="${doc.icon}"></i>
-                                    <span>${doc.name}</span>
-                                    <i class="fas fa-check-circle" style="margin-left: auto; color: #4CAF50;"></i>
-                                </a>` :
-                                `<div class="document-link missing">
-                                    <i class="${doc.icon}"></i>
-                                    <span>${doc.name}</span>
-                                    <i class="fas fa-times-circle" style="margin-left: auto; color: #f44336;"></i>
-                                </div>`
-                            }
-                        `).join('')}
-                    </div>
-                </div>
-            `;
+            </div>
+            <!-- Add Remove Button Here -->
+            <div style="grid-column: span 2; margin-top: 20px; display: flex; justify-content: flex-end; gap: 15px;">
+                <button class="btn btn-danger" onclick="confirmRemovePlayer('${player.team_player_id}')" style="padding: 12px 24px; font-size: 16px;">
+                    <i class="fas fa-trash-alt"></i> Remove Player
+                </button>
+                <button class="btn" onclick="hidePlayerModal()" style="padding: 12px 24px; font-size: 16px; background: #6c757d; color: white;">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        `;
             
             document.getElementById('playerModal').style.display = 'block';
         }
@@ -1304,6 +1313,7 @@
     </script>
 </body>
 </html>
+
 
 
 
