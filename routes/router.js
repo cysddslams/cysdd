@@ -221,11 +221,12 @@ router.put("/admin/schedule/match/:matchId/result", adminAuthMiddleware, schedul
 router.post("/admin/schedule/generate-next-round", adminAuthMiddleware, scheduleController.generateNextRoundManual);
 router.get("/admin/schedule/event/:eventId/brackets", adminAuthMiddleware, scheduleController.getEventBrackets);
 router.post("/admin/schedule/set-champion", adminAuthMiddleware, scheduleController.setChampionManually);
-router.post('/format-recommendations/:eventId/:sportType', scheduleController.getFormatRecommendations);
+router.post('/admin/format-recommendations/:eventId/:sportType', scheduleController.getFormatRecommendations);
 
 
 
 module.exports = router;
+
 
 
 
