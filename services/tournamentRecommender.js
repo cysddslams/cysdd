@@ -31,11 +31,11 @@ class TournamentRecommender {
         
         // Check for special cases first
         if (numTeams === 2) {
-            return this.generateRecommendation('single_elimination', numTeams, 95);
+            return await this.generateFullRecommendation('single_elimination', numTeams, 95, sportType);
         }
         
         if (numTeams === 3 || numTeams === 4) {
-            return this.generateRecommendation('round_robin', numTeams, 85);
+            return await this.generateFullRecommendation('round_robin', numTeams, 85, sportType);
         }
         
         // Get historical data to improve recommendations
@@ -67,18 +67,14 @@ class TournamentRecommender {
         }
         
         // Generate complete recommendation
-        return {
-            recommendation: await this.generateCompleteRecommendation(recommendedFormat, numTeams, confidence, learnedPreferences),
-            alternatives: await this.generateAlternatives(numTeams, recommendedFormat),
-            analysis: this.generateAnalysis(numTeams, sportType)
-        };
+        return await this.generateFullRecommendation(recommendedFormat, numTeams, confidence, sportType, learnedPreferences);
     }
 
-    // Generate complete recommendation object
-    async generateCompleteRecommendation(format, numTeams, confidence, learnedData) {
+    // Generate full recommendation with all components
+    async generateFullRecommendation(format, numTeams, confidence, sportType, learnedData = { usedLearning: false, similarCases: 0 }) {
         const matchCounts = this.calculateMatchCounts(numTeams);
         
-        return {
+        const recommendation = {
             format: format,
             recommendation: '✅ RECOMMENDED',
             matches: matchCounts[format],
@@ -87,6 +83,15 @@ class TournamentRecommender {
             description: this.getFormatDescription(format, numTeams, matchCounts[format]),
             reason: this.getRecommendationReason(format, numTeams, learnedData),
             learningBased: learnedData.usedLearning || false
+        };
+        
+        const alternatives = await this.generateAlternatives(numTeams, format);
+        const analysis = this.generateAnalysis(numTeams, sportType);
+        
+        return {
+            recommendation: recommendation,
+            alternatives: alternatives,
+            analysis: analysis
         };
     }
 
