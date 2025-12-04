@@ -1,6 +1,9 @@
 const db = require('../config/db');
 const { getPendingCoachNotifications, getPendingTeamNotifications } = require("../utils/notificationHelper");
 
+// Import the tournament recommender
+const tournamentRecommender = require('../services/tournamentRecommender');
+
 // Get schedule main page
 exports.getSchedulePage = async (req, res) => {
     if (!req.session.admin) {
@@ -187,15 +190,72 @@ exports.getEventTeams = async (req, res) => {
     }
 };
 
-// Create tournament bracket - UPDATED FOR BADMINTON CATEGORIES
+// AI-Powered Tournament Format Recommendation
+exports.getFormatRecommendations = async (req, res) => {
+    try {
+        const { eventId, sportType } = req.params;
+        const { teamIds } = req.body;
+        
+        console.log('🤖 Getting AI recommendations for:', { eventId, sportType, teamCount: teamIds.length });
+        
+        if (!teamIds || !Array.isArray(teamIds) || teamIds.length < 2) {
+            return res.status(400).json({ 
+                error: 'Please select at least 2 teams for tournament recommendations' 
+            });
+        }
+        
+        // Get AI recommendation
+        const recommendation = await tournamentRecommender.getRecommendation(
+            eventId, 
+            sportType, 
+            teamIds
+        );
+        
+        // Store the recommendation for AI learning
+        const recommendationId = await tournamentRecommender.storeRecommendation(
+            eventId,
+            sportType,
+            teamIds.length,
+            teamIds,
+            recommendation.recommendation.format,
+            recommendation.recommendation.confidence
+        );
+        
+        res.json({
+            success: true,
+            recommendationId: recommendationId,
+            recommendation: recommendation.recommendation,
+            alternatives: recommendation.alternatives,
+            analysis: recommendation.analysis,
+            message: `AI Recommendation: ${recommendation.recommendation.format.replace('_', ' ').toUpperCase()} for ${teamIds.length} teams`
+        });
+    } catch (error) {
+        console.error('Error getting format recommendations:', error);
+        res.status(500).json({ 
+            error: 'Error generating tournament recommendations',
+            details: error.message 
+        });
+    }
+};
+
+// Create tournament bracket - UPDATED WITH AI RECOMMENDATION SUPPORT
 exports.createTournamentBracket = async (req, res) => {
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
 
-        const { eventId, sportType, sportName, bracketType, teams } = req.body;
+        const { 
+            eventId, 
+            sportType, 
+            sportName, 
+            bracketType, 
+            teams, 
+            recommendationId  // New parameter for AI learning
+        } = req.body;
 
-        console.log('Creating bracket with data:', { eventId, sportType, sportName, bracketType, teams });
+        console.log('Creating bracket with data:', { 
+            eventId, sportType, sportName, bracketType, teams, recommendationId 
+        });
 
         // Validate bracket type
         const validBracketTypes = ['single_elimination', 'round_robin'];
@@ -249,6 +309,18 @@ exports.createTournamentBracket = async (req, res) => {
             await generateSingleEliminationMatches(connection, bracketId, teams, 1);
         } else if (bracketType === 'round_robin') {
             await generateRoundRobinMatches(connection, bracketId, teams);
+        }
+
+        // Record admin's choice for AI learning if recommendation was provided
+        if (recommendationId) {
+            await tournamentRecommender.recordAdminChoice(
+                recommendationId, 
+                bracketType, 
+                teams,
+                eventId
+            );
+            
+            console.log('✅ Admin choice recorded for AI learning');
         }
 
         await connection.commit();
@@ -733,7 +805,23 @@ exports.setChampionManually = async (req, res) => {
     } finally {
         connection.release();
     }
-
 };
 
-
+// Get AI recommendation statistics (for dashboard)
+exports.getAIRecommendationStats = async (req, res) => {
+    try {
+        const stats = await tournamentRecommender.getSuccessStatistics();
+        
+        res.json({
+            success: true,
+            stats: stats,
+            message: 'AI Recommendation Statistics'
+        });
+    } catch (error) {
+        console.error('Error getting AI recommendation stats:', error);
+        res.status(500).json({ 
+            error: 'Error getting AI statistics',
+            details: error.message 
+        });
+    }
+};
