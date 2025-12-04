@@ -6,14 +6,310 @@
     <title>Event History - SLAMS</title>
     <link rel="stylesheet" href="/styles/adminHome.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
-<style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background-color: #8B0039;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+            height: 70px;
+        }
+
+        .header .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header .logo img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .slams-title {
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .sidebar {
+            height: 100%;
+            width: 240px;
+            position: fixed;
+            top: 70px;
+            left: -240px;
+            background-color: white;
+            z-index: 999;
+            padding-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+        }
+
+        .sidebar a {
+            padding: 16px 24px;
+            text-decoration: none;
+            color: rgb(46, 0, 0);
+            font-size: 18px;
+            display: block;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #000000;
+        }
+
+        .sidebar a i {
+            margin-right: 15px;
+        }
+
+        .sidebar a:hover {
+            background-color: #a32600;
+            padding-left: 32px;
+            color: white;
+        }
+
+        .sidebar a.active {
+            background-color: #581000;
+            color: #fff;
+            padding-left: 32px;
+        }
+
+        .sidebar-btn {
+            font-size: 15px;
+            color: white;
+            background-color: #8B0039;
+            padding: 5px;
+            padding-left: 10px;
+            padding-right: 10px;
+            cursor: pointer;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1001;
+            border-radius: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-btn:hover {
+            transform: scale(1.1);
+            background-color: #8B0039;
+        }
+
+        .team-dropdown-btn {
+            padding: 16px 24px;
+            text-decoration: none;
+            color: rgb(46, 0, 0);
+            font-size: 18px;
+            display: block;
+            cursor: pointer;
+            background-color: #ffffff;
+            border-bottom: 1px solid #000000;
+            transition: all 0.3s ease;
+        }
+
+        .team-dropdown-btn:hover {
+            background-color: #a32600;
+            padding-left: 32px;
+            color: white;
+        }
+
+        .team-dropdown-content {
+            display: none;
+            background-color: #f4f4f4;
+            padding-left: 20px;
+            border-left: 3px solid #3498db;
+        }
+
+        .team-dropdown-content a {
+            padding: 8px 15px;
+            text-decoration: none;
+            font-size: 16px;
+            color: #333;
+            display: block;
+            border-bottom: 1px solid #000000;
+        }
+
+        .team-dropdown-content a:hover {
+            background-color: #a32600;
+            color: white;
+        }
+
+        .team-dropdown-btn.active+.team-dropdown-content {
+            display: block;
+        }
+
+        .dropdown-content {
+            position: absolute;
+            right: 0;
+            top: 40px;
+            background-color: #621616;
+            color: #fff;
+            min-width: 180px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.5);
+            border-radius: 0;
+            padding: 15px;
+            z-index: 104;
+            border: 1px solid #ffcc00;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .user-profile:hover .dropdown-content {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .dropdown-content a {
+            padding: 10px 15px;
+            text-decoration: none;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-content a i {
+            margin-right: 10px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #9a1b1b;
+            transform: translateX(5px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding-top: 100px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 0 auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            animation: scaleIn 0.3s ease-in-out;
+            position: relative;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.9); }
+            to { transform: scale(1); }
+        }
+
+        .modal-content h3 {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .confirm-btn, .cancel-btn {
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 6px;
+            border: none;
+            transition: all 0.3s;
+            min-width: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .confirm-btn {
+            background-color: #4CAF50;
+            color: #fff;
+        }
+
+        .cancel-btn {
+            background-color: #f44336;
+            color: #fff;
+        }
+
+        .confirm-btn:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .cancel-btn:hover {
+            background-color: #e53935;
+            transform: translateY(-2px);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            color: #999;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
         .event-history-container {
-            padding: 20px;
+            padding: 90px 20px 20px;
             max-width: 1200px;
             margin: 0 auto;
-            background: #f8f9fa;
             min-height: 100vh;
+            transition: all 0.3s ease;
         }
 
         .page-header {
@@ -23,7 +319,7 @@
 
         .page-header h1 {
             color: #333;
-            font-size: 2.5rem;
+            font-size: 2rem;
             margin-bottom: 10px;
             background: linear-gradient(135deg, #007bff, #0056b3);
             -webkit-background-clip: text;
@@ -32,32 +328,32 @@
 
         .page-header p {
             color: #666;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         .events-grid {
             display: grid;
-            gap: 25px;
+            gap: 20px;
         }
 
         .event-card {
             background: white;
             border-radius: 12px;
-            padding: 25px;
+            padding: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             border: 1px solid #e0e0e0;
             transition: all 0.3s ease;
         }
 
         .event-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
 
         .event-header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            gap: 10px;
             margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 2px solid #007bff;
@@ -65,14 +361,14 @@
 
         .event-title {
             color: #333;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 700;
             margin: 0;
         }
 
         .event-date {
             color: #666;
-            font-size: 1rem;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -80,11 +376,18 @@
 
         .event-location {
             color: #666;
-            font-size: 1rem;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-top: 5px;
+        }
+
+        .event-stats .badge {
+            background: #6c757d;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9rem;
         }
 
         .champions-section {
@@ -93,23 +396,26 @@
 
         .section-title {
             color: #333;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
             margin-bottom: 15px;
             padding-bottom: 8px;
             border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .champions-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 12px;
             margin-bottom: 20px;
         }
 
         .champion-card {
             background: #f8f9fa;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
             border-left: 4px solid #28a745;
         }
@@ -118,17 +424,18 @@
             font-weight: 600;
             color: #333;
             margin-bottom: 5px;
+            font-size: 0.95rem;
         }
 
         .champion-team {
             color: #28a745;
             font-weight: 600;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         .bracket-type {
             color: #666;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-style: italic;
         }
 
@@ -141,8 +448,15 @@
             border-radius: 8px;
         }
 
+        .no-champions i {
+            font-size: 2rem;
+            color: #ddd;
+            margin-bottom: 10px;
+        }
+
         .event-actions {
             display: flex;
+            flex-wrap: wrap;
             gap: 10px;
             margin-top: 20px;
             padding-top: 20px;
@@ -150,7 +464,7 @@
         }
 
         .btn {
-            padding: 10px 20px;
+            padding: 10px 16px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
@@ -161,6 +475,10 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
+            text-align: center;
         }
 
         .btn-primary {
@@ -203,6 +521,16 @@
             transform: translateY(-2px);
         }
 
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -220,28 +548,46 @@
             margin-bottom: 10px;
         }
 
-        /* Leaderboard Styles */
         .leaderboard-section {
-            margin-top: 30px;
+            margin-top: 25px;
             padding-top: 20px;
             border-top: 1px solid #eee;
         }
 
         .leaderboard-tabs {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 15px;
             flex-wrap: wrap;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .leaderboard-tabs::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .leaderboard-tabs::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 2px;
+        }
+
+        .leaderboard-tabs::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 2px;
         }
 
         .leaderboard-tab {
-            padding: 8px 16px;
+            padding: 8px 14px;
             background: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 500;
             transition: all 0.3s ease;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .leaderboard-tab.active {
@@ -254,26 +600,35 @@
             background: #e9ecef;
         }
 
+        .leaderboard-table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+
         .leaderboard-table {
             width: 100%;
             border-collapse: collapse;
             background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-width: 600px;
         }
 
         .leaderboard-table th {
             background: #007bff;
             color: white;
-            padding: 12px 15px;
+            padding: 12px 10px;
             text-align: left;
             font-weight: 600;
+            font-size: 0.9rem;
+            position: sticky;
+            top: 0;
         }
 
         .leaderboard-table td {
-            padding: 12px 15px;
+            padding: 10px;
             border-bottom: 1px solid #eee;
+            font-size: 0.85rem;
         }
 
         .leaderboard-table tr:hover {
@@ -296,8 +651,8 @@
         }
 
         .medal {
-            font-size: 1.2rem;
-            margin-right: 8px;
+            font-size: 1rem;
+            margin-right: 5px;
         }
 
         .gold-medal {
@@ -315,27 +670,32 @@
         .team-info {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .team-avatar {
-            width: 35px;
-            height: 35px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid #007bff;
+            flex-shrink: 0;
         }
 
         .team-name {
             font-weight: 600;
             color: #333;
+            font-size: 0.9rem;
+            word-break: break-word;
         }
 
         .organization-badge {
             padding: 3px 8px;
             border-radius: 12px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
+            display: inline-block;
+            white-space: nowrap;
         }
 
         .school-badge {
@@ -351,14 +711,16 @@
         .stats-number {
             font-weight: 700;
             color: #333;
+            font-size: 0.9rem;
         }
 
         .win-rate {
             display: inline-block;
             padding: 4px 8px;
             border-radius: 12px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
+            white-space: nowrap;
         }
 
         .high-win-rate {
@@ -378,40 +740,161 @@
 
         .no-leaderboard {
             text-align: center;
-            padding: 40px 20px;
+            padding: 30px 20px;
             color: #666;
             background: #f8f9fa;
             border-radius: 8px;
         }
 
         .no-leaderboard i {
-            font-size: 3rem;
+            font-size: 2.5rem;
             color: #ddd;
             margin-bottom: 15px;
         }
 
-        @media (max-width: 768px) {
+        .no-leaderboard h4 {
+            margin-bottom: 10px;
+        }
+
+        .results-modal .modal-content,
+        .leaderboard-modal .modal-content {
+            max-width: 95%;
+            width: 800px;
+            padding: 20px;
+            margin-top: 50px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .leaderboard-modal .modal-content {
+            width: 1000px;
+            max-width: 95%;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .event-history-container {
+                padding: 90px 30px 30px;
+            }
+
+            .page-header h1 {
+                font-size: 2.5rem;
+            }
+
+            .page-header p {
+                font-size: 1.1rem;
+            }
+
+            .events-grid {
+                gap: 25px;
+            }
+
+            .event-card {
+                padding: 25px;
+            }
+
             .event-header {
-                flex-direction: column;
+                flex-direction: row;
+                justify-content: space-between;
                 align-items: flex-start;
-                gap: 10px;
+            }
+
+            .event-title {
+                font-size: 1.5rem;
+            }
+
+            .event-date,
+            .event-location {
+                font-size: 1rem;
             }
 
             .champions-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 15px;
             }
 
             .event-actions {
-                flex-direction: column;
+                flex-wrap: nowrap;
+            }
+
+            .btn {
+                flex: none;
             }
 
             .leaderboard-table {
-                font-size: 0.85rem;
+                min-width: 0;
             }
 
             .leaderboard-table th,
             .leaderboard-table td {
-                padding: 8px 10px;
+                padding: 12px 15px;
+                font-size: 0.9rem;
+            }
+
+            .team-avatar {
+                width: 35px;
+                height: 35px;
+            }
+
+            .team-name {
+                font-size: 0.95rem;
+            }
+
+            .leaderboard-tab {
+                font-size: 0.9rem;
+                padding: 8px 16px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .event-history-container {
+                padding: 100px 40px 40px;
+            }
+
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .champions-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+
+            .leaderboard-table th,
+            .leaderboard-table td {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .sidebar {
+                top: 70px;
+                width: 100%;
+                left: -100%;
+            }
+
+            body.sidebar-open .sidebar {
+                left: 0;
+            }
+
+            body.sidebar-open {
+                overflow: hidden;
+            }
+
+            .event-history-container {
+                padding: 80px 15px 15px;
+            }
+
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .champions-grid {
+                grid-template-columns: 1fr;
             }
 
             .team-info {
@@ -419,18 +902,121 @@
                 align-items: flex-start;
                 gap: 5px;
             }
+
+            .leaderboard-table td:nth-child(2),
+            .leaderboard-table th:nth-child(2) {
+                min-width: 150px;
+            }
+
+            .leaderboard-table td:nth-child(7),
+            .leaderboard-table th:nth-child(7),
+            .leaderboard-table td:nth-child(8),
+            .leaderboard-table th:nth-child(8) {
+                min-width: 80px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .event-history-container {
+                padding: 70px 10px 10px;
+            }
+
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .page-header p {
+                font-size: 0.9rem;
+            }
+
+            .event-card {
+                padding: 15px;
+            }
+
+            .event-title {
+                font-size: 1.2rem;
+            }
+
+            .section-title {
+                font-size: 1rem;
+            }
+
+            .btn {
+                padding: 8px 12px;
+                font-size: 13px;
+                min-width: 110px;
+            }
+
+            .leaderboard-tab {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+
+            .leaderboard-table th,
+            .leaderboard-table td {
+                padding: 8px 6px;
+                font-size: 0.8rem;
+            }
+
+            .team-avatar {
+                width: 25px;
+                height: 25px;
+            }
+
+            .team-name {
+                font-size: 0.8rem;
+            }
+
+            .organization-badge {
+                font-size: 0.65rem;
+                padding: 2px 6px;
+            }
+
+            .stats-number {
+                font-size: 0.8rem;
+            }
+
+            .win-rate {
+                font-size: 0.7rem;
+                padding: 3px 6px;
+            }
+
+            .medal {
+                font-size: 0.9rem;
+            }
+        }
+
+        .results-modal,
+        .leaderboard-modal {
+            padding-top: 50px;
+            align-items: flex-start;
+        }
+
+        .results-modal .modal-content,
+        .leaderboard-modal .modal-content {
+            margin-top: 20px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Sidebar Menu -->
     <div id="mySidebar" class="sidebar">
         <a href="/admin/home" class="active"><i class="fas fa-home"></i> Home</a>
-        <a href="/admin/posts" ><i class="fas fa-newspaper"></i> Posts</a>
+        <a href="/admin/posts"><i class="fas fa-newspaper"></i> Posts</a>
         <a href="/admin/events"><i class="fas fa-calendar-alt"></i> Events</a>
         <a href="/admin/schedule"><i class="fas fa-calendar-day"></i> Schedule</a>
         <a href="/admin/coach"><i class="fas fa-chalkboard-teacher"></i> Coordinator Request</a>
-        <!-- Team dropdown section -->
         <a href="javascript:void(0);" class="team-dropdown-btn"><i class="fas fa-users-cog"></i> Teams</a>
         <div class="team-dropdown-content">
             <a href="/admin/team-request"><i class="fas fa-users"></i> Team Request</a>
@@ -440,10 +1026,10 @@
         <a href="/admin/all-users"><i class="fas fa-user-friends"></i> Users</a>
         <a href="/admin/event-history"><i class="fas fa-history"></i> Event History</a>
     </div>
-    <!-- Sidebar toggle button -->
+
     <span class="sidebar-btn" onclick="toggleNav()">&#9776;</span>
     
-    <header class="header" style="display: flex; justify-content: space-between; align-items: center;">
+    <header class="header">
         <div class="logo">
             <a href="/admin/home" style="text-decoration: none;">
                 <img src="/images/cityYouth.jpg" alt="SLAMS Logo">
@@ -451,7 +1037,6 @@
             <span class="slams-title">CYSDD</span>
         </div>
         <div style="display: flex; align-items: center; gap: 20px;">
-            <!-- Admin Profile -->
             <div class="user-profile" style="position: relative;" id="adminProfileContainer">
                 <% if (admin && admin.profilePic) { %>
                     <img src="<%= admin.profilePic %>" 
@@ -508,7 +1093,7 @@
                                 </div>
                             </div>
                             <div class="event-stats">
-                                <span class="badge" style="background: #6c757d; color: white; padding: 5px 10px; border-radius: 15px;">
+                                <span class="badge">
                                     <%= event.totalChampions || 0 %> Champions
                                 </span>
                             </div>
@@ -556,13 +1141,12 @@
 
                             <% if (event.totalChampions === 0) { %>
                                 <div class="no-champions">
-                                    <i class="fas fa-trophy" style="font-size: 2rem; color: #ddd; margin-bottom: 10px;"></i>
+                                    <i class="fas fa-trophy"></i>
                                     <p>No tournament results available for this event.</p>
                                 </div>
                             <% } %>
                         </div>
 
-                        <!-- Leaderboard Section -->
                         <div class="leaderboard-section">
                             <h4 class="section-title"><i class="fas fa-trophy"></i> Team Leaderboard</h4>
                             
@@ -578,24 +1162,22 @@
                                 </div>
 
                                 <div class="leaderboard-content" id="leaderboardContent-<%= event.id %>">
-                                    <!-- All Sports Leaderboard (default) -->
                                     <div class="leaderboard-table-container" data-sport="all">
                                         <table class="leaderboard-table">
                                             <thead>
                                                 <tr>
-                                                    <th width="60">Rank</th>
+                                                    <th>Rank</th>
                                                     <th>Team</th>
-                                                    <th width="100">Organization</th>
-                                                    <th width="80">Gold</th>
-                                                    <th width="80">Silver</th>
-                                                    <th width="80">Bronze</th>
-                                                    <th width="100">Total Points</th>
-                                                    <th width="100">Win Rate</th>
+                                                    <th>Org</th>
+                                                    <th>G</th>
+                                                    <th>S</th>
+                                                    <th>B</th>
+                                                    <th>Points</th>
+                                                    <th>Win Rate</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <% 
-                                                    // Calculate aggregated leaderboard across all sports
                                                     const teamStats = {};
                                                     event.leaderboards.forEach(lb => {
                                                         if (!teamStats[lb.team_id]) {
@@ -619,19 +1201,15 @@
                                                         teamStats[lb.team_id].wins += lb.wins || 0;
                                                     });
 
-                                                    // Convert to array and calculate points and win rate (CAP AT 100%)
                                                     const aggregatedLeaderboard = Object.values(teamStats).map(team => {
                                                         team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
-                                                        // Ensure win rate never exceeds 100%
                                                         team.win_rate = team.total_matches > 0 ? 
                                                             Math.min(Math.round((team.wins / team.total_matches) * 100), 100) : 0;
                                                         return team;
                                                     });
 
-                                                    // Sort by total points (descending)
                                                     aggregatedLeaderboard.sort((a, b) => b.total_points - a.total_points);
 
-                                                    // Display the leaderboard
                                                     aggregatedLeaderboard.forEach((team, index) => { 
                                                         const rank = index + 1;
                                                         const medalClass = rank === 1 ? 'gold-medal' : rank === 2 ? 'silver-medal' : rank === 3 ? 'bronze-medal' : '';
@@ -651,7 +1229,7 @@
                                                                 <% if (team.team_profile) { %>
                                                                     <img src="<%= team.team_profile %>" alt="<%= team.team_name %>" class="team-avatar">
                                                                 <% } else { %>
-                                                                    <div style="width: 35px; height: 35px; border-radius: 50%; background: #007bff; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                                                    <div class="team-avatar" style="background: #007bff; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
                                                                         <%= team.team_name.charAt(0).toUpperCase() %>
                                                                     </div>
                                                                 <% } %>
@@ -660,7 +1238,7 @@
                                                         </td>
                                                         <td>
                                                             <span class="organization-badge <%= team.organization === 'school' ? 'school-badge' : 'barangay-badge' %>">
-                                                                <%= team.organization %>
+                                                                <%= team.organization === 'school' ? 'School' : 'Barangay' %>
                                                             </span>
                                                         </td>
                                                         <td class="stats-number"><%= team.gold %></td>
@@ -678,7 +1256,6 @@
                                         </table>
                                     </div>
 
-                                    <!-- Individual Sport Leaderboards -->
                                     <% 
                                         const sportsLeaderboards = {};
                                         event.leaderboards.forEach(lb => {
@@ -692,7 +1269,6 @@
                                             const sportLeaderboard = sportsLeaderboards[sport]
                                                 .map(team => {
                                                     team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
-                                                    // Ensure win rate never exceeds 100%
                                                     team.win_rate = team.total_matches > 0 ? 
                                                         Math.min(Math.round((team.wins / team.total_matches) * 100), 100) : 0;
                                                     return team;
@@ -703,14 +1279,14 @@
                                             <table class="leaderboard-table">
                                                 <thead>
                                                     <tr>
-                                                        <th width="60">Rank</th>
+                                                        <th>Rank</th>
                                                         <th>Team</th>
-                                                        <th width="100">Organization</th>
-                                                        <th width="80">Gold</th>
-                                                        <th width="80">Silver</th>
-                                                        <th width="80">Bronze</th>
-                                                        <th width="100">Total Points</th>
-                                                        <th width="100">Win Rate</th>
+                                                        <th>Org</th>
+                                                        <th>G</th>
+                                                        <th>S</th>
+                                                        <th>B</th>
+                                                        <th>Points</th>
+                                                        <th>Win Rate</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -733,7 +1309,7 @@
                                                                     <% if (team.team_profile) { %>
                                                                         <img src="<%= team.team_profile %>" alt="<%= team.team_name %>" class="team-avatar">
                                                                     <% } else { %>
-                                                                        <div style="width: 35px; height: 35px; border-radius: 50%; background: #007bff; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                                                        <div class="team-avatar" style="background: #007bff; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
                                                                             <%= team.team_name.charAt(0).toUpperCase() %>
                                                                         </div>
                                                                     <% } %>
@@ -742,7 +1318,7 @@
                                                             </td>
                                                             <td>
                                                                 <span class="organization-badge <%= team.organization === 'school' ? 'school-badge' : 'barangay-badge' %>">
-                                                                    <%= team.organization %>
+                                                                    <%= team.organization === 'school' ? 'School' : 'Barangay' %>
                                                                 </span>
                                                             </td>
                                                             <td class="stats-number"><%= team.gold %></td>
@@ -787,36 +1363,29 @@
         <% } %>
     </main>
 
-    <!-- Results Modal -->
-    <div id="resultsModal" class="modal">
-        <div class="modal-content" style="max-width: 800px;">
+    <div id="resultsModal" class="modal results-modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('resultsModal')">&times;</button>
             <h3 id="modalTitle">Event Results</h3>
-            <div id="modalContent">
-                <!-- Dynamic content will be loaded here -->
-            </div>
+            <div id="modalContent"></div>
             <div class="form-actions">
                 <button class="btn btn-secondary" onclick="closeModal('resultsModal')">Close</button>
             </div>
         </div>
     </div>
 
-    <!-- Leaderboard Modal -->
-    <div id="leaderboardModal" class="modal">
-        <div class="modal-content" style="max-width: 1000px;">
+    <div id="leaderboardModal" class="modal leaderboard-modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('leaderboardModal')">&times;</button>
             <h3 id="leaderboardModalTitle">Event Leaderboard</h3>
-            <div id="leaderboardModalContent">
-                <!-- Dynamic leaderboard content will be loaded here -->
-            </div>
+            <div id="leaderboardModalContent"></div>
             <div class="form-actions">
                 <button class="btn btn-secondary" onclick="closeModal('leaderboardModal')">Close</button>
             </div>
         </div>
     </div>
-                
-    
 
-    <!-- Modal for logout confirmation -->
-     <div id="logoutModal" class="modal">
+    <div id="logoutModal" class="modal">
         <div class="modal-content">
             <button class="close-btn" onclick="hideLogoutModal()">&times;</button>
             <h3>Are you sure you want to log out?</h3>
@@ -828,50 +1397,102 @@
     </div>
     
     <script>
-        // Leaderboard Tab Functionality
+        let isSidebarOpen = false;
+
+        function toggleNav() {
+            const sidebar = document.getElementById("mySidebar");
+            const body = document.body;
+            
+            if (isSidebarOpen) {
+                sidebar.style.left = "-100%";
+                body.classList.remove('sidebar-open');
+            } else {
+                sidebar.style.left = "0";
+                body.classList.add('sidebar-open');
+            }
+            isSidebarOpen = !isSidebarOpen;
+        }
+
+        const teamDropdownBtn = document.querySelector('.team-dropdown-btn');
+        const teamDropdownContent = document.querySelector('.team-dropdown-content');
+        
+        teamDropdownBtn.addEventListener('click', function() {
+            teamDropdownBtn.classList.toggle('active');
+            teamDropdownContent.style.display = teamDropdownContent.style.display === "block" ? "none" : "block";
+        });
+
+        function showLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'block';
+        }
+        
+        function hideLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'none';
+        }
+        
+        document.getElementById('confirmLogout').addEventListener('click', function() {
+            window.location.href = '/admin/logout';
+        });
+        
+        document.getElementById('cancelLogout').addEventListener('click', function() {
+            hideLogoutModal();
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize leaderboard tabs for each event
+            const profileContainer = document.getElementById('adminProfileContainer');
+            const dropdownMenu = document.getElementById('adminDropdownMenu');
+            
+            if (profileContainer && dropdownMenu) {
+                profileContainer.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+                });
+            }
+            
             document.querySelectorAll('[id^="leaderboardTabs-"]').forEach(tabsContainer => {
                 const eventId = tabsContainer.id.split('-')[1];
                 const tabs = tabsContainer.querySelectorAll('.leaderboard-tab');
                 const contentContainer = document.getElementById(`leaderboardContent-${eventId}`);
                 
-                tabs.forEach(tab => {
-                    tab.addEventListener('click', function() {
-                        // Remove active class from all tabs
-                        tabs.forEach(t => t.classList.remove('active'));
-                        // Add active class to clicked tab
-                        this.classList.add('active');
-                        
-                        // Hide all leaderboard tables
-                        contentContainer.querySelectorAll('.leaderboard-table-container').forEach(table => {
-                            table.style.display = 'none';
+                if (contentContainer) {
+                    tabs.forEach(tab => {
+                        tab.addEventListener('click', function() {
+                            tabs.forEach(t => t.classList.remove('active'));
+                            this.classList.add('active');
+                            
+                            contentContainer.querySelectorAll('.leaderboard-table-container').forEach(table => {
+                                table.style.display = 'none';
+                            });
+                            
+                            const sport = this.dataset.sport;
+                            const targetTable = contentContainer.querySelector(`[data-sport="${sport}"]`);
+                            if (targetTable) {
+                                targetTable.style.display = 'block';
+                            }
                         });
-                        
-                        // Show the selected leaderboard table
-                        const sport = this.dataset.sport;
-                        const targetTable = contentContainer.querySelector(`[data-sport="${sport}"]`);
-                        if (targetTable) {
-                            targetTable.style.display = 'block';
-                        }
                     });
+                }
+            });
+            
+            document.querySelectorAll('.view-results-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const eventId = this.dataset.eventId;
+                    loadEventResults(eventId);
                 });
             });
-        });
-
-        // View detailed results
-        document.querySelectorAll('.view-results-btn').forEach(btn => {
-            btn.addEventListener('click', async function() {
-                const eventId = this.dataset.eventId;
-                await loadEventResults(eventId);
+            
+            document.querySelectorAll('.view-leaderboard-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const eventId = this.dataset.eventId;
+                    loadEventLeaderboard(eventId);
+                });
             });
-        });
-
-        // View full leaderboard
-        document.querySelectorAll('.view-leaderboard-btn').forEach(btn => {
-            btn.addEventListener('click', async function() {
-                const eventId = this.dataset.eventId;
-                await loadEventLeaderboard(eventId);
+            
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.style.display = 'none';
+                    }
+                });
             });
         });
 
@@ -963,20 +1584,17 @@
                     <button class="leaderboard-tab active" data-sport="all">All Sports</button>
             `;
             
-            // Add sport tabs
             const sports = [...new Set(data.leaderboards.map(lb => lb.sport_type))];
             sports.forEach(sport => {
                 html += `<button class="leaderboard-tab" data-sport="${sport}">${sport}</button>`;
             });
             
-            html += `</div><div id="modalLeaderboardContent">`;
+            html += `</div><div>`;
             
-            // All Sports Leaderboard
             html += `<div class="leaderboard-table-container" data-sport="all">`;
             html += generateLeaderboardTable(data.leaderboards, true);
             html += `</div>`;
             
-            // Individual Sport Leaderboards
             const sportsLeaderboards = {};
             data.leaderboards.forEach(lb => {
                 if (!sportsLeaderboards[lb.sport_type]) {
@@ -995,7 +1613,6 @@
             
             modalContent.innerHTML = html;
             
-            // Add tab functionality to modal
             const modalTabs = modalContent.querySelectorAll('.leaderboard-tab');
             modalTabs.forEach(tab => {
                 tab.addEventListener('click', function() {
@@ -1019,17 +1636,16 @@
 
         function generateLeaderboardTable(leaderboardData, isAggregated) {
             let tableHtml = `<table class="leaderboard-table"><thead><tr>
-                <th width="60">Rank</th>
+                <th>Rank</th>
                 <th>Team</th>
-                <th width="100">Organization</th>
-                <th width="80">Gold</th>
-                <th width="80">Silver</th>
-                <th width="80">Bronze</th>
-                <th width="100">Total Points</th>
-                <th width="100">Win Rate</th>
+                <th>Org</th>
+                <th>G</th>
+                <th>S</th>
+                <th>B</th>
+                <th>Points</th>
+                <th>Win Rate</th>
             </tr></thead><tbody>`;
             
-            // Process data based on whether it's aggregated or not
             let processedData;
             if (isAggregated) {
                 const teamStats = {};
@@ -1057,7 +1673,6 @@
                 
                 processedData = Object.values(teamStats).map(team => {
                     team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
-                    // Ensure win rate never exceeds 100%
                     team.win_rate = team.total_matches > 0 ? 
                         Math.min(Math.round((team.wins / team.total_matches) * 100), 100) : 0;
                     return team;
@@ -1066,7 +1681,6 @@
                 processedData = leaderboardData
                     .map(team => {
                         team.total_points = (team.gold * 3) + (team.silver * 2) + (team.bronze * 1);
-                        // Ensure win rate never exceeds 100%
                         team.win_rate = team.total_matches > 0 ? 
                             Math.min(Math.round((team.wins / team.total_matches) * 100), 100) : 0;
                         return team;
@@ -1074,7 +1688,6 @@
                     .sort((a, b) => b.total_points - a.total_points);
             }
             
-            // Generate table rows
             processedData.forEach((team, index) => {
                 const rank = index + 1;
                 const medalClass = rank === 1 ? 'gold-medal' : rank === 2 ? 'silver-medal' : rank === 3 ? 'bronze-medal' : '';
@@ -1091,7 +1704,7 @@
                         <div class="team-info">
                             ${team.team_profile ? 
                                 `<img src="${team.team_profile}" alt="${team.team_name}" class="team-avatar">` : 
-                                `<div style="width: 35px; height: 35px; border-radius: 50%; background: #007bff; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                `<div class="team-avatar" style="background: #007bff; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
                                     ${team.team_name.charAt(0).toUpperCase()}
                                 </div>`
                             }
@@ -1100,7 +1713,7 @@
                     </td>
                     <td>
                         <span class="organization-badge ${team.organization === 'school' ? 'school-badge' : 'barangay-badge'}">
-                            ${team.organization}
+                            ${team.organization === 'school' ? 'School' : 'Barangay'}
                         </span>
                     </td>
                     <td class="stats-number">${team.gold}</td>
@@ -1123,78 +1736,10 @@
             document.getElementById(modalId).style.display = 'none';
         }
 
-        //Sidebar toggle
-        let isSidebarOpen = false;
-
-        function toggleNav() {
-            const sidebar = document.getElementById("mySidebar");
-            const content = document.querySelector(".dashboard-container");
-            const sidebarBtn = document.querySelector(".sidebar-btn");
-
-            if (isSidebarOpen) {
-                sidebar.style.left = "-240px";  
-                content.style.marginLeft = "0"; 
-                sidebarBtn.innerHTML = "&#9776;"; 
-            } else {
-                sidebar.style.left = "0";  
-                content.style.marginLeft = "0";  
-                sidebarBtn.innerHTML = "&#9776;"; 
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 767 && isSidebarOpen) {
+                toggleNav();
             }
-            isSidebarOpen = !isSidebarOpen;  
-        }
-        
-        // Toggle the team dropdown
-        const teamDropdownBtn = document.querySelector('.team-dropdown-btn');
-        const teamDropdownContent = document.querySelector('.team-dropdown-content');
-        teamDropdownBtn.addEventListener('click', function() {
-            teamDropdownBtn.classList.toggle('active');
-            if (teamDropdownContent.style.display === "block") {
-                teamDropdownContent.style.display = "none";
-            } else {
-                teamDropdownContent.style.display = "block";
-            }
-        });
-        
-        // Show the logout confirmation modal
-        function showLogoutModal() {
-            document.getElementById('logoutModal').style.display = 'block';
-        }
-        
-        function hideLogoutModal() {
-            document.getElementById('logoutModal').style.display = 'none';
-        }
-        
-        document.getElementById('confirmLogout').addEventListener('click', function() {
-            window.location.href = '/admin/logout';  
-        });
-        
-        document.getElementById('cancelLogout').addEventListener('click', function() {
-            hideLogoutModal(); 
-        });
-        
-        //Success message 
-        window.addEventListener("DOMContentLoaded", () => {
-            const successAlert = document.querySelector(".alert-success");
-            if (successAlert) {
-                setTimeout(() => {
-                    successAlert.style.transition = "opacity 0.5s ease";
-                    successAlert.style.opacity = "0";
-                    setTimeout(() => successAlert.remove(), 500);
-                }, 1000);
-            }
-        });
-        
-        
-        //admin profile dropdown
-        document.addEventListener('DOMContentLoaded', () => {
-            const profileContainer = document.getElementById('adminProfileContainer');
-            const dropdownMenu = document.getElementById('adminDropdownMenu');
-            let hideTimeout;
-
-            profileContainer.addEventListener('click', function(e) {
-            e.stopPropagation();
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-        });
         });
     </script>
 </body>
