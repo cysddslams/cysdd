@@ -1152,7 +1152,7 @@
                             
                             <% if (event.leaderboards && event.leaderboards.length > 0) { %>
                                 <div class="leaderboard-tabs" id="leaderboardTabs-<%= event.id %>">
-                                    <button class="leaderboard-tab active" data-sport="all">All Sports</button>
+                                    <button class="leaderboard-tab active" data-sport="all">Over all</button>
                                     <% 
                                         const sports = [...new Set(event.leaderboards.map(lb => lb.sport_type))];
                                         sports.forEach(sport => { 
@@ -1581,7 +1581,7 @@
                 </div>
                 
                 <div class="leaderboard-tabs" style="margin-bottom: 20px;">
-                    <button class="leaderboard-tab active" data-sport="all">All Sports</button>
+                    <button class="leaderboard-tab active" data-sport="all">Over all</button>
             `;
             
             const sports = [...new Set(data.leaderboards.map(lb => lb.sport_type))];
@@ -1744,3 +1744,4 @@
     </script>
 </body>
 </html>
+
